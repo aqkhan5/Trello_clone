@@ -1,6 +1,7 @@
+# Trello Backend Entity Relationship Diagram & Schema Constraints
+
 ```mermaid
 erDiagram
-
     USERS {
         uuid id PK
         string email UK
@@ -14,7 +15,7 @@ erDiagram
         uuid id PK
         uuid owner_id FK
         string name
-        string description
+        text description
         datetime created_at
         datetime updated_at
     }
@@ -25,6 +26,19 @@ erDiagram
         uuid user_id FK
         string role "ADMIN | MEMBER"
         datetime joined_at
+    }
+
+    WORKSPACE_INVITATIONS {
+        uuid id PK
+        uuid workspace_id FK
+        uuid invited_by FK
+        string email
+        string role "ADMIN | MEMBER"
+        string token UK
+        string status "PENDING | ACCEPTED | EXPIRED | REVOKED"
+        datetime expires_at
+        datetime accepted_at
+        datetime created_at
     }
 
     BOARDS {
@@ -42,7 +56,7 @@ erDiagram
         uuid id PK
         uuid board_id FK
         uuid user_id FK
-        string role "ADMIN | MEMBER"
+        string role "ADMIN | MEMBER | OBSERVER"
         datetime joined_at
     }
 
@@ -96,6 +110,7 @@ erDiagram
         uuid id PK
         uuid card_id FK
         string title
+        decimal position
         datetime created_at
         datetime updated_at
     }
@@ -133,60 +148,48 @@ erDiagram
     ACTIVITY_LOGS {
         uuid id PK
         uuid board_id FK
-        uuid user_id FK
-        string entity_type
+        uuid user_id FK "Nullable"
+        string entity_type "BOARD | LIST | CARD"
         uuid entity_id
         string action_type
         json metadata
         datetime created_at
     }
 
-    WORKSPACE_INVITATIONS {
-        uuid id PK
-        uuid workspace_id FK
-        string email
-        string role "ADMIN | MEMBER"
-        string token UK
-        datetime expires_at
-        datetime accepted_at
-        datetime created_at
-    }
-
-
     USERS ||--o{ WORKSPACES : "owns"
-
     USERS ||--o{ WORKSPACE_MEMBERS : "is member of"
     WORKSPACES ||--o{ WORKSPACE_MEMBERS : "has"
-
+    WORKSPACES ||--o{ WORKSPACE_INVITATIONS : "receives"
+    USERS ||--o{ WORKSPACE_INVITATIONS : "sends"
     WORKSPACES ||--o{ BOARDS : "contains"
     USERS ||--o{ BOARDS : "creates"
-
     BOARDS ||--o{ BOARD_MEMBERS : "has"
     USERS ||--o{ BOARD_MEMBERS : "is member of"
-
     BOARDS ||--o{ LISTS : "contains"
     LISTS ||--o{ CARDS : "contains"
-
     USERS ||--o{ CARDS : "creates"
-
     CARDS ||--o{ CARD_MEMBERS : "assigned to"
     USERS ||--o{ CARD_MEMBERS : "assigned"
-
     BOARDS ||--o{ LABELS : "has"
     CARDS ||--o{ CARD_LABELS : "has"
     LABELS ||--o{ CARD_LABELS : "applied to"
-
     CARDS ||--o{ CHECKLISTS : "has"
     CHECKLISTS ||--o{ CHECKLIST_ITEMS : "contains"
-
     CARDS ||--o{ COMMENTS : "receives"
     USERS ||--o{ COMMENTS : "writes"
-
     CARDS ||--o{ ATTACHMENTS : "has"
     USERS ||--o{ ATTACHMENTS : "uploads"
-
     BOARDS ||--o{ ACTIVITY_LOGS : "tracks"
     USERS ||--o{ ACTIVITY_LOGS : "performs"
-
-    WORKSPACES ||--o{ WORKSPACE_INVITATIONS : "receives"
 ```
+
+## Required Database Constraints & Indexes
+
+* `USERS`: `UNIQUE(email)`
+* `WORKSPACE_MEMBERS`: `UNIQUE(workspace_id, user_id)`
+* `BOARD_MEMBERS`: `UNIQUE(board_id, user_id)`
+* `CARD_MEMBERS`: `UNIQUE(card_id, user_id)`
+* `CARD_LABELS`: `UNIQUE(card_id, label_id)`
+* `WORKSPACE_INVITATIONS`: `UNIQUE(token)` + Partial Unique Index: `UNIQUE(workspace_id, email) WHERE status = 'PENDING'`
+* `LISTS`: `INDEX(board_id, position)`
+* `CARDS`: `INDEX(list_id, position)`
