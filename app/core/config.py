@@ -1,5 +1,9 @@
-import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-project_name = "Trello Clone Backend"
-API_name = "/api/v1"
+class Settings(BaseSettings):
+        PROJECT_NAME : str = "Trello Clone Backend"
+        API_V1_STR : str = "/api/v1"
+        DATABASE_URL : str
+        model_config = SettingsConfigDict(env_file=".env", extra= "ignore")
+
+settings = Settings()
