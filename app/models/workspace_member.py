@@ -14,5 +14,4 @@ class WorkspaceMember(Base):
     workspace_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
     user_id:Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete= "CASCADE"), nullable=False)
     role: Mapped[str] = mapped_column(String(50), nullable=False)
-    joined_at: Mapped[datetime] = mapped_column(UUID(as_uuid=True), DateTime(timezone=True), server_default=func.now())
-    
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)    
