@@ -24,11 +24,11 @@ class Card(Base):
     )
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="CASCADE")
-        nullable= Falsee
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable= False
     )
     title: Mapped[str] = mapped_column(
-        String(50),
+        String(255),
         nullable=False
     )
     description: Mapped[str | None] = mapped_column(
@@ -43,7 +43,7 @@ class Card(Base):
         DateTime(timezone=True),
         nullable=True
     )
-    is_completd: Mapped[bool] = mapped_column(
+    is_completed: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False
