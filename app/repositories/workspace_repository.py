@@ -50,6 +50,7 @@ class WorkspaceRepository:
         await self.db.refresh(member)
         return member
 
+
     # Query workspace_members filtered by composite (workspace_id, user_id).
     async def get_member(
             self, workspace_id: UUID, user_id: UUID
@@ -61,12 +62,27 @@ class WorkspaceRepository:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
+
     # Return all workspace members with their user relation eagerly loaded.
     async def list_members(self, workspace_id: UUID) -> list[WorkspaceMember]:
-        query = ( select(WorkspaceMember)
-        .where( WorkspaceMember.workspace_id == workspace_id )
-        .options(selectinload(WorkspaceMember.user))
-        .order_by(WorkspaceMember.joined_at.asc())
-
+        query = (
+            select(WorkspaceMember)
+            .where(WorkspaceMember.workspace_id == workspace_id)
+            .options(selectinload(WorkspaceMember.user))
+            .order_by(WorkspaceMember.joined_at.asc())
         )
-        
+        result = await self.db.execute(query)
+        return list(result.scalar().all())
+
+
+    # Delete member record from session.
+    async def remove_member(self, member: WorkspaceMember) -> WorkspaceMember:
+        await self.db.delete(member)
+        await self.db. flush()
+
+
+    # Delete workspace record from session.
+    async def delete(self, workspace: Workspace) -> None:
+        await self.db.delete(workspace)
+        await self.db.flush()
+
