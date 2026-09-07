@@ -1,16 +1,18 @@
+# app/schemas/workspace_member.py
 from datetime import datetime
-from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
+
+# Import your existing enum from the model or enum module to keep single-source-of-truth:
+# e.g., from app.models.workspace_member import WorkspaceRole
+from app.models.workspace_member import WorkspaceRole
 from app.schemas.user import UserResponse
 
-class WorkspaceRole(str, Enum):
-    ADMIN = "ADMIN"
-    MEMBER = "MEMBER"
 
-class WorkspaceMemberRole(BaseModel):
+class WorkspaceMemberUpdate(BaseModel):
     role: WorkspaceRole
+
 
 class WorkspaceMemberResponse(BaseModel):
     id: UUID
