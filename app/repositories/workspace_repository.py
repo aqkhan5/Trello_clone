@@ -72,11 +72,11 @@ class WorkspaceRepository:
             .order_by(WorkspaceMember.joined_at.asc())
         )
         result = await self.db.execute(query)
-        return list(result.scalar().all())
+        return list(result.scalars().all())
 
 
     # Delete member record from session.
-    async def remove_member(self, member: WorkspaceMember) -> WorkspaceMember:
+    async def remove_member(self, member: WorkspaceMember) -> None:
         await self.db.delete(member)
         await self.db. flush()
 
@@ -85,4 +85,3 @@ class WorkspaceRepository:
     async def delete(self, workspace: Workspace) -> None:
         await self.db.delete(workspace)
         await self.db.flush()
-
