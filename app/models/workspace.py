@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# Workspace model and persisted ownership metadata.
 class Workspace(Base):
     __tablename__ = "workspaces"
 

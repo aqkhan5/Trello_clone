@@ -10,10 +10,12 @@ from app.models.workspace_member import WorkspaceRole
 from app.schemas.user import UserResponse
 
 
+# Payload for changing a member's workspace role.
 class WorkspaceMemberUpdate(BaseModel):
     role: WorkspaceRole
 
 
+# Workspace member representation returned by the API.
 class WorkspaceMemberResponse(BaseModel):
     id: UUID
     workspace_id: UUID

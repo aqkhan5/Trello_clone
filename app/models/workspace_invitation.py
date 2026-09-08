@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# Invitation model for pending workspace membership requests.
 class WorkspaceInvitation(Base):
     __tablename__ = "workspace_invitations"
     __table_args__ = (

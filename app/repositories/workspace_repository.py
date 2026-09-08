@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 from app.models.workspace import Workspace
 from app.models.workspace_member import WorkspaceMember
 
+# Persistence queries for workspaces and memberships.
 class WorkspaceRepository:
     def __init__ (self, db: AsyncSession):
         self.db = db
