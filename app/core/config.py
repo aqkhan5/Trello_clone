@@ -3,6 +3,7 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+# Application settings loaded from environment variables.
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Trello Clone Backend"
     API_V1_STR: str = "/api/v1"
