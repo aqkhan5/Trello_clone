@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
+# Activity log model for auditable workspace actions.
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
