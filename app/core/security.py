@@ -8,6 +8,7 @@ import jwt
 from app.core.config import settings
 
 
+# Password hashing and JWT helpers shared by authentication flows.
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against the stored bcrypt hash."""
     # Truncate to 72 bytes to conform to bcrypt standard specification
