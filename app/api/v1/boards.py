@@ -1,4 +1,6 @@
-# app/api/v1/boards.py
+# API routes for creating, reading, updating, and deleting boards and board members.
+# Authentication and authorization are handled by FastAPI dependencies; business
+# rules and database mutations are delegated to BoardService.
 
 # Standard library and FastAPI imports for typed route definitions.
 from typing import Annotated
@@ -39,10 +41,8 @@ from app.services.board_service import BoardService
 router = APIRouter(tags=["Boards"])
 
 
-# ---------------------------------------------------------------------------
-# Workspace-scoped Board Endpoints
-# ---------------------------------------------------------------------------
 
+# Workspace-scoped Board Endpoints
 
 # Create a board inside a workspace where the caller is a member.
 @router.post(
@@ -94,9 +94,8 @@ async def list_workspace_boards(
     return await board_repo.list_for_workspace(workspace_id, current_user.id)
 
 
-# ---------------------------------------------------------------------------
+
 # Direct Board Endpoints
-# ---------------------------------------------------------------------------
 
 
 # Return board details after member-level access has been verified.
@@ -162,9 +161,8 @@ async def delete_board(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ---------------------------------------------------------------------------
+
 # Board Member Endpoints
-# ---------------------------------------------------------------------------
 
 
 # List members after verifying the caller can access the board.
