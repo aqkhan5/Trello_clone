@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# Board model and workspace-level configuration.
 class Board(Base):
     __tablename__ = "boards"
 

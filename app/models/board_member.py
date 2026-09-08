@@ -5,6 +5,7 @@ from sqlalchemy import DateTime, String, func, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.base import Base
 
+# Board membership model and member permissions.
 class BoardMember(Base):
     __tablename__ = "board_members"
     __table_args__ = (UniqueConstraint("board_id", "user_id", name = "uq_board_user"),)
