@@ -16,6 +16,7 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False
 )
 # 3. FastAPI dependency for handling DB sessions per request
+# Request-scoped database session dependency.
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as db:
         try:
