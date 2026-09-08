@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# Card model and ordering, status, and scheduling fields.
 class Card(Base):
     __tablename__ = "cards"
     __table_args__ = (
