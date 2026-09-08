@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# Label model used to categorize cards.
 class Label(Base):
     __tablename__ = "labels"
 

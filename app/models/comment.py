@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
+# Comment model for card discussions.
 class Comment(Base):
     __tablename__ = "comments"
 

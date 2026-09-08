@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
+# Checklist model for card-level task groups.
 class Checklist(Base):
     __tablename__ = "checklists"
 

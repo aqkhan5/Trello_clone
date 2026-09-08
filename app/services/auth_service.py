@@ -7,6 +7,7 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.user import UserCreate
 
+# Business logic for registration and token-based authentication.
 class AuthService:
     def __init__ (self, user_repo: UserRepository, db: AsyncSession):
         self.user_repo = user_repo
@@ -17,8 +18,8 @@ class AuthService:
         existing_user = await self.user_repo.get_by_email(user_in.email)
         if existing_user:
             raise HTTPException(
-                status_code=  status.HTTP_409_CONFLICT,
-                details = "Email already exists",
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already exists",
             )
 
         hashed_password = get_password_hash(user_in.password)

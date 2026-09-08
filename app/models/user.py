@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from app.db.base import Base
 
+# User model and authentication profile fields.
 class User(Base):
     __tablename__ = "users"
 

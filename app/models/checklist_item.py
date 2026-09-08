@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
+# Checklist item model for individual tasks.
 class ChecklistItem(Base):
     __tablename__ = "checklist_items"
     __table_args__ = (

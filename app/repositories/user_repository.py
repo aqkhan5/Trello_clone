@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 
 
+# Persistence queries for user lookup and creation.
 class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

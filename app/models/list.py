@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# List model and board-level ordering fields.
 class List(Base):
     __tablename__ = "lists"
     __table_args__ = (
