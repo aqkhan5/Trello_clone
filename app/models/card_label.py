@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
+# Association model connecting cards to labels.
 class CardLabel(Base):
     __tablename__ = "card_labels"
     __table_args__ = (
