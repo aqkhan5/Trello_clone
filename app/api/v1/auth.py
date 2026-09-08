@@ -50,9 +50,9 @@ async def register(
 async def login(
     credentials: LoginRequest,
     db: Annotated[AsyncSession, Depends(get_db)]
-) -> User:
+) -> TokenResponse:
     """Authenticate via JSON payload (email and password) and issue a Bearer token."""
-    user_repo = user_repo(db)
+    user_repo = UserRepository(db)
     auth_service = AuthService(user_repo, db)
     return await auth_service.authenticate_user(credentials)
 
