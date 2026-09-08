@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
+# Attachment model for files associated with cards.
 class Attachment(Base):
     __tablename__ = "attachments"
 
