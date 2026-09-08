@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
+# Card membership model and assignment metadata.
 class CardMember(Base):
     __tablename__ = "card_members"
     __table_args__ = (
