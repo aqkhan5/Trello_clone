@@ -71,7 +71,9 @@ async def get_current_user(
     return user
 
 
+# ---------------------------------------------------------------------------
 # Workspace access control
+# ---------------------------------------------------------------------------
 
 # These dependencies ensure a user is only allowed to access a workspace if:
 # 1) the workspace exists,
@@ -149,7 +151,9 @@ async def require_workspace_admin(
 
     return workspace, member
 
+# ---------------------------------------------------------------------------
 # Board and board-member access control
+# ---------------------------------------------------------------------------
 
 from app.models.board import Board
 from app.models.board_member import BoardMember, BoardRole
@@ -228,7 +232,12 @@ async def require_board_admin(
     )
 
 
-from app.models.board_member import BoardRole
+# ---------------------------------------------------------------------------
+# List access control
+# ---------------------------------------------------------------------------
+
+# A list inherits access from its parent board. These dependencies resolve
+# the list first, then reuse board-level membership and writer checks.
 from app.models.list import List as ListModel
 from app.repositories.list_repository import ListRepository
 
@@ -252,6 +261,7 @@ async def require_list_board_member(
         db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[ListModel, BoardMember | None]:
     """ Verify user is an active board member ( or workspace owner ) for this list."""
+    # Resolve list -> board and reuse the board membership dependency.
     list_obj = await get_list_or_404(list_id, db)
     board, member = await require_board_member(list_obj.board_id, current_user, db)
     return list_obj, member
@@ -266,7 +276,7 @@ async def require_list_board_writer(
 ) -> tuple[ListModel, BoardMember | None]:
     """ Verify write permission ( rejects OBSERVER/VIEWER roles)."""
     list_obj, member = list_and_member
-    # Workspace owners and board creators retain full write permissions
+    # Workspace owners and board creators retain full write permissions.
     Workspace_repo = WorkspaceRepository(db)
     board_repo = BoardRepository(db)
     board = await board_repo.get_by_id(list_obj.board_id)
@@ -279,7 +289,7 @@ async def require_list_board_writer(
         if workspace and workspace.owner_id == current_user.id:
             return list_obj, member
 
-    # check member role ( must be ADMIN or MEMBER)
+    # Regular members may write, but observer/viewer roles are read-only.
     if member is not None: 
         observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
         if member.role == observer_role:
@@ -301,11 +311,12 @@ async def require_board_writer(
 ) -> tuple[Board, BoardMember | None]:
     """ Verify write permission diretly on a board."""
     board, member = board_and_member
+    # Board creators and workspace owners bypass ordinary member role checks.
     if board.created_by == current_user.id:
         return board, member
     workspace_repo = WorkspaceRepository(db)
     workspace = await workspace_repo.get_by_id(board.workspace_id)
-    if workspace and workspace.ownerid == current_user.id:
+    if workspace and workspace.owner_id == current_user.id:
         return board, member
     if member is not None:
         observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
@@ -319,3 +330,66 @@ async def require_board_writer(
         status_code=status.HTTP_403_FORBIDDEN,
         detail= "Write permission required for this board",
     )
+
+
+
+
+# ---------------------------------------------------------------------------
+# Card access control
+# ---------------------------------------------------------------------------
+
+# Cards inherit permissions through their parent list and board. The card
+# dependencies therefore resolve card -> list -> board before checking access.
+from app.models.card import Card
+from app.repositories.card_repository import CardRepository
+
+
+async def get_card_or_404(
+    card_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Card:
+    """Fetch card by ID or raise 404."""
+    repo = CardRepository(db)
+    card = await repo.get_by_id(card_id)
+    if not card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found",
+        )
+    return card
+
+
+async def require_card_board_member(
+    card_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[Card, BoardMember | None]:
+    """Resolve card -> list -> board and ensure read access."""
+    # Reuse list/board membership logic instead of duplicating access rules.
+    card = await get_card_or_404(card_id, db)
+    _, member = await require_list_board_member(card.list_id, current_user, db)
+    return card, member
+
+
+async def require_card_board_writer(
+    card_and_member: Annotated[
+        tuple[Card, BoardMember | None], Depends(require_card_board_member)
+    ],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[Card, BoardMember | None]:
+    """Ensure user has write permissions (rejects OBSERVER/VIEWER)."""
+    card, member = card_and_member
+
+    # Reuse list writer logic so board role rules stay consistent for cards.
+    list_repo = ListRepository(db)
+    list_obj = await list_repo.get_by_id(card.list_id)
+    if not list_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Parent list not found",
+        )
+
+    await require_list_board_writer((list_obj, member), current_user, db)
+    return card, member
+
