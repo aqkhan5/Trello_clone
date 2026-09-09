@@ -18,12 +18,13 @@ from app.repositories.list_repository import ListRepository
 from app.schemas.list import ListCreate, ListResponse, ListUpdate
 from app.services.list_service import ListService
 
-router = APIRouter(tag = ["Lists"])
+router = APIRouter(tags=["Lists"])
 
 # Board Scoped list endpoints
 
 @router.post(
     "/boards/{board_id}/lists",
+    response_model= ListResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new list on Board"
 )

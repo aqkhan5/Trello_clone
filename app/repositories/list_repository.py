@@ -20,7 +20,7 @@ class ListRepository:
 
     async def get_by_id(self, list_id: UUID) -> ListModel | None:
         """" Fetch a single list by primary key."""
-        result = await self.db.excecute(
+        result = await self.db.execute(
             select(ListModel).where(ListModel.id == list_id)
         )
         return result.scalar_one_or_none()
