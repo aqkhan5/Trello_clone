@@ -85,7 +85,7 @@ async def get_list(
     "/lists/{list_id}",
     response_model=ListResponse,
     status_code=status.HTTP_200_OK,
-    summary="Update a list by ID",
+    summary="Update a list title, position, or archived status",
 )
 async def update_list(
     payload: ListUpdate,
@@ -94,4 +94,26 @@ async def update_list(
     ],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ListModel:
-    """" Update a list, """
+    """" Update a list, (Required a board writer permissions), """
+    list_obj, _ = list_and_member
+    list_repo = ListRepository(db)
+    service = ListService(list_repo, db)
+    return await service.update_list(list_obj, payload)
+
+@router.delete(
+    "/lists/{list_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a list",
+)
+async def delete_list(
+    list_and_member: Annotated[
+        tuple[ListModel, BoardMember|None], Depends(require_list_board_writer)
+    ],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Response:
+    """Delete a list and cascade card ( Requires the board writer permissions.)"""
+    list_obj, _ = list_and_member
+    list_repo = ListRepository(db)
+    service = ListService(list_repo, db)
+    await service.delete_list(list_obj)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
