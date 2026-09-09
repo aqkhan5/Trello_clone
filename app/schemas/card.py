@@ -21,7 +21,7 @@ class CardUpdate(BaseModel):
     is_archived: bool | None = None
 
 class CardMove(BaseModel):
-    target_list_id = UUID
+    target_list_id : UUID
     position: Decimal | None = None
 
 class CardResponse(CardBase):
