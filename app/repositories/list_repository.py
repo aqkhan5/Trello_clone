@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models import board
 from app.models.list import List as ListModel
 
 class ListRepository:
@@ -37,4 +38,14 @@ class ListRepository:
         return list(result.scalars().all())
 
     async def get_max_position(self, board_id: UUID) -> Decimal | None:
-        
+        """" Query the highest position value among lists in a board."""
+        query = select(func.max(ListModel.position)).where(
+            ListModel.board_id == board_id
+        )
+        result = await self.db.execute(query)
+        return result.scalar()
+
+    async def delete(self, list_obj: ListModel) -> None:
+        """" Delete list entity from session and flush."""
+        await self.db.delete(list_obj)
+        await self.db.flush()

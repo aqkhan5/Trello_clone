@@ -226,3 +226,99 @@ async def require_board_admin(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Board admin permissions required",
     )
+
+
+from app.models.board_member import BoardRole
+from app.models.list import List as ListModel
+from app.repositories.list_repository import ListRepository
+
+async def get_list_or_404(
+        list_id: UUID,
+        db: Annotated[AsyncSession, Depends(get_db)],
+) -> ListModel:
+    """ Fetch list by ID or raise 404."""
+    repo = ListRepository(db)
+    list_obj = await repo.get_by_id(list_id)
+    if not list_obj:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail= " List not found "
+        )
+    return list_obj
+
+async def require_list_board_member(
+        list_id: UUID,
+        current_user: Annotated[User, Depends(get_current_user)],
+        db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[ListModel, BoardMember | None]:
+    """ Verify user is an active board member ( or workspace owner ) for this list."""
+    list_obj = await get_list_or_404(list_id, db)
+    board, member = await require_board_member(list_obj.board_id, current_user, db)
+    return list_obj, member
+
+async def require_list_board_writer(
+        list_and_member: Annotated [
+            tuple[ListModel, BoardMember | None],
+            Depends(require_list_board_member)
+            ],
+        current_user: Annotated[User, Depends(get_current_user)],
+        db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[ListModel, BoardMember | None]:
+    """ Verify write permission ( rejects OBSERVER/VIEWER roles)."""
+    list_obj, member = list_and_member
+    # Workspace owners and board creators retain full write permissions
+    Workspace_repo = WorkspaceRepository(db)
+    board_repo = BoardRepository(db)
+    board = await board_repo.get_by_id(list_obj.board_id)
+
+    if board and board.created_by == current_user.id:
+        return list_obj, member
+
+    if board: 
+        workspace = await Workspace_repo.get_by_id(board.workspace_id)
+        if workspace and workspace.owner_id == current_user.id:
+            return list_obj, member
+
+        # check member role ( must be ADMIN or MEMBER)
+        if member is not None: 
+            observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
+            if member.role == observer_role:
+                raise HTTPException(
+                    status_code = status.HTTP_403_FORBIDDEN,
+                    detail = "write permisson required for this board",
+                )
+            return list_obj, member
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail= "Writer permission required for this board"
+        )
+    async def require_board_writer(
+            board_and_member: Annotated[
+                tuple[Board, BoardMember | None], Depends(require_board_member)
+            ],
+            current_user: Annotated[User, Depends(get_current_user)],
+            db: Annotated[AsyncSession, Depends(get_db)],
+    ) -> tuple[Board, BoardMember | None]:
+        """ Verify write permission diretly on a board."""
+        board, member = board_and_member
+
+        if board.created_by == current_user.id:
+            return board, member
+
+        workspace_repo = WorkspaceRepository(db)
+        workspace = await workspace_repo.get_by_id(board.workspace_id)
+        if workspace and workspace.ownerid == current_user.id:
+            return board, member
+
+        if member is not None:
+            observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
+            if member.role == observer_role:
+                raise HTTPException(
+                    status_code= status.HTTP_403_FORBIDDEN,
+                    detail= "Write permission required for this board"
+                )
+            return board, member
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail= "Write permission required for this board",
+        )
