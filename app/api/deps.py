@@ -279,46 +279,43 @@ async def require_list_board_writer(
         if workspace and workspace.owner_id == current_user.id:
             return list_obj, member
 
-        # check member role ( must be ADMIN or MEMBER)
-        if member is not None: 
-            observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
-            if member.role == observer_role:
-                raise HTTPException(
-                    status_code = status.HTTP_403_FORBIDDEN,
-                    detail = "write permisson required for this board",
-                )
-            return list_obj, member
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail= "Writer permission required for this board"
-        )
-    async def require_board_writer(
-            board_and_member: Annotated[
-                tuple[Board, BoardMember | None], Depends(require_board_member)
-            ],
-            current_user: Annotated[User, Depends(get_current_user)],
-            db: Annotated[AsyncSession, Depends(get_db)],
-    ) -> tuple[Board, BoardMember | None]:
-        """ Verify write permission diretly on a board."""
-        board, member = board_and_member
-
-        if board.created_by == current_user.id:
-            return board, member
-
-        workspace_repo = WorkspaceRepository(db)
-        workspace = await workspace_repo.get_by_id(board.workspace_id)
-        if workspace and workspace.ownerid == current_user.id:
-            return board, member
-
-        if member is not None:
-            observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
-            if member.role == observer_role:
-                raise HTTPException(
-                    status_code= status.HTTP_403_FORBIDDEN,
-                    detail= "Write permission required for this board"
-                )
-            return board, member
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail= "Write permission required for this board",
-        )
+    # check member role ( must be ADMIN or MEMBER)
+    if member is not None: 
+        observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
+        if member.role == observer_role:
+            raise HTTPException(
+                status_code = status.HTTP_403_FORBIDDEN,
+                detail = "write permisson required for this board",
+            )
+        return list_obj, member
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail= "Writer permission required for this board"
+    )
+async def require_board_writer(
+        board_and_member: Annotated[
+            tuple[Board, BoardMember | None], Depends(require_board_member)
+        ],
+        current_user: Annotated[User, Depends(get_current_user)],
+        db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[Board, BoardMember | None]:
+    """ Verify write permission diretly on a board."""
+    board, member = board_and_member
+    if board.created_by == current_user.id:
+        return board, member
+    workspace_repo = WorkspaceRepository(db)
+    workspace = await workspace_repo.get_by_id(board.workspace_id)
+    if workspace and workspace.ownerid == current_user.id:
+        return board, member
+    if member is not None:
+        observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
+        if member.role == observer_role:
+            raise HTTPException(
+                status_code= status.HTTP_403_FORBIDDEN,
+                detail= "Write permission required for this board"
+            )
+        return board, member
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail= "Write permission required for this board",
+    )
