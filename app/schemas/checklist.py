@@ -61,7 +61,7 @@ class ChecklistResponse(ChecklistBase):
     id: UUID
     card_id: UUID
     position: Decimal | None = None
-    item: list[ChecklistItemResponse] = []
+    items: list[ChecklistItemResponse] = []
     created_at: datetime
     updated_at: datetime
 
