@@ -117,3 +117,4 @@ async def delete_label(
     service = get_card_detail_service(db)
     await service.delete_label(label)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+    

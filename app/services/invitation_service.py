@@ -73,7 +73,7 @@ class InvitationService:
         # Build the pending invitation before saving it through the repository.
         invitation = WorkspaceInvitation(
             workspace_id=workspace.id,
-            inviter_id=inviter_id,
+            invited_by=inviter_id,
             email=data.email,
             role=data.role,
             token=token,
