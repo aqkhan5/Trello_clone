@@ -334,9 +334,8 @@ async def require_board_writer(
 
 
 
-# ---------------------------------------------------------------------------
 # Card access control
-# ---------------------------------------------------------------------------
+
 
 # Cards inherit permissions through their parent list and board. The card
 # dependencies therefore resolve card -> list -> board before checking access.
@@ -393,3 +392,91 @@ async def require_card_board_writer(
     await require_list_board_writer((list_obj, member), current_user, db)
     return card, member
 
+
+
+# In app/api/deps.py
+from app.models.checklist import Checklist
+from app.models.checklist_item import ChecklistItem
+from app.models.label import Label
+from app.repositories.checklist_repository import ChecklistRepository
+from app.repositories.label_repository import LabelRepository
+
+
+async def get_label_or_404(
+    label_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Label:
+    """Fetch label by primary key or raise 404."""
+    repo = LabelRepository(db)
+    label = await repo.get_by_id(label_id)
+    if not label:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Label not found",
+        )
+    return label
+
+
+async def require_label_board_writer(
+    label_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[Label, BoardMember | None]:
+    """Ensure user has write permissions on the board owning this label."""
+    label = await get_label_or_404(label_id, db)
+    board_and_member = await require_board_member(label.board_id, current_user, db)
+    await require_board_writer(board_and_member, current_user, db)
+    return label, board_and_member[1]
+
+
+async def get_checklist_or_404(
+    checklist_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Checklist:
+    """Fetch checklist by primary key or raise 404."""
+    repo = ChecklistRepository(db)
+    checklist = await repo.get_checklist_by_id(checklist_id)
+    if not checklist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Checklist not found",
+        )
+    return checklist
+
+
+async def require_checklist_board_writer(
+    checklist_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[Checklist, BoardMember | None]:
+    """Ensure user has write access on the board owning this checklist."""
+    checklist = await get_checklist_or_404(checklist_id, db)
+    card_and_member = await require_card_board_member(checklist.card_id, current_user, db)
+    await require_card_board_writer(card_and_member, current_user, db)
+    return checklist, card_and_member[1]
+
+
+async def get_checklist_item_or_404(
+    item_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ChecklistItem:
+    """Fetch checklist item by primary key or raise 404."""
+    repo = ChecklistRepository(db)
+    item = await repo.get_item_by_id(item_id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Checklist item not found",
+        )
+    return item
+
+
+async def require_checklist_item_board_writer(
+    item_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[ChecklistItem, BoardMember | None]:
+    """Ensure user has write access on the board owning this checklist item."""
+    item = await get_checklist_item_or_404(item_id, db)
+    checklist_and_member = await require_checklist_board_writer(item.checklist_id, current_user, db)
+    return item, checklist_and_member[1]
