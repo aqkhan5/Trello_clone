@@ -1,3 +1,6 @@
+# Purpose: Define reusable FastAPI dependencies for authentication and resource access control.
+# Working: Dependencies resolve parent resources in order and enforce membership or write permissions.
+
 # Standard library and framework imports used by FastAPI dependencies.
 import uuid
 from typing import Annotated
@@ -14,7 +17,9 @@ from app.schemas.auth import TokenPayload
 
 
 
+# ---------------------------------------------------------------------------
 # Authentication dependencies
+# ---------------------------------------------------------------------------
 
 
 # This is the first layer of protection for protected API routes.
@@ -334,7 +339,9 @@ async def require_board_writer(
 
 
 
+# ---------------------------------------------------------------------------
 # Card access control
+# ---------------------------------------------------------------------------
 
 
 # Cards inherit permissions through their parent list and board. The card
@@ -394,7 +401,9 @@ async def require_card_board_writer(
 
 
 
-# In app/api/deps.py
+# ---------------------------------------------------------------------------
+# Labels, checklists, and checklist-item access control
+# ---------------------------------------------------------------------------
 from app.models.checklist import Checklist
 from app.models.checklist_item import ChecklistItem
 from app.models.label import Label
