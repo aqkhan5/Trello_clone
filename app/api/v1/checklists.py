@@ -1,4 +1,3 @@
-# app/api/v1/checklists.py
 # Purpose: Define API routes for checklists and checklist items attached to cards.
 # Working: Access dependencies protect each resource, repositories handle reads, and CardDetailService handles writes.
 
@@ -56,9 +55,7 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
     )
 
 
-# ---------------------------------------------------------------------------
 # Checklist endpoints
-# ---------------------------------------------------------------------------
 
 # Create a checklist after board-level write access is verified.
 @router.post(
@@ -130,9 +127,8 @@ async def delete_checklist(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# ---------------------------------------------------------------------------
+
 # Checklist-item endpoints
-# ---------------------------------------------------------------------------
 
 # Add an item after verifying write access to the parent checklist's board.
 @router.post(
