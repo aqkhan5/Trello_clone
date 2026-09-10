@@ -489,3 +489,41 @@ async def require_checklist_item_board_writer(
     item = await get_checklist_item_or_404(item_id, db)
     checklist_and_member = await require_checklist_board_writer(item.checklist_id, current_user, db)
     return item, checklist_and_member[1]
+
+
+
+# In app/api/deps.py
+from app.models.attachment import Attachment
+from app.models.comment import Comment
+from app.repositories.attachment_repository import AttachmentRepository
+from app.repositories.comment_repository import CommentRepository
+
+
+async def get_comment_or_404(
+    comment_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Comment:
+    """Fetch comment by ID or raise 404."""
+    repo = CommentRepository(db)
+    comment = await repo.get_by_id(comment_id)
+    if not comment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comment not found",
+        )
+    return comment
+
+
+async def get_attachment_or_404(
+    attachment_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Attachment:
+    """Fetch attachment by ID or raise 404."""
+    repo = AttachmentRepository(db)
+    attachment = await repo.get_by_id(attachment_id)
+    if not attachment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attachment not found",
+        )
+    return attachment
