@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # Title is required and bounded; description is optional with a length limit.
 class BoardBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
+    visibility: str = Field(default="WORKSPACE", max_length=50)
 
 
 # Request body for creating a board.
@@ -25,8 +25,8 @@ class BoardCreate(BoardBase):
 # Fields default to None so callers can update only the values they provide.
 class BoardUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
-    is_closed: bool | None = None
+    visibility: str | None = Field(default=None, max_length=50)
+    is_archived: bool | None = None
 
 
 # Response returned for a board.
@@ -35,7 +35,7 @@ class BoardResponse(BoardBase):
     id: UUID
     workspace_id: UUID
     created_by: UUID
-    is_closed: bool
+    is_archived: bool
     created_at: datetime
     updated_at: datetime
 
