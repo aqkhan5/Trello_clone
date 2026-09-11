@@ -1,5 +1,3 @@
-# app/services/board_service.py
-
 # Standard library and framework imports used by the service layer.
 from uuid import UUID
 
@@ -41,8 +39,8 @@ class BoardService:
             workspace_id=workspace_id,
             created_by=user_id,
             title=data.title,
-            description=data.description,
-            is_closed=False,
+            visibility=data.visibility or "WORKSPACE",
+            is_archived=False,
         )
         await self.board_repo.create(board)
 
