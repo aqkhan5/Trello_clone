@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Database models used while creating and accepting invitations.
+# Database models used while creating, accepting, and declining invitations.
 from app.models.user import User
 from app.models.workspace import Workspace
 from app.models.workspace_invitation import WorkspaceInvitation
@@ -22,7 +22,7 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.workspace_invitation import InvitationCreate, InvitationStatus
 
 
-# Business rules for inviting users to workspaces and accepting invitations.
+# Business rules for inviting users to workspaces, viewing invites, and handling decisions.
 # This service coordinates multiple repositories and owns the transaction flow.
 class InvitationService:
     def __init__(
@@ -64,7 +64,7 @@ class InvitationService:
                 detail="An active invitation already exists for this email",
             )
 
-        # Generate an unpredictable token that the recipient will use to accept.
+        # Generate an unpredictable token that the recipient will use to accept or decline.
         token = secrets.token_urlsafe(32)
 
         # Invitations remain valid for seven days from creation.
@@ -86,6 +86,10 @@ class InvitationService:
         await self.db.commit()
         await self.db.refresh(invitation)
         return invitation
+
+    async def list_user_pending_invites(self, email: str) -> list[WorkspaceInvitation]:
+        """Fetch all active, unexpired invitations addressed to this user's email."""
+        return await self.invitation_repo.list_pending_for_email(email)
 
     async def accept_invitation(self, token: str, current_user: User) -> WorkspaceMember:
         """Accept an invitation, validate email/expiry, and add member atomically."""
@@ -140,3 +144,45 @@ class InvitationService:
         await self.db.commit()
         await self.db.refresh(member)
         return member
+
+    async def decline_invitation(
+        self, token: str, current_user: User
+    ) -> WorkspaceInvitation:
+        """Decline a pending invitation, ensuring caller identity and valid state."""
+        invitation = await self.invitation_repo.get_by_token(token)
+        if not invitation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invitation not found",
+            )
+
+        if invitation.status != InvitationStatus.PENDING:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invitation is no longer active",
+            )
+
+        current_time = datetime.now(timezone.utc)
+        invitation_expiry = invitation.expires_at
+        if invitation_expiry.tzinfo is None:
+            invitation_expiry = invitation_expiry.replace(tzinfo=timezone.utc)
+
+        if invitation_expiry < current_time:
+            invitation.status = InvitationStatus.EXPIRED
+            await self.db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invitation has expired",
+            )
+
+        # Enforce that only the intended recipient can decline.
+        if current_user.email.lower() != invitation.email.lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This invitation was sent to a different email address",
+            )
+
+        invitation.status = InvitationStatus.DECLINED
+        await self.db.commit()
+        await self.db.refresh(invitation)
+        return invitation
