@@ -1,8 +1,9 @@
-
 # Standard library and SQLAlchemy imports used for typed database queries.
+from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 # Invitation entity and the enum used to identify active invitations.
 from app.models.workspace_invitation import WorkspaceInvitation
@@ -58,3 +59,25 @@ class InvitationRepository:
         )
         result = await self.db.execute(query)
         return list(result.scalars().all())
+
+    async def list_pending_for_email(self, email: str) -> list[WorkspaceInvitation]:
+        """Fetch all valid, active invitations addressed to a user's email."""
+        # Filters by lowercase email, active PENDING status, and unexpired dates.
+        query = (
+            select(WorkspaceInvitation)
+            .where(
+                WorkspaceInvitation.email == email.lower(),
+                WorkspaceInvitation.status == InvitationStatus.PENDING,
+                WorkspaceInvitation.expires_at > datetime.now(timezone.utc),
+            )
+            .options(selectinload(WorkspaceInvitation.workspace))
+            .order_by(WorkspaceInvitation.created_at.desc())
+        )
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
+    async def update(self, invitation: WorkspaceInvitation) -> WorkspaceInvitation:
+        """Flush changes to an existing invitation and refresh its state."""
+        await self.db.flush()
+        await self.db.refresh(invitation)
+        return invitation
