@@ -1,6 +1,6 @@
 import logging
 
-# Use the existing Uvicorn logger so messages appear cleanly in the active terminal
+# Using the existing Uvicorn logger so messages appear cleanly in the active terminal
 logger = logging.getLogger("uvicorn")
 
 
@@ -16,10 +16,10 @@ async def send_invitation_email(
     invite_url = f"http://localhost:3000/invitations/accept?token={token}"
 
     logger.info(
-        f"\n==================== [TRELLO NOTIFICATION EMAIL] ====================\n"
+        f"\n                       TRELLO NOTIFICATION EMAIL                        \n"
         f"To: {recipient_email}\n"
         f"Subject: You have been invited to join the '{workspace_name}' workspace!\n"
         f"Click the link below to accept your invitation:\n"
         f"--> {invite_url} <--\n"
-        f"=====================================================================\n"
+        f"__________________________________________________________________________\n"
     )
