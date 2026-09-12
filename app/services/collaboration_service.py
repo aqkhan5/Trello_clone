@@ -7,6 +7,7 @@ from app.models.activity_log import ActivityLog
 from app.models.attachment import Attachment
 from app.models.board_member import BoardRole
 from app.models.comment import Comment
+
 from app.repositories.activity_log_repository import ActivityLogRepository
 from app.repositories.attachment_repository import AttachmentRepository
 from app.repositories.board_repository import BoardRepository
@@ -14,6 +15,7 @@ from app.repositories.card_repository import CardRepository
 from app.repositories.comment_repository import CommentRepository
 from app.repositories.list_repository import ListRepository
 from app.repositories.workspace_repository import WorkspaceRepository
+
 from app.schemas.attachment import AttachmentCreate
 from app.schemas.comment import CommentCreate, CommentUpdate
 
@@ -38,6 +40,22 @@ class CollaborationService:
         self.board_repo = board_repo
         self.workspace_repo = workspace_repo
         self.db = db
+
+    async def _get_board_id_for_card(self, card_id: UUID) -> UUID:
+        """Resolve the board_id hosting the target card."""
+        card = await self.card_repo.get_by_id(card_id)
+        if not card:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Card not found",
+            )
+        list_obj = await self.list_repo.get_by_id(card.list_id)
+        if not list_obj:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="List not found",
+            )
+        return list_obj.board_id
 
     async def _is_user_board_admin_or_owner(
         self, card_id: UUID, user_id: UUID
@@ -67,6 +85,8 @@ class CollaborationService:
         self, card_id: UUID, user_id: UUID, data: CommentCreate
     ) -> Comment:
         """Create comment and emit activity log in an atomic transaction."""
+        board_id = await self._get_board_id_for_card(card_id)
+
         comment = Comment(
             card_id=card_id,
             user_id=user_id,
@@ -75,11 +95,12 @@ class CollaborationService:
         await self.comment_repo.create(comment)
 
         log = ActivityLog(
+            board_id=board_id,
+            user_id=user_id,
             entity_type="CARD",
             entity_id=card_id,
-            action="COMMENT_ADDED",
-            user_id=user_id,
-            details={"comment_length": len(data.content)},
+            action_type="COMMENT_ADDED",
+            metadata_={"comment_length": len(data.content)},
         )
         await self.activity_repo.create(log)
 
@@ -125,22 +146,25 @@ class CollaborationService:
         self, card_id: UUID, user_id: UUID, data: AttachmentCreate
     ) -> Attachment:
         """Add attachment and emit ATTACHMENT_ADDED activity log."""
+        board_id = await self._get_board_id_for_card(card_id)
+
         attachment = Attachment(
             card_id=card_id,
             uploaded_by=user_id,
             file_name=data.file_name,
             file_url=data.file_url,
             file_size=data.file_size,
-            content_type=data.content_type,
+            file_type=data.content_type,
         )
         await self.attachment_repo.create(attachment)
 
         log = ActivityLog(
+            board_id=board_id,
+            user_id=user_id,
             entity_type="CARD",
             entity_id=card_id,
-            action="ATTACHMENT_ADDED",
-            user_id=user_id,
-            details={
+            action_type="ATTACHMENT_ADDED",
+            metadata_={
                 "file_name": data.file_name,
                 "file_size": data.file_size,
             },
