@@ -527,3 +527,32 @@ async def get_attachment_or_404(
             detail="Attachment not found",
         )
     return attachment
+
+
+# ---------------------------------------------------------------------------
+# Invitation service and repository dependencies
+# ---------------------------------------------------------------------------
+from app.repositories.invitation_repository import InvitationRepository
+from app.services.invitation_service import InvitationService
+
+
+async def get_invitation_repository(
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> InvitationRepository:
+    """Provide an InvitationRepository scoped to the active request session."""
+    return InvitationRepository(db)
+
+
+async def get_invitation_service(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    invitation_repo: Annotated[InvitationRepository, Depends(get_invitation_repository)],
+) -> InvitationService:
+    """Assemble and inject the domain service for workspace invitations."""
+    workspace_repo = WorkspaceRepository(db)
+    user_repo = UserRepository(db)
+    return InvitationService(
+        invitation_repo=invitation_repo,
+        workspace_repo=workspace_repo,
+        user_repo=user_repo,
+        db=db,
+    )
