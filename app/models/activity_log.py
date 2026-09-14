@@ -10,7 +10,6 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.user import User
 
-
 # Activity log model for auditable workspace actions.
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
