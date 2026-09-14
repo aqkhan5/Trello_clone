@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import secrets
 from uuid import UUID
@@ -24,10 +18,6 @@ from app.schemas.workspace_invitation import (
     InvitationStatus,
 )
 
-# ---------------------------------------------------------------------------
-# Service: InvitationService
-# ---------------------------------------------------------------------------
-# Handles workspace invitations and acceptance workflows.
 class InvitationService:
     def __init__(
         self,
@@ -50,7 +40,6 @@ class InvitationService:
         """Generate a secure workspace invitation if the user is not already a member."""
         normalized_email = data.email.lower()
 
-        # 1. Verify workspace exists
         workspace = await self.workspace_repo.get_by_id(workspace_id)
         if not workspace:
             raise HTTPException(
@@ -58,7 +47,6 @@ class InvitationService:
                 detail="Workspace not found",
             )
 
-        # 2. Check if the target email belongs to an existing user who is already a member
         target_user = await self.user_repo.get_by_email(normalized_email)
         if target_user:
             existing_member = await self.workspace_repo.get_member(
@@ -70,7 +58,6 @@ class InvitationService:
                     detail="This user is already a member of the workspace",
                 )
 
-        # 3. Check if an active, unexpired invitation already exists for this email
         active_invite = await self.invitation_repo.get_pending_by_workspace_and_email(
             workspace_id=workspace_id, email=normalized_email
         )
@@ -80,7 +67,6 @@ class InvitationService:
                 detail="A pending invitation has already been sent to this email address",
             )
 
-        # 4. Generate a cryptographically secure token valid for 7 days
         token = secrets.token_urlsafe(32)
         expires_at = datetime.now(timezone.utc) + timedelta(days=7)
 
@@ -115,14 +101,12 @@ class InvitationService:
                 detail="Invitation not found or invalid link",
             )
 
-        # Ensure the invitation was directed to this authenticated user
         if invitation.email.lower() != current_user.email.lower():
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="This invitation was addressed to a different email address",
             )
 
-        # Check status and expiration
         current_utc = datetime.now(timezone.utc)
         if invitation.status != InvitationStatus.PENDING:
             raise HTTPException(
@@ -139,7 +123,6 @@ class InvitationService:
                 detail="This invitation has expired",
             )
 
-        # Prevent duplicate workspace member records
         existing_member = await self.workspace_repo.get_member(
             workspace_id=invitation.workspace_id, user_id=current_user.id
         )
@@ -149,7 +132,6 @@ class InvitationService:
             await self.db.commit()
             return existing_member
 
-        # Atomic transaction: Create member and mark invitation ACCEPTED
         member = WorkspaceMember(
             workspace_id=invitation.workspace_id,
             user_id=current_user.id,

@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -17,10 +11,6 @@ from app.repositories.workspace_repository import WorkspaceRepository
 
 from app.schemas.board import BoardCreate, BoardUpdate
 
-# ---------------------------------------------------------------------------
-# Service: BoardService
-# ---------------------------------------------------------------------------
-# Handles business logic for boards and board membership.
 class BoardService:
     def __init__(
         self,
@@ -75,7 +65,6 @@ class BoardService:
         self, board: Board, target_user_id: UUID, role: BoardRole
     ) -> BoardMember:
         """Add user to board after verifying parent workspace membership."""
-        # Rule 1: Board membership is only valid for users already in the workspace.
         ws_member = await self.workspace_repo.get_member(
             board.workspace_id, target_user_id
         )
@@ -85,7 +74,6 @@ class BoardService:
                 detail="User must belong to the workspace before joining the board",
             )
 
-        # Rule 2: Prevent duplicate membership on the same board.
         existing_board_member = await self.board_repo.get_member(
             board.id, target_user_id
         )
@@ -95,14 +83,12 @@ class BoardService:
                 detail="User is already a member of this board",
             )
 
-        # Create the membership using the requested board role.
         new_member = BoardMember(
             board_id=board.id,
             user_id=target_user_id,
             role=role,
         )
         await self.board_repo.add_member(new_member)
-        # Commit and refresh so the caller receives the persisted membership.
         await self.db.commit()
         await self.db.refresh(new_member)
         return new_member
@@ -111,14 +97,12 @@ class BoardService:
         self, board: Board, target_user_id: UUID, new_role: BoardRole
     ) -> BoardMember:
         """Update role, preventing demotion of the board creator."""
-        # The creator must always retain ADMIN privileges.
         if board.created_by == target_user_id and new_role != BoardRole.ADMIN:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="The board creator cannot be demoted from ADMIN",
             )
 
-        # Look up the target membership before applying the role change.
         member = await self.board_repo.get_member(board.id, target_user_id)
         if not member:
             raise HTTPException(
@@ -133,14 +117,12 @@ class BoardService:
 
     async def remove_member(self, board: Board, target_user_id: UUID) -> None:
         """Remove member, preventing removal of the board creator."""
-        # The creator cannot be removed; deleting the board removes their access.
         if board.created_by == target_user_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="The board creator cannot be removed from the board",
             )
 
-        # Resolve the membership so a missing target can return a clear 404.
         member = await self.board_repo.get_member(board.id, target_user_id)
         if not member:
             raise HTTPException(

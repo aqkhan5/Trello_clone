@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -38,14 +32,8 @@ from app.schemas.checklist import (
 )
 from app.services.card_detail_service import CardDetailService
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Checklists"])
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 def get_card_detail_service(db: AsyncSession) -> CardDetailService:
     return CardDetailService(
         label_repo=LabelRepository(db),
@@ -56,9 +44,6 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
         db=db,
     )
 
-# Checklist endpoints
-
-# Create a checklist after board-level write access is verified.
 @router.post(
     "/cards/{card_id}/checklists",
     response_model=ChecklistResponse,
@@ -71,11 +56,9 @@ async def create_checklist(
     _: Annotated[tuple[Card, BoardMember | None], Depends(require_card_board_writer)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Checklist:
-    # CardDetailService calculates a default position and commits the checklist.
     service = get_card_detail_service(db)
     return await service.create_checklist(card_id, payload)
 
-# List checklists with their items; board-member access is sufficient.
 @router.get(
     "/cards/{card_id}/checklists",
     response_model=list[ChecklistResponse],
@@ -87,11 +70,9 @@ async def list_card_checklists(
     _: Annotated[tuple[Card, BoardMember | None], Depends(require_card_board_member)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> list[Checklist]:
-    # This read-only operation uses the repository directly.
     repo = ChecklistRepository(db)
     return await repo.list_checklists_for_card(card_id)
 
-# Update a checklist after resolving it through its parent card and board.
 @router.patch(
     "/checklists/{checklist_id}",
     response_model=ChecklistResponse,
@@ -103,12 +84,10 @@ async def update_checklist(
     checklist_and_member: Annotated[tuple[Checklist, BoardMember | None], Depends(require_checklist_board_writer)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Checklist:
-    # The dependency supplies the authorized checklist instance.
     checklist, _ = checklist_and_member
     service = get_card_detail_service(db)
     return await service.update_checklist(checklist, payload)
 
-# Delete a checklist and its dependent items.
 @router.delete(
     "/checklists/{checklist_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -118,15 +97,11 @@ async def delete_checklist(
     checklist_and_member: Annotated[tuple[Checklist, BoardMember | None], Depends(require_checklist_board_writer)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
-    # The service commits before the endpoint returns HTTP 204.
     checklist, _ = checklist_and_member
     service = get_card_detail_service(db)
     await service.delete_checklist(checklist)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-# Checklist-item endpoints
-
-# Add an item after verifying write access to the parent checklist's board.
 @router.post(
     "/checklists/{checklist_id}/items",
     response_model=ChecklistItemResponse,
@@ -139,11 +114,9 @@ async def create_checklist_item(
     _: Annotated[tuple[Checklist, BoardMember | None], Depends(require_checklist_board_writer)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ChecklistItem:
-    # CardDetailService calculates a default item position and persists the item.
     service = get_card_detail_service(db)
     return await service.create_checklist_item(checklist_id, payload)
 
-# Update item content, completion state, or position.
 @router.patch(
     "/checklists/items/{item_id}",
     response_model=ChecklistItemResponse,
@@ -155,12 +128,10 @@ async def update_checklist_item(
     item_and_member: Annotated[tuple[ChecklistItem, BoardMember | None], Depends(require_checklist_item_board_writer)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ChecklistItem:
-    # The dependency resolves the item and confirms board-level write access.
     item, _ = item_and_member
     service = get_card_detail_service(db)
     return await service.update_checklist_item(item, payload)
 
-# Permanently delete a checklist item.
 @router.delete(
     "/checklists/items/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -170,7 +141,6 @@ async def delete_checklist_item(
     item_and_member: Annotated[tuple[ChecklistItem, BoardMember | None], Depends(require_checklist_item_board_writer)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
-    # The service commits the deletion before returning HTTP 204.
     item, _ = item_and_member
     service = get_card_detail_service(db)
     await service.delete_checklist_item(item)

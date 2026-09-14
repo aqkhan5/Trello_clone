@@ -1,10 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
-
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,16 +7,10 @@ from app.models.workspace_member import WorkspaceMember, WorkspaceRole
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.workspace import WorkspaceCreate, WorkspaceUpdate
 
-# ---------------------------------------------------------------------------
-# Service: WorkspaceService
-# ---------------------------------------------------------------------------
-# Handles workspace settings, ownership, and team members.
 class WorkspaceService:
     def __init__(self, workspace_repo: WorkspaceRepository, db: AsyncSession):
         self.workspace_repo = workspace_repo
         self.db = db
-
-    # Create — Persist a new workspace and auto-assign the creator as ADMIN member.
 
     async def create_workspace(
         self, user_id: UUID, data: WorkspaceCreate
@@ -47,8 +34,6 @@ class WorkspaceService:
         await self.db.refresh(workspace)
         return workspace
 
-    # Update — Apply partial updates to workspace fields (name, description, etc.).
-
     async def update_workspace(
         self, workspace: Workspace, data: WorkspaceUpdate
     ) -> Workspace:
@@ -61,15 +46,10 @@ class WorkspaceService:
         await self.db.refresh(workspace)
         return workspace
 
-    # Delete — Remove the workspace entirely.
-
     async def delete_workspace(self, workspace: Workspace) -> None:
         """Delete workspace and all dependent rows committed by cascade."""
         await self.workspace_repo.delete(workspace)
         await self.db.commit()
-
-    # Update Member Role — Change a member's role within the workspace.
-    # Guard: the workspace owner can never be demoted below ADMIN.
 
     async def update_member_role(
         self, workspace: Workspace, target_user_id: UUID, new_role: WorkspaceRole
@@ -92,9 +72,6 @@ class WorkspaceService:
         await self.db.commit()
         await self.db.refresh(member)
         return member
-
-    # Remove Member — Delete a user's membership from the workspace.
-    # Guard: the workspace owner cannot be removed (use delete_workspace instead).
 
     async def remove_member(
         self, workspace: Workspace, target_user_id: UUID

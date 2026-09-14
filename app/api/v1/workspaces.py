@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -31,16 +25,8 @@ from app.schemas.workspace_member import (
 )
 from app.services.workspace_service import WorkspaceService
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(prefix="/workspaces", tags=["Workspaces"])
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
-# Workspace Endpoints
-# Create a workspace for the authenticated user.
 @router.post(
     "",
     response_model=WorkspaceResponse,
@@ -57,7 +43,6 @@ async def create_workspace(
     workspace_service = WorkspaceService(workspace_repo, db)
     return await workspace_service.create_workspace(current_user.id, payload)
 
-# Return every workspace that the authenticated user owns or belongs to.
 @router.get(
     "",
     response_model=list[WorkspaceResponse],
@@ -72,7 +57,6 @@ async def list_my_workspaces(
     workspace_repo = WorkspaceRepository(db)
     return await workspace_repo.list_for_user(current_user.id)
 
-# Get one workspace after membership authorization has succeeded.
 @router.get(
     "/{workspace_id}",
     response_model=WorkspaceResponse,
@@ -85,11 +69,9 @@ async def get_workspace(
     ],
 ) -> Workspace:
     """Fetch workspace details if current user is an authorized member."""
-    # The dependency performs the lookup and access check before this handler runs.
     workspace, _ = workspace_and_member
     return workspace
 
-# Update workspace fields; only administrators or the owner may do this.
 @router.patch(
     "/{workspace_id}",
     response_model=WorkspaceResponse,
@@ -104,7 +86,6 @@ async def update_workspace(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Workspace:
     """Update workspace name or description (Requires ADMIN or Owner)."""
-    # Authorization is handled by require_workspace_admin; the service applies the update.
     workspace, _ = workspace_and_member
     workspace_repo = WorkspaceRepository(db)
     workspace_service = WorkspaceService(workspace_repo, db)
@@ -122,16 +103,12 @@ async def delete_workspace(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
     """Delete a workspace and cascade all child records (Requires ADMIN or Owner)."""
-    # The service handles deletion and commits the transaction before returning 204.
     workspace, _ = workspace_and_member
     workspace_repo = WorkspaceRepository(db)
     workspace_service = WorkspaceService(workspace_repo, db)
     await workspace_service.delete_workspace(workspace)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-# Workspace Member Endpoints
-
-# List members after confirming the requester belongs to the workspace.
 @router.get(
     "/{workspace_id}/members",
     response_model=list[WorkspaceMemberResponse],
@@ -146,7 +123,6 @@ async def list_workspace_members(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> list[WorkspaceMember]:
     """List all members joined to the workspace (eager loads profile details)."""
-    # The underscore marks the dependency result as intentionally unused here.
     workspace_repo = WorkspaceRepository(db)
     return await workspace_repo.list_members(workspace_id)
 
@@ -165,7 +141,6 @@ async def update_member_role(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> WorkspaceMember:
     """Update member role. Enforces the rule that the workspace owner cannot be demoted."""
-    # The admin dependency authorizes the requester; the service enforces owner-role rules.
     workspace, _ = workspace_and_member
     workspace_repo = WorkspaceRepository(db)
     workspace_service = WorkspaceService(workspace_repo, db)
@@ -186,7 +161,6 @@ async def remove_workspace_member(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
     """Remove member from workspace. Enforces the rule that the workspace owner cannot be removed."""
-    # The service validates the target and commits the membership deletion.
     workspace, _ = workspace_and_member
     workspace_repo = WorkspaceRepository(db)
     workspace_service = WorkspaceService(workspace_repo, db)

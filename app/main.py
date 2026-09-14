@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from fastapi import FastAPI
 
 from app.api.v1.activity_logs import router as activity_router
@@ -19,15 +13,8 @@ from app.api.v1.lists import router as lists_router
 from app.api.v1.workspaces import router as workspaces_router
 from app.core.config import settings
 
-# ---------------------------------------------------------------------------
-# Application Initialization
-# ---------------------------------------------------------------------------
 app = FastAPI(title=settings.PROJECT_NAME)
 
-# ---------------------------------------------------------------------------
-# API Routes Registration
-# ---------------------------------------------------------------------------
-# Register all API endpoints under the /api/v1 prefix
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(workspaces_router, prefix=settings.API_V1_STR)
 app.include_router(invitations_router, prefix=settings.API_V1_STR)

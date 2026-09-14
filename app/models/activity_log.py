@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from typing import Any, TYPE_CHECKING
@@ -16,10 +10,6 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.user import User
 
-# ---------------------------------------------------------------------------
-# Database Model: ActivityLog
-# ---------------------------------------------------------------------------
-# Database table for recording action history and audit logs.
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
@@ -50,7 +40,6 @@ class ActivityLog(Base):
         String(50),
         nullable=False,
     )
-    # Using 'metadata_' to avoid Python/SQLAlchemy reserved namespace conflict with Base.metadata
     metadata_: Mapped[dict[str, Any] | None] = mapped_column(
         "metadata",
         JSONB,

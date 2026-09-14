@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -12,21 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.card import Card
 
-
-# ---------------------------------------------------------------------------
-# Repository: CardRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for cards within lists.
 class CardRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
     async def create(self, card: Card) -> Card:
         """Add card, flush, and refresh."""
-        # Flush makes the INSERT visible in the current transaction without committing.
         self.db.add(card)
         await self.db.flush()
-        # Refresh loads database-generated fields before returning the card.
         await self.db.refresh(card)
         return card
 

@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -31,14 +25,8 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.attachment import AttachmentCreate, AttachmentResponse
 from app.services.collaboration_service import CollaborationService
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Attachments"])
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 def get_collaboration_service(db: AsyncSession) -> CollaborationService:
     return CollaborationService(
         comment_repo=CommentRepository(db),

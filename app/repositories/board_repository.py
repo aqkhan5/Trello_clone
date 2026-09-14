@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import or_, select
@@ -13,32 +7,24 @@ from sqlalchemy.orm import selectinload
 from app.models.board import Board
 from app.models.board_member import BoardMember
 
-# ---------------------------------------------------------------------------
-# Repository: BoardRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for boards and board memberships.
 class BoardRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
     async def create(self, board: Board) -> Board:
         """Add board, flush, and refresh."""
-        # Flush persists the pending INSERT without ending the transaction.
         self.db.add(board)
         await self.db.flush()
-        # Refresh makes database-generated values available to the caller.
         await self.db.refresh(board)
         return board
 
     async def get_by_id(self, board_id: UUID) -> Board | None:
         """Fetch a single board by ID."""
-        # Return one board when found, otherwise None.
         result = await self.db.execute(select(Board).where(Board.id == board_id))
         return result.scalar_one_or_none()
 
     async def list_for_workspace(self, workspace_id: UUID, user_id: UUID) -> list[Board]:
         """Fetch boards in the workspace where the user is either the creator or an assigned member."""
-        # or an explicit board-member record.
         query = (
             select(Board)
             .outerjoin(BoardMember, Board.id == BoardMember.board_id)

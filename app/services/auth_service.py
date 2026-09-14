@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,16 +7,11 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.user import UserCreate
 
-# ---------------------------------------------------------------------------
-# Service: AuthService
-# ---------------------------------------------------------------------------
-# Handles user registration and login authentication.
 class AuthService:
     def __init__ (self, user_repo: UserRepository, db: AsyncSession):
         self.user_repo = user_repo
         self.db = db
 
-    # Register a new user after verifying unique email
     async def register_user(self, user_in: UserCreate) -> User:
         existing_user = await self.user_repo.get_by_email(user_in.email)
         if existing_user:
@@ -43,7 +32,6 @@ class AuthService:
         await self.db.refresh(user)
         return user
     
-    # Authenticate user credentials and issue an access token
     async def authenticate_user(self, credentials: LoginRequest) -> TokenResponse:
         user = await self.user_repo.get_by_email(credentials.email)
         if not user or not verify_password(credentials.password, user.hashed_password):

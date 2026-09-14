@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import select
@@ -12,11 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.card_label import CardLabel
 from app.models.label import Label
 
-
-# ---------------------------------------------------------------------------
-# Repository: LabelRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for labels and card-label links.
 class LabelRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

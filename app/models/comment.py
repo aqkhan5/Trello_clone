@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -16,10 +10,6 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.user import User
 
-# ---------------------------------------------------------------------------
-# Database Model: Comment
-# ---------------------------------------------------------------------------
-# Database table for user comments and discussions on cards.
 class Comment(Base):
     __tablename__ = "comments"
 

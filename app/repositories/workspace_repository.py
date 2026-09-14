@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,10 +6,6 @@ from sqlalchemy.orm import selectinload
 from app.models.workspace import Workspace
 from app.models.workspace_member import WorkspaceMember
 
-# ---------------------------------------------------------------------------
-# Repository: WorkspaceRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for workspaces and workspace members.
 class WorkspaceRepository:
     def __init__ (self, db: AsyncSession):
         self.db = db

@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import select
@@ -12,10 +6,6 @@ from sqlalchemy.orm import selectinload
 
 from app.models.comment import Comment
 
-# ---------------------------------------------------------------------------
-# Repository: CommentRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for user comments on cards.
 class CommentRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

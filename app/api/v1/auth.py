@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import json
 from typing import Annotated
 
@@ -21,17 +15,7 @@ from app.schemas.user import UserCreate, UserResponse
 
 from app.services.auth_service import AuthService
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
-# POST /auth/register — Create a new user account
-# Enforces unique email constraint via the auth service layer.
-# Returns the newly created user profile on success (201).
 
 @router.post(
     "/register",
@@ -64,10 +48,6 @@ class OAuth2LoginForm:
         self.username = username
         self.password = password
 
-# POST /auth/login — Authenticate an existing user
-# Accepts OAuth2 form data (email in username field) or JSON body (email & password).
-# Returns a JWT Bearer token on successful authentication (200).
-
 @router.post(
     "/login",
     response_model=TokenResponse,
@@ -83,7 +63,6 @@ async def login(
     email = form_data.username
     password = form_data.password
 
-    # Fall back to JSON body if form fields were not supplied
     if not email or not password:
         try:
             body = await request.json()
@@ -93,7 +72,6 @@ async def login(
         except Exception:
             pass
 
-    # If stream was consumed by Form parser (e.g. mismatched Content-Type with raw JSON), inspect cached form
     if not email or not password:
         try:
             form = await request.form()
@@ -130,10 +108,6 @@ async def login(
     user_repo = UserRepository(db)
     auth_service = AuthService(user_repo, db)
     return await auth_service.authenticate_user(credentials)
-
-# GET /auth/me — Retrieve the current authenticated user's profile
-# Requires a valid JWT token (injected via the get_current_user dependency).
-# Returns the user object associated with the token (200).
 
 @router.get(
     "/me",

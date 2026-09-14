@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import select
@@ -13,10 +7,6 @@ from sqlalchemy.orm import selectinload
 from app.models.card_member import CardMember
 from app.models.user import User
 
-# ---------------------------------------------------------------------------
-# Repository: CardMemberRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for assigning users to cards.
 class CardMemberRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -49,7 +39,6 @@ class CardMemberRepository:
             select(CardMember)
             .where(CardMember.card_id == card_id)
             .options(selectinload(CardMember.user))
-            # Preserve assignment history order in API responses.
             .order_by(CardMember.assigned_at.asc())
         )
         result = await self.db.execute(query)

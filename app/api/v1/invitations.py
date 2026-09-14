@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, status
 
@@ -23,14 +17,8 @@ from app.schemas.workspace_invitation import (
 from app.schemas.workspace_member import WorkspaceMemberResponse
 from app.services.invitation_service import InvitationService
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Invitations & Notifications"])
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 @router.post(
     "/workspaces/{workspace_id}/invitations",
     response_model=InvitationResponse,
@@ -52,7 +40,6 @@ async def invite_workspace_member(
         data=payload,
     )
 
-    # Queue transactional notification in background
     background_tasks.add_task(
         send_invitation_email,
         recipient_email=invitation.email,

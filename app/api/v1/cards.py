@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -38,14 +32,8 @@ from app.schemas.label import LabelResponse
 from app.services.card_detail_service import CardDetailService
 from app.services.card_service import CardService
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Cards"])
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 def get_card_detail_service(db: AsyncSession) -> CardDetailService:
     return CardDetailService(
         label_repo=LabelRepository(db),
@@ -56,9 +44,6 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
         db=db,
     )
 
-# List-scoped Card Endpoints
-
-# Create a card after the caller passes list-level board writer authorization.
 @router.post(
     "/lists/{list_id}/cards",
     response_model=CardResponse,
@@ -75,13 +60,11 @@ async def create_card(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Card:
     """Create a new card assigned to the specified list."""
-    # Creation uses the service because it calculates the card position and commits.
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
     return await service.create_card(list_id, current_user.id, payload)
 
-# Read cards in a list; readers may optionally include archived cards.
 @router.get(
     "/lists/{list_id}/cards",
     response_model=list[CardResponse],
@@ -99,13 +82,9 @@ async def list_cards_in_list(
     ),
 ) -> list[Card]:
     """Retrieve all cards belonging to a list, ordered by position."""
-    # The dependency checks board access; the repository performs the read query.
     card_repo = CardRepository(db)
     return await card_repo.list_for_list(list_id, include_archived=include_archived)
 
-# Direct Card Endpoints
-
-# Return one card after board-member authorization has succeeded.
 @router.get(
     "/cards/{card_id}",
     response_model=CardResponse,
@@ -118,11 +97,9 @@ async def get_card(
     ],
 ) -> Card:
     """Retrieve details of a single card."""
-    # The dependency performs the card lookup and access check before this handler.
     card, _ = card_and_member
     return card
 
-# Update card content or state; writer access is required.
 @router.patch(
     "/cards/{card_id}",
     response_model=CardResponse,
@@ -137,14 +114,12 @@ async def update_card(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Card:
     """Update title, description, due date, completion status, or archive state."""
-    # CardService applies partial-update rules and owns the transaction commit.
     card, _ = card_and_member
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
     return await service.update_card(card, payload)
 
-# Move a card between lists or assign a new position within its current list.
 @router.post(
     "/cards/{card_id}/move",
     response_model=CardResponse,
@@ -159,14 +134,12 @@ async def move_card(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Card:
     """Move card to a new target list and/or assign a new fractional position."""
-    # CardService validates cross-list moves and persists the new position.
     card, _ = card_and_member
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
     return await service.move_card(card, payload)
 
-# Permanently remove a card; writer access is required.
 @router.delete(
     "/cards/{card_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -179,15 +152,12 @@ async def delete_card(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
     """Permanently delete a card."""
-    # The service performs deletion and commits before the 204 response.
     card, _ = card_and_member
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
     await service.delete_card(card)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-# Card Member Endpoints
 
 @router.get(
     "/cards/{card_id}/members",
@@ -233,8 +203,6 @@ async def remove_card_member(
     service = get_card_detail_service(db)
     await service.remove_card_member(card_id, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-# Card Label Endpoints
 
 @router.get(
     "/cards/{card_id}/labels",

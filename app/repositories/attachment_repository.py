@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import select
@@ -11,10 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.attachment import Attachment
 
-# ---------------------------------------------------------------------------
-# Repository: AttachmentRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for file attachments uploaded to cards.
 class AttachmentRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

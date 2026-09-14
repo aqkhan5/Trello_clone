@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -17,10 +11,6 @@ if TYPE_CHECKING:
     from app.models.workspace import Workspace
     from app.models.user import User
 
-# ---------------------------------------------------------------------------
-# Database Model: WorkspaceInvitation
-# ---------------------------------------------------------------------------
-# Database table for pending email invitations to join a workspace.
 class WorkspaceInvitation(Base):
     __tablename__ = "workspace_invitations"
     __table_args__ = (
@@ -76,7 +66,5 @@ class WorkspaceInvitation(Base):
         nullable=False
     )
 
-    # Add these relationship:
     workspace: Mapped["Workspace"] = relationship("Workspace", lazy="selectin")
-    # Recommended for showing who sent the invite
     inviter: Mapped["User"] = relationship("User", foreign_keys=[invited_by], lazy="selectin")

@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -13,10 +7,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-# ---------------------------------------------------------------------------
-# Database Model: ChecklistItem
-# ---------------------------------------------------------------------------
-# Database table for individual to-do items inside a checklist.
 class ChecklistItem(Base):
     __tablename__ = "checklist_items"
     __table_args__ = (

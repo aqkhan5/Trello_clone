@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -14,17 +8,11 @@ from sqlalchemy.orm import selectinload
 from app.models.checklist import Checklist
 from app.models.checklist_item import ChecklistItem
 
-
-# ---------------------------------------------------------------------------
-# Repository: ChecklistRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for checklists and checklist items.
 class ChecklistRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
    
-    # Checklist persistence and ordering
 
     async def create_checklist(self, checklist: Checklist) -> Checklist:
         """Add checklist, flush, and refresh."""
@@ -69,8 +57,6 @@ class ChecklistRepository:
         """Delete checklist and flush."""
         await self.db.delete(checklist)
         await self.db.flush()
-
-    # Checklist-item persistence and ordering helpers
 
     async def create_item(self, item: ChecklistItem) -> ChecklistItem:
         """Add item, flush, and refresh."""

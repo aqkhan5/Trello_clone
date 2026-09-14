@@ -1,27 +1,13 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from datetime import datetime
 from uuid import UUID
 from decimal import Decimal
 
 from pydantic import BaseModel, Field, ConfigDict
 
-# ---------------------------------------------------------------------------
-# Shared Base Schemas
-# ---------------------------------------------------------------------------
-# Shared properties common to both requests and responses
 class ChecklistItemBase(BaseModel):
     content: str = Field(..., min_length=1, max_length=255)
     
 
-# ---------------------------------------------------------------------------
-# Request Schemas
-# ---------------------------------------------------------------------------
-# Schemas for validating incoming request data
 class ChecklistItemCreate(ChecklistItemBase):
     position: Decimal | None = None
 
@@ -30,10 +16,6 @@ class ChecklistItemUpdate(BaseModel):
     is_completed: bool | None = None
     position: Decimal | None = None
 
-# ---------------------------------------------------------------------------
-# Response Schemas
-# ---------------------------------------------------------------------------
-# Schemas for formatting outgoing API responses
 class ChecklistItemResponse(ChecklistItemBase):
     id: UUID
     checklist_id: UUID

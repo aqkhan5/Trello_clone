@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import enum
 import uuid
 from datetime import datetime
@@ -16,18 +10,11 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.user import User
 
-# ---------------------------------------------------------------------------
-# Role Enums
-# ---------------------------------------------------------------------------
 class BoardRole(str, enum.Enum):
     ADMIN = "ADMIN"
     MEMBER = "MEMBER"
     OBSERVER = "OBSERVER"
 
-# ---------------------------------------------------------------------------
-# Database Model: BoardMember
-# ---------------------------------------------------------------------------
-# Database table for tracking board members and their access permissions.
 class BoardMember(Base):
     __tablename__ = "board_members"
     __table_args__ = (UniqueConstraint("board_id", "user_id", name="uq_board_user"),)

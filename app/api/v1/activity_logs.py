@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -17,14 +11,8 @@ from app.models.card import Card
 from app.repositories.activity_log_repository import ActivityLogRepository
 from app.schemas.activity_log import ActivityLogResponse
 
-# ---------------------------------------------------------------------------
-# Router Configuration
-# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Activity Logs"])
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 @router.get(
     "/cards/{card_id}/activity",
     response_model=list[ActivityLogResponse],

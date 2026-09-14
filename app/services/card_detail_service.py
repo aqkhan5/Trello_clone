@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -30,10 +24,6 @@ from app.schemas.label import LabelCreate, LabelUpdate
 
 DEFAULT_POSITION_STEP = Decimal("65536.0")
 
-# ---------------------------------------------------------------------------
-# Service: CardDetailService
-# ---------------------------------------------------------------------------
-# Handles labels, checklists, and member assignments on cards.
 class CardDetailService:
     def __init__(
         self,
@@ -52,7 +42,6 @@ class CardDetailService:
         self.db = db
 
     
-    # Labels
 
     async def create_board_label(self, board_id: UUID, data: LabelCreate) -> Label:
         label = Label(board_id=board_id, name=data.name, color=data.color)
@@ -74,8 +63,6 @@ class CardDetailService:
         await self.db.commit()
 
     async def attach_label_to_card(self, card: Card, label_id: UUID) -> None:
-        # A label can only be attached when it belongs to the card's board and
-        # is not already linked to the card.
         label = await self.label_repo.get_by_id(label_id)
         if not label:
             raise HTTPException(
@@ -101,7 +88,6 @@ class CardDetailService:
         await self.db.commit()
 
     async def detach_label_from_card(self, card_id: UUID, label_id: UUID) -> None:
-        # Removing a link does not delete the label itself.
         card_label = await self.label_repo.get_card_label(card_id, label_id)
         if not card_label:
             raise HTTPException(
@@ -111,9 +97,6 @@ class CardDetailService:
         await self.label_repo.detach_from_card(card_label)
         await self.db.commit()
 
-    # Card Members
-
-    # Card assignment requires board membership and prevents duplicate assignments.
     async def assign_card_member(self, card: Card, target_user_id: UUID) -> CardMember:
         card_list = await self.list_repo.get_by_id(card.list_id)
         if not card_list:
@@ -146,7 +129,6 @@ class CardDetailService:
         return assignment
 
     async def remove_card_member(self, card_id: UUID, target_user_id: UUID) -> None:
-        # Remove only the card assignment; the user remains on the board.
         assignment = await self.card_member_repo.get_member(card_id, target_user_id)
         if not assignment:
             raise HTTPException(
@@ -156,9 +138,6 @@ class CardDetailService:
         await self.card_member_repo.remove_member(assignment)
         await self.db.commit()
 
-    # Checklists & Items
-
-    # explicit position when provided, otherwise append after the current maximum.
     async def create_checklist(
         self, card_id: UUID, data: ChecklistCreate
     ) -> Checklist:

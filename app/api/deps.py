@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from typing import Annotated
 from uuid import UUID
@@ -41,15 +35,9 @@ from app.schemas.auth import TokenPayload
 from app.schemas.workspace_member import WorkspaceRole
 from app.services.invitation_service import InvitationService
 
-
-# ---------------------------------------------------------------------------
-# Authentication Dependencies
-# ---------------------------------------------------------------------------
-# Reads bearer token from the Authorization header
 oauth_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
 )
-
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth_scheme)],
@@ -86,10 +74,6 @@ async def get_current_user(
 
     return user
 
-
-# ---------------------------------------------------------------------------
-# Workspace Access Dependencies
-# ---------------------------------------------------------------------------
 async def get_workspace_or_404(
     workspace_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -103,7 +87,6 @@ async def get_workspace_or_404(
             detail="Workspace not found",
         )
     return workspace
-
 
 async def require_workspace_member(
     workspace_id: UUID,
@@ -122,7 +105,6 @@ async def require_workspace_member(
         )
     return workspace, member
 
-
 async def require_workspace_admin(
     workspace_and_member: Annotated[
         tuple[Workspace, WorkspaceMember], Depends(require_workspace_member)
@@ -140,10 +122,6 @@ async def require_workspace_admin(
         )
     return workspace, member
 
-
-# ---------------------------------------------------------------------------
-# Board Access Dependencies
-# ---------------------------------------------------------------------------
 async def get_board_or_404(
     board_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -158,7 +136,6 @@ async def get_board_or_404(
         )
     return board
 
-
 async def require_board_member(
     board_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -172,7 +149,6 @@ async def require_board_member(
     if board_member:
         return board, board_member
 
-    # Workspace owners also have access to all boards in their workspace
     workspace_repo = WorkspaceRepository(db)
     workspace = await workspace_repo.get_by_id(board.workspace_id)
     if workspace and workspace.owner_id == current_user.id:
@@ -182,7 +158,6 @@ async def require_board_member(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Not a member of this board",
     )
-
 
 async def require_board_admin(
     board_and_member: Annotated[
@@ -208,7 +183,6 @@ async def require_board_admin(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Board admin permissions required",
     )
-
 
 async def require_board_writer(
     board_and_member: Annotated[
@@ -241,10 +215,6 @@ async def require_board_writer(
         detail="Write permission required for this board",
     )
 
-
-# ---------------------------------------------------------------------------
-# List Access Dependencies
-# ---------------------------------------------------------------------------
 async def get_list_or_404(
     list_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -259,7 +229,6 @@ async def get_list_or_404(
         )
     return list_obj
 
-
 async def require_list_board_member(
     list_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -269,7 +238,6 @@ async def require_list_board_member(
     list_obj = await get_list_or_404(list_id, db)
     board, member = await require_board_member(list_obj.board_id, current_user, db)
     return list_obj, member
-
 
 async def require_list_board_writer(
     list_and_member: Annotated[
@@ -307,10 +275,6 @@ async def require_list_board_writer(
         detail="Writer permission required for this board",
     )
 
-
-# ---------------------------------------------------------------------------
-# Card Access Dependencies
-# ---------------------------------------------------------------------------
 async def get_card_or_404(
     card_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -325,7 +289,6 @@ async def get_card_or_404(
         )
     return card
 
-
 async def require_card_board_member(
     card_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -335,7 +298,6 @@ async def require_card_board_member(
     card = await get_card_or_404(card_id, db)
     _, member = await require_list_board_member(card.list_id, current_user, db)
     return card, member
-
 
 async def require_card_board_writer(
     card_and_member: Annotated[
@@ -357,10 +319,6 @@ async def require_card_board_writer(
     await require_list_board_writer((list_obj, member), current_user, db)
     return card, member
 
-
-# ---------------------------------------------------------------------------
-# Label & Checklist Dependencies
-# ---------------------------------------------------------------------------
 async def get_label_or_404(
     label_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -375,7 +333,6 @@ async def get_label_or_404(
         )
     return label
 
-
 async def require_label_board_writer(
     label_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -386,7 +343,6 @@ async def require_label_board_writer(
     board_and_member = await require_board_member(label.board_id, current_user, db)
     await require_board_writer(board_and_member, current_user, db)
     return label, board_and_member[1]
-
 
 async def get_checklist_or_404(
     checklist_id: UUID,
@@ -402,7 +358,6 @@ async def get_checklist_or_404(
         )
     return checklist
 
-
 async def require_checklist_board_writer(
     checklist_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -413,7 +368,6 @@ async def require_checklist_board_writer(
     card_and_member = await require_card_board_member(checklist.card_id, current_user, db)
     await require_card_board_writer(card_and_member, current_user, db)
     return checklist, card_and_member[1]
-
 
 async def get_checklist_item_or_404(
     item_id: UUID,
@@ -429,7 +383,6 @@ async def get_checklist_item_or_404(
         )
     return item
 
-
 async def require_checklist_item_board_writer(
     item_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -440,10 +393,6 @@ async def require_checklist_item_board_writer(
     checklist_and_member = await require_checklist_board_writer(item.checklist_id, current_user, db)
     return item, checklist_and_member[1]
 
-
-# ---------------------------------------------------------------------------
-# Comment & Attachment Dependencies
-# ---------------------------------------------------------------------------
 async def get_comment_or_404(
     comment_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -457,7 +406,6 @@ async def get_comment_or_404(
             detail="Comment not found",
         )
     return comment
-
 
 async def get_attachment_or_404(
     attachment_id: UUID,
@@ -473,16 +421,11 @@ async def get_attachment_or_404(
         )
     return attachment
 
-
-# ---------------------------------------------------------------------------
-# Invitation Service Dependencies
-# ---------------------------------------------------------------------------
 async def get_invitation_repository(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> InvitationRepository:
     """Create and return an InvitationRepository instance."""
     return InvitationRepository(db)
-
 
 async def get_invitation_service(
     db: Annotated[AsyncSession, Depends(get_db)],

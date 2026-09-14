@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy import select
@@ -13,10 +7,6 @@ from sqlalchemy.orm import selectinload
 from app.models.workspace_invitation import WorkspaceInvitation
 from app.schemas.workspace_invitation import InvitationStatus
 
-# ---------------------------------------------------------------------------
-# Repository: InvitationRepository
-# ---------------------------------------------------------------------------
-# Handles database operations for workspace invitations.
 class InvitationRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

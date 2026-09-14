@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, UniqueConstraint
@@ -11,10 +5,6 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
-# ---------------------------------------------------------------------------
-# Database Model: CardLabel
-# ---------------------------------------------------------------------------
-# Database table linking cards to their assigned labels.
 class CardLabel(Base):
     __tablename__ = "card_labels"
     __table_args__ = (

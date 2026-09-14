@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -17,11 +11,6 @@ from app.schemas.card import CardCreate, CardMove, CardUpdate
 
 DEFAULT_POSITION_STEP = Decimal("65536.0")
 
-
-# ---------------------------------------------------------------------------
-# Service: CardService
-# ---------------------------------------------------------------------------
-# Handles creating, updating, reordering, and moving cards.
 class CardService:
     def __init__(
         self,
@@ -37,7 +26,6 @@ class CardService:
         self, list_id: UUID, user_id: UUID, data: CardCreate
     ) -> Card:
         """Create a card with calculated fractional position if omitted."""
-        # current last card using the configured spacing step.
         if data.position is not None:
             assigned_position = data.position
         else:
@@ -74,7 +62,6 @@ class CardService:
 
     async def move_card(self, card: Card, data: CardMove) -> Card:
         """Move card within same list or across lists with new fractional position."""
-        # card's foreign key. Same-list moves only need a new position.
         if card.list_id != data.target_list_id:
             target_list = await self.list_repo.get_by_id(data.target_list_id)
             if not target_list:

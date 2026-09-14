@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -15,10 +9,6 @@ from app.schemas.list import ListCreate, ListUpdate
 
 DEFAULT_POSITION_STEP = Decimal("65536.0")
 
-# ---------------------------------------------------------------------------
-# Service: ListService
-# ---------------------------------------------------------------------------
-# Handles creating, updating, and deleting board lists.
 class ListService:
     def __init__(self, list_repo: ListRepository, db: AsyncSession):
         self.list_repo = list_repo

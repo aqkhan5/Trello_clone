@@ -1,9 +1,3 @@
-# This project is a backend API for a Trello-like task and project management application.
-# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
-
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -17,10 +11,6 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.checklist_item import ChecklistItem
 
-# ---------------------------------------------------------------------------
-# Database Model: Checklist
-# ---------------------------------------------------------------------------
-# Database table for checklists inside a card.
 class Checklist(Base):
     __tablename__ = "checklists"
 
