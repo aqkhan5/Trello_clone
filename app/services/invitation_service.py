@@ -1,29 +1,24 @@
-# Standard library utilities for secure tokens, expiry times, and UUIDs.
-import secrets
 from datetime import datetime, timedelta, timezone
+import secrets
 from uuid import UUID
 
-# FastAPI error responses and database session type.
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Database models used while creating, accepting, and declining invitations.
-from app.models.user import User
-from app.models.workspace import Workspace
 from app.models.workspace_invitation import WorkspaceInvitation
 from app.models.workspace_member import WorkspaceMember
+from app.models.user import User
 
-# Repositories keep database queries separate from business rules.
 from app.repositories.invitation_repository import InvitationRepository
-from app.repositories.user_repository import UserRepository
 from app.repositories.workspace_repository import WorkspaceRepository
+from app.repositories.user_repository import UserRepository
 
-# Request data and the invitation lifecycle enum.
-from app.schemas.workspace_invitation import InvitationCreate, InvitationStatus
+from app.schemas.workspace_invitation import (
+    InvitationCreate,
+    InvitationStatus,
+)
 
 
-# Business rules for inviting users to workspaces, viewing invites, and handling decisions.
-# This service coordinates multiple repositories and owns the transaction flow.
 class InvitationService:
     def __init__(
         self,
@@ -32,157 +27,158 @@ class InvitationService:
         user_repo: UserRepository,
         db: AsyncSession,
     ):
-        # Each repository uses the same request-scoped database session.
         self.invitation_repo = invitation_repo
         self.workspace_repo = workspace_repo
         self.user_repo = user_repo
         self.db = db
 
     async def create_invitation(
-        self, workspace: Workspace, inviter_id: UUID, data: InvitationCreate
+        self,
+        workspace_id: UUID,
+        current_user_id: UUID,
+        data: InvitationCreate,
     ) -> WorkspaceInvitation:
-        """Create a workspace invitation adhering to duplicate and membership rules."""
-        # Rule 1: An existing account must not receive an invitation if it is
-        # already a member of this workspace.
-        existing_user = await self.user_repo.get_by_email(data.email)
-        if existing_user:
-            member = await self.workspace_repo.get_member(workspace.id, existing_user.id)
-            if member:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="User is already a member of this workspace",
-                )
+        """Generate a secure workspace invitation if the user is not already a member."""
+        normalized_email = data.email.lower()
 
-        # Rule 2: Prevent multiple active invitations for the same workspace
-        # and email address. Non-pending invitations do not block a new one.
-        pending_invite = await self.invitation_repo.get_pending_by_workspace_and_email(
-            workspace_id=workspace.id, email=data.email
-        )
-        if pending_invite:
+        # 1. Verify workspace exists
+        workspace = await self.workspace_repo.get_by_id(workspace_id)
+        if not workspace:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="An active invitation already exists for this email",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Workspace not found",
             )
 
-        # Generate an unpredictable token that the recipient will use to accept or decline.
-        token = secrets.token_urlsafe(32)
+        # 2. Check if the target email belongs to an existing user who is already a member
+        target_user = await self.user_repo.get_by_email(normalized_email)
+        if target_user:
+            existing_member = await self.workspace_repo.get_member(
+                workspace_id=workspace_id, user_id=target_user.id
+            )
+            if existing_member or workspace.owner_id == target_user.id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="This user is already a member of the workspace",
+                )
 
-        # Invitations remain valid for seven days from creation.
+        # 3. Check if an active, unexpired invitation already exists for this email
+        active_invite = await self.invitation_repo.get_pending_by_workspace_and_email(
+            workspace_id=workspace_id, email=normalized_email
+        )
+        if active_invite:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A pending invitation has already been sent to this email address",
+            )
+
+        # 4. Generate a cryptographically secure token valid for 7 days
+        token = secrets.token_urlsafe(32)
         expires_at = datetime.now(timezone.utc) + timedelta(days=7)
 
-        # Build the pending invitation before saving it through the repository.
         invitation = WorkspaceInvitation(
-            workspace_id=workspace.id,
-            invited_by=inviter_id,
-            email=data.email,
+            workspace_id=workspace_id,
+            invited_by=current_user_id,
+            email=normalized_email,
             role=data.role,
             token=token,
             status=InvitationStatus.PENDING,
             expires_at=expires_at,
         )
 
-        # Persist, commit, and refresh so the returned object contains database values.
-        await self.invitation_repo.create(invitation)
+        created_invite = await self.invitation_repo.create(invitation)
         await self.db.commit()
-        await self.db.refresh(invitation)
-        return invitation
+        return created_invite
 
-    async def list_user_pending_invites(self, email: str) -> list[WorkspaceInvitation]:
-        """Fetch all active, unexpired invitations addressed to this user's email."""
-        return await self.invitation_repo.list_pending_for_email(email)
+    async def list_pending_invitations_for_user(
+        self, user: User
+    ) -> list[WorkspaceInvitation]:
+        """Retrieve all active pending invitations for the user's notification bell."""
+        return await self.invitation_repo.list_pending_for_email(user.email)
 
-    async def accept_invitation(self, token: str, current_user: User) -> WorkspaceMember:
-        """Accept an invitation, validate email/expiry, and add member atomically."""
-        # Find the invitation using the secure token from the acceptance request.
+    async def accept_invitation(
+        self, token: str, current_user: User
+    ) -> WorkspaceMember:
+        """Validate token and atomically add the current user as a workspace member."""
         invitation = await self.invitation_repo.get_by_token(token)
         if not invitation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Invitation not found",
+                detail="Invitation not found or invalid link",
             )
 
-        # A token can only be used while its invitation is still pending.
+        # Ensure the invitation was directed to this authenticated user
+        if invitation.email.lower() != current_user.email.lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This invitation was addressed to a different email address",
+            )
+
+        # Check status and expiration
+        current_utc = datetime.now(timezone.utc)
         if invitation.status != InvitationStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invitation is no longer valid",
+                detail=f"This invitation is no longer active (status: {invitation.status})",
             )
 
-        # Compare timezone-aware UTC datetimes. Some database drivers may return
-        # a naive datetime, so treat it as UTC before comparing.
-        current_time = datetime.now(timezone.utc)
-        invitation_expiry = invitation.expires_at
-        if invitation_expiry.tzinfo is None:
-            invitation_expiry = invitation_expiry.replace(tzinfo=timezone.utc)
-
-        if invitation_expiry < current_time:
-            # Record the expired state before rejecting the acceptance attempt.
+        if invitation.expires_at <= current_utc:
             invitation.status = InvitationStatus.EXPIRED
+            await self.invitation_repo.update(invitation)
             await self.db.commit()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invitation has expired",
+                detail="This invitation has expired",
             )
 
-        # Only the account matching the invited email may accept this invitation.
-        if current_user.email.lower() != invitation.email.lower():
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This invitation was sent to a different email address",
-            )
+        # Prevent duplicate workspace member records
+        existing_member = await self.workspace_repo.get_member(
+            workspace_id=invitation.workspace_id, user_id=current_user.id
+        )
+        if existing_member:
+            invitation.status = InvitationStatus.ACCEPTED
+            await self.invitation_repo.update(invitation)
+            await self.db.commit()
+            return existing_member
 
-        # Create the membership using the role granted by the invitation.
+        # Atomic transaction: Create member and mark invitation ACCEPTED
         member = WorkspaceMember(
             workspace_id=invitation.workspace_id,
             user_id=current_user.id,
             role=invitation.role,
         )
-        # Add the member and mark the invitation accepted in the same transaction.
-        await self.workspace_repo.add_member(member)
+        self.db.add(member)
 
         invitation.status = InvitationStatus.ACCEPTED
+        invitation.accepted_at = current_utc
+        await self.invitation_repo.update(invitation)
+
         await self.db.commit()
         await self.db.refresh(member)
         return member
 
     async def decline_invitation(
         self, token: str, current_user: User
-    ) -> WorkspaceInvitation:
-        """Decline a pending invitation, ensuring caller identity and valid state."""
+    ) -> None:
+        """Decline a pending invitation and mark its status as DECLINED."""
         invitation = await self.invitation_repo.get_by_token(token)
         if not invitation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Invitation not found",
+                detail="Invitation not found or invalid link",
+            )
+
+        if invitation.email.lower() != current_user.email.lower():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This invitation was addressed to a different email address",
             )
 
         if invitation.status != InvitationStatus.PENDING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invitation is no longer active",
-            )
-
-        current_time = datetime.now(timezone.utc)
-        invitation_expiry = invitation.expires_at
-        if invitation_expiry.tzinfo is None:
-            invitation_expiry = invitation_expiry.replace(tzinfo=timezone.utc)
-
-        if invitation_expiry < current_time:
-            invitation.status = InvitationStatus.EXPIRED
-            await self.db.commit()
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invitation has expired",
-            )
-
-        # Enforce that only the intended recipient can decline.
-        if current_user.email.lower() != invitation.email.lower():
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This invitation was sent to a different email address",
+                detail="Invitation is no longer pending",
             )
 
         invitation.status = InvitationStatus.DECLINED
+        await self.invitation_repo.update(invitation)
         await self.db.commit()
-        await self.db.refresh(invitation)
-        return invitation
