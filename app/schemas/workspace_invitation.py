@@ -1,38 +1,43 @@
-
-# Standard library types used by the invitation schemas.
-import enum
 from datetime import datetime
+from enum import Enum
 from uuid import UUID
-
-# Pydantic provides validation and serialization for API payloads.
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-# Reuse the workspace role enum so invitation roles match membership roles.
-from app.models.workspace_member import WorkspaceRole
 
-
-# Lifecycle states for a workspace invitation.
-# An invitation normally moves from PENDING to ACCEPTED, DECLINED, or EXPIRED.
-class InvitationStatus(str, enum.Enum):
+class InvitationStatus(str, Enum):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     DECLINED = "DECLINED"
     EXPIRED = "EXPIRED"
 
 
-# Request body used when an administrator invites someone to a workspace.
-# The invited user receives the MEMBER role unless another valid role is supplied.
+class WorkspaceRole(str, Enum):
+    ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
+
+
+# Lightweight workspace details nested in notification responses
+class WorkspaceSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    description: str | None = None
+
+
+# Payload to invite a new user by email
 class InvitationCreate(BaseModel):
     email: EmailStr
     role: WorkspaceRole = WorkspaceRole.MEMBER
 
 
-# Response model returned when an invitation is created or retrieved.
-# It includes identity, ownership, recipient, security, status, and timing data.
+# Standard response model when an invitation is generated
 class InvitationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     workspace_id: UUID
-    inviter_id: UUID
+    invited_by: UUID
     email: EmailStr
     role: WorkspaceRole
     token: str
@@ -40,5 +45,16 @@ class InvitationResponse(BaseModel):
     expires_at: datetime
     created_at: datetime
 
-    # Allow Pydantic to build this schema from a SQLAlchemy model instance.
+
+# Trello-style in-app notification item (used for GET /invitations/my-pending)
+class TrelloNotificationItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    email: EmailStr
+    role: WorkspaceRole
+    token: str
+    status: InvitationStatus
+    expires_at: datetime
+    created_at: datetime
+    workspace: WorkspaceSummary
