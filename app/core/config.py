@@ -24,7 +24,6 @@ class Settings(BaseSettings):
         elif v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
             v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-        # Strip libpq-only parameters incompatible with asyncpg
         v = v.replace("sslmode=require", "ssl=require")
         v = (
             v.replace("&channel_binding=require", "")
