@@ -1,5 +1,6 @@
 # Imports — Standard library, FastAPI framework, and project modules
 
+import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
@@ -80,15 +81,33 @@ async def login(
 
     # Fall back to JSON body if form fields were not supplied
     if not email or not password:
-        content_type = request.headers.get("content-type", "").lower()
-        if "application/json" in content_type:
-            try:
-                body = await request.json()
-                if isinstance(body, dict):
-                    email = body.get("email") or body.get("username")
-                    password = body.get("password")
-            except Exception:
-                pass
+        try:
+            body = await request.json()
+            if isinstance(body, dict):
+                email = email or body.get("email") or body.get("username")
+                password = password or body.get("password")
+        except Exception:
+            pass
+
+    # If stream was consumed by Form parser (e.g. mismatched Content-Type with raw JSON), inspect cached form
+    if not email or not password:
+        try:
+            form = await request.form()
+            email = email or form.get("email") or form.get("username")
+            password = password or form.get("password")
+            if not email or not password:
+                for k in form.keys():
+                    try:
+                        data = json.loads(k)
+                        if isinstance(data, dict):
+                            email = email or data.get("email") or data.get("username")
+                            password = password or data.get("password")
+                            if email and password:
+                                break
+                    except Exception:
+                        pass
+        except Exception:
+            pass
 
     if not email or not password:
         raise HTTPException(
