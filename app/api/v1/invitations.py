@@ -26,6 +26,7 @@ router = APIRouter(tags=["Invitations & Notifications"])
     status_code=status.HTTP_201_CREATED,
     summary="Invite a member to a workspace (Admin/Owner only)",
 )
+
 async def invite_workspace_member(
     workspace_id: UUID,
     payload: InvitationCreate,
@@ -62,6 +63,7 @@ async def get_my_pending_invitations(
 ):
     """Retrieve all active, unexpired pending invitations addressed to the logged-in user."""
     return await service.list_pending_invitations_for_user(current_user)
+
 
 @router.post(
     "/invitations/{token}/accept",
