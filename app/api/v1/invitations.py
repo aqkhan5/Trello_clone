@@ -9,6 +9,7 @@ from app.api.deps import (
 from app.core.notifications import send_invitation_email
 from app.models.user import User
 from app.models.workspace import Workspace
+from app.models.workspace_member import WorkspaceMember
 from app.schemas.workspace_invitation import (
     InvitationCreate,
     InvitationResponse,
@@ -29,10 +30,11 @@ async def invite_workspace_member(
     workspace_id: UUID,
     payload: InvitationCreate,
     background_tasks: BackgroundTasks,
-    workspace: Workspace = Depends(require_workspace_admin),
+    workspace_and_member: tuple[Workspace, WorkspaceMember] = Depends(require_workspace_admin),
     current_user: User = Depends(get_current_user),
     service: InvitationService = Depends(get_invitation_service),
 ):
+    workspace, _ = workspace_and_member
     """Create an invitation and send a transactional notification in the background."""
     invitation = await service.create_invitation(
         workspace_id=workspace_id,

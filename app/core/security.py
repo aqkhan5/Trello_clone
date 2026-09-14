@@ -17,6 +17,7 @@ def get_password_hash(password: str) -> str:
     hashed = bcrypt.hashpw(password_bytes, salt)
     return hashed.decode("utf-8")
 
+
 def create_access_token(
     subject: str | Any, expires_delta: timedelta | None = None
 ) -> str:
