@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -6,18 +12,15 @@ import jwt
 
 from app.core.config import settings
 
-
-# Password hashing and JWT helpers shared by authentication flows.
-#Verify a plain password against the stored bcrypt hash
-# Truncate to 72 bytes to conform to bcrypt standard specification
+# ---------------------------------------------------------------------------
+# Password Security & Token Generation
+# ---------------------------------------------------------------------------
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     password_bytes = plain_password.encode("utf-8")[:72]
     hash_bytes = hashed_password.encode("utf-8")
     return bcrypt.checkpw(password_bytes, hash_bytes)
 
 
-# Hash a plaintext password using bcrypt directly.
-# Truncate to 72 bytes to conform to bcrypt standard specification
 def get_password_hash(password: str) -> str:
     password_bytes = password.encode("utf-8")[:72]
     salt = bcrypt.gensalt()
@@ -25,7 +28,6 @@ def get_password_hash(password: str) -> str:
     return hashed.decode("utf-8")
 
 
-# Create a signed JWT access token.
 def create_access_token(
     subject: str | Any, expires_delta: timedelta | None = None
 ) -> str:

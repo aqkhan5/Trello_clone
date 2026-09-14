@@ -1,22 +1,34 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
 
-# 1. Create the async database engine
+# ---------------------------------------------------------------------------
+# Database Connection Engine
+# ---------------------------------------------------------------------------
+# Async engine that manages connections to the PostgreSQL database
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=True  # Set to False in production; True helps see SQL queries during development
+    echo=True
 )
 
-# 2. Create the async session
+# Factory that generates database sessions for queries
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False
 )
-# 3. FastAPI dependency for handling DB sessions per request
-# Request-scoped database session dependency.
+
+# ---------------------------------------------------------------------------
+# Database Session Dependency
+# ---------------------------------------------------------------------------
+# Provides a database session for each API request and automatically closes it
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as db:
         try:

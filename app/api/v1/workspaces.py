@@ -1,6 +1,9 @@
-# app/api/v1/workspaces.py
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Standard library and framework imports.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -28,11 +31,14 @@ from app.schemas.workspace_member import (
 )
 from app.services.workspace_service import WorkspaceService
 
-# All routes in this module are exposed under /workspaces.
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(prefix="/workspaces", tags=["Workspaces"])
 
-
-
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 # Workspace Endpoints
 # Create a workspace for the authenticated user.
 @router.post(
@@ -47,11 +53,9 @@ async def create_workspace(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Workspace:
     """Create a workspace and assign creator as ADMIN in a single transaction."""
-    # The service coordinates workspace creation and owner membership in one transaction.
     workspace_repo = WorkspaceRepository(db)
     workspace_service = WorkspaceService(workspace_repo, db)
     return await workspace_service.create_workspace(current_user.id, payload)
-
 
 # Return every workspace that the authenticated user owns or belongs to.
 @router.get(
@@ -65,10 +69,8 @@ async def list_my_workspaces(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> list[Workspace]:
     """Retrieve all workspaces where the current user is owner or member."""
-    # Listing is a read-only repository query, so no service layer is needed here.
     workspace_repo = WorkspaceRepository(db)
     return await workspace_repo.list_for_user(current_user.id)
-
 
 # Get one workspace after membership authorization has succeeded.
 @router.get(
@@ -86,7 +88,6 @@ async def get_workspace(
     # The dependency performs the lookup and access check before this handler runs.
     workspace, _ = workspace_and_member
     return workspace
-
 
 # Update workspace fields; only administrators or the owner may do this.
 @router.patch(
@@ -109,7 +110,6 @@ async def update_workspace(
     workspace_service = WorkspaceService(workspace_repo, db)
     return await workspace_service.update_workspace(workspace, payload)
 
-
 @router.delete(
     "/{workspace_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -128,7 +128,6 @@ async def delete_workspace(
     workspace_service = WorkspaceService(workspace_repo, db)
     await workspace_service.delete_workspace(workspace)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
 
 # Workspace Member Endpoints
 
@@ -150,7 +149,6 @@ async def list_workspace_members(
     # The underscore marks the dependency result as intentionally unused here.
     workspace_repo = WorkspaceRepository(db)
     return await workspace_repo.list_members(workspace_id)
-
 
 @router.patch(
     "/{workspace_id}/members/{user_id}",
@@ -174,7 +172,6 @@ async def update_member_role(
     return await workspace_service.update_member_role(
         workspace=workspace, target_user_id=user_id, new_role=payload.role
     )
-
 
 @router.delete(
     "/{workspace_id}/members/{user_id}",

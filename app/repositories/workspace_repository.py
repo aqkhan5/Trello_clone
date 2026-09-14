@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from uuid import UUID
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,28 +12,26 @@ from sqlalchemy.orm import selectinload
 from app.models.workspace import Workspace
 from app.models.workspace_member import WorkspaceMember
 
-# Persistence queries for workspaces and memberships.
+# ---------------------------------------------------------------------------
+# Repository: WorkspaceRepository
+# ---------------------------------------------------------------------------
+# Handles database operations for workspaces and workspace members.
 class WorkspaceRepository:
     def __init__ (self, db: AsyncSession):
         self.db = db
 
-    # Add workspace to session, flush, and refresh
     async def create(self, workspace: Workspace) -> Workspace:
         self.db.add(workspace)
         await self.db.flush()
         await self.db.refresh(workspace)
         return workspace
 
-
-    # Fetch workspace by primary key.
     async def get_by_id(self, workspace_id: UUID) -> Workspace | None:
         result = await self.db.execute(
             select(Workspace).where(Workspace.id == workspace_id)
         )
         return result.scalar_one_or_none()
 
-
-    # Query workspaces where the user is either the owner or an active member.
     async def list_for_user(self, user_id: UUID) -> list[Workspace]:
         query = (
             select(Workspace).outerjoin(WorkspaceMember, Workspace.id == WorkspaceMember.workspace_id).
@@ -44,15 +48,12 @@ class WorkspaceRepository:
         return list(result.scalars().all())
 
     
-    # Add a member entity to the session and flush
     async def add_member(self, member: WorkspaceMember) -> WorkspaceMember:
         self.db.add(member)
         await self.db.flush()
         await self.db.refresh(member)
         return member
 
-
-    # Query workspace_members filtered by composite (workspace_id, user_id).
     async def get_member(
             self, workspace_id: UUID, user_id: UUID
     ) -> WorkspaceMember | None :
@@ -63,8 +64,6 @@ class WorkspaceRepository:
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
 
-
-    # Return all workspace members with their user relation eagerly loaded.
     async def list_members(self, workspace_id: UUID) -> list[WorkspaceMember]:
         query = (
             select(WorkspaceMember)
@@ -75,14 +74,10 @@ class WorkspaceRepository:
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-
-    # Delete member record from session.
     async def remove_member(self, member: WorkspaceMember) -> None:
         await self.db.delete(member)
         await self.db. flush()
 
-
-    # Delete workspace record from session.
     async def delete(self, workspace: Workspace) -> None:
         await self.db.delete(workspace)
         await self.db.flush()

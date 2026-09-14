@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -18,8 +24,14 @@ from app.repositories.list_repository import ListRepository
 from app.schemas.list import ListCreate, ListResponse, ListUpdate
 from app.services.list_service import ListService
 
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Lists"])
 
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 # Board Scoped list endpoints
 
 @router.post(
@@ -80,7 +92,6 @@ async def get_list(
     """ Retrieve a single list by ID after verifying board access """
     list_obj, _ = list_and_member
     return list_obj
-
 
 @router.patch(
     "/lists/{list_id}",

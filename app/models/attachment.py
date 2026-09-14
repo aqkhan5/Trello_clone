@@ -1,4 +1,9 @@
-# app/models/attachment.py
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from sqlalchemy import BigInteger, DateTime, ForeignKey, String, func
@@ -7,8 +12,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-
-# Attachment model for files associated with cards.
+# ---------------------------------------------------------------------------
+# Database Model: Attachment
+# ---------------------------------------------------------------------------
+# Database table for file attachments uploaded to cards.
 class Attachment(Base):
     __tablename__ = "attachments"
 

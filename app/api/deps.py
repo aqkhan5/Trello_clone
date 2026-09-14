@@ -1,32 +1,51 @@
-# Purpose: Define reusable FastAPI dependencies for authentication and resource access control.
-# Working: Dependencies resolve parent resources in order and enforce membership or write permissions.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Standard library and framework imports used by FastAPI dependencies.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 import uuid
 from typing import Annotated
+from uuid import UUID
+
 import jwt
-from fastapi import HTTPException, Depends, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import get_db
+from app.models.attachment import Attachment
+from app.models.board import Board
+from app.models.board_member import BoardMember, BoardRole
+from app.models.card import Card
+from app.models.checklist import Checklist
+from app.models.checklist_item import ChecklistItem
+from app.models.comment import Comment
+from app.models.label import Label
+from app.models.list import List as ListModel
 from app.models.user import User
+from app.models.workspace import Workspace
+from app.models.workspace_member import WorkspaceMember
+from app.repositories.attachment_repository import AttachmentRepository
+from app.repositories.board_repository import BoardRepository
+from app.repositories.card_repository import CardRepository
+from app.repositories.checklist_repository import ChecklistRepository
+from app.repositories.comment_repository import CommentRepository
+from app.repositories.invitation_repository import InvitationRepository
+from app.repositories.label_repository import LabelRepository
+from app.repositories.list_repository import ListRepository
 from app.repositories.user_repository import UserRepository
+from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.auth import TokenPayload
-
+from app.schemas.workspace_member import WorkspaceRole
+from app.services.invitation_service import InvitationService
 
 
 # ---------------------------------------------------------------------------
-# Authentication dependencies
+# Authentication Dependencies
 # ---------------------------------------------------------------------------
-
-
-# This is the first layer of protection for protected API routes.
-# FastAPI will read the bearer token from the Authorization header and pass it
-# to the dependency below, which verifies that the token is valid and belongs to
-# a real user in the database.
-
+# Reads bearer token from the Authorization header
 oauth_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
 )
@@ -36,9 +55,7 @@ async def get_current_user(
     token: Annotated[str, Depends(oauth_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
-    """Validate the bearer token and return the authenticated user."""
-    # Use one generic 401 response so callers do not learn whether a token,
-    # token payload, or user lookup was the part that failed.
+    """Validate the login token and return the authenticated user."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -46,14 +63,11 @@ async def get_current_user(
     )
 
     try:
-        # Decode the JWT using the app's secret key and algorithm.
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-
-        # The token payload should include a user identifier in the `sub` field.
         token_data = TokenPayload(**payload)
         if token_data.sub is None:
             raise credentials_exception
@@ -61,15 +75,12 @@ async def get_current_user(
         raise credentials_exception
 
     try:
-        # `sub` is stored as a string UUID, so convert it back to UUID type.
         user_id = uuid.UUID(token_data.sub)
     except ValueError:
         raise credentials_exception
 
-    # Query the database to ensure the user still exists.
     user_repo = UserRepository(db)
     user = await user_repo.get_by_id(user_id)
-
     if user is None:
         raise credentials_exception
 
@@ -77,40 +88,20 @@ async def get_current_user(
 
 
 # ---------------------------------------------------------------------------
-# Workspace access control
+# Workspace Access Dependencies
 # ---------------------------------------------------------------------------
-
-# These dependencies ensure a user is only allowed to access a workspace if:
-# 1) the workspace exists,
-# 2) the user is a member of that workspace,
-# 3) the user has admin-level permissions when required.
-
-# Workspace dependencies first verify existence, then verify membership,
-# and finally verify admin-level permissions when the route requires them.
-from uuid import UUID
-from app.models.workspace import Workspace
-
-# To this:
-from app.models.workspace_member import WorkspaceMember
-from app.schemas.workspace_member import WorkspaceRole
-from app.repositories.workspace_repository import WorkspaceRepository
-
-
 async def get_workspace_or_404(
     workspace_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Workspace:
-    """Fetch a workspace by ID, or raise a 404 if it does not exist."""
-    # Keep workspace lookup in one dependency so other checks can reuse it.
+    """Find workspace by ID or return 404 if not found."""
     repo = WorkspaceRepository(db)
     workspace = await repo.get_by_id(workspace_id)
-
     if not workspace:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Workspace not found",
         )
-
     return workspace
 
 
@@ -119,10 +110,8 @@ async def require_workspace_member(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Workspace, WorkspaceMember]:
-    """Ensure the current user belongs to the target workspace."""
-    # First validate that the workspace exists, then load the user's membership.
+    """Verify that the current user is a member of the workspace."""
     workspace = await get_workspace_or_404(workspace_id, db)
-
     repo = WorkspaceRepository(db)
     member = await repo.get_member(workspace_id, current_user.id)
 
@@ -131,7 +120,6 @@ async def require_workspace_member(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not a member of this workspace",
         )
-
     return workspace, member
 
 
@@ -140,11 +128,8 @@ async def require_workspace_admin(
         tuple[Workspace, WorkspaceMember], Depends(require_workspace_member)
     ],
 ) -> tuple[Workspace, WorkspaceMember]:
-    """Require the user to be a workspace admin or owner."""
+    """Verify that the user is an admin or the owner of the workspace."""
     workspace, member = workspace_and_member
-
-    # Workspace owners can manage the workspace even if their membership role
-    # is not explicitly ADMIN; regular admins also receive elevated rights.
     is_owner = workspace.owner_id == member.user_id
     is_admin = member.role == WorkspaceRole.ADMIN
 
@@ -153,24 +138,17 @@ async def require_workspace_admin(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin permissions required",
         )
-
     return workspace, member
 
+
 # ---------------------------------------------------------------------------
-# Board and board-member access control
+# Board Access Dependencies
 # ---------------------------------------------------------------------------
-
-from app.models.board import Board
-from app.models.board_member import BoardMember, BoardRole
-from app.repositories.board_repository import BoardRepository
-
-
 async def get_board_or_404(
     board_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Board:
-    """Fetch board by primary key or raise 404."""
-    # Centralize board existence checks for all board-protected routes.
+    """Find board by ID or return 404 if not found."""
     repo = BoardRepository(db)
     board = await repo.get_by_id(board_id)
     if not board:
@@ -186,17 +164,15 @@ async def require_board_member(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Board, BoardMember | None]:
-    """Verify user is an active board member or the parent workspace owner."""
-    # Load the board before checking its membership records.
+    """Verify that user is a member of the board or owner of the workspace."""
     board = await get_board_or_404(board_id, db)
     board_repo = BoardRepository(db)
     board_member = await board_repo.get_member(board.id, current_user.id)
 
     if board_member:
         return board, board_member
-    
 
-    # A workspace owner may access a board without a separate board-membership row.
+    # Workspace owners also have access to all boards in their workspace
     workspace_repo = WorkspaceRepository(db)
     workspace = await workspace_repo.get_by_id(board.workspace_id)
     if workspace and workspace.owner_id == current_user.id:
@@ -215,17 +191,14 @@ async def require_board_admin(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Board, BoardMember | None]:
-    """Ensure user is a board ADMIN, board creator, or workspace owner."""
+    """Verify that user has admin permissions on the board."""
     board, board_member = board_and_member
-
-    # Board creators and board admins can manage board-level settings and members.
     is_creator = board.created_by == current_user.id
     is_board_admin = board_member is not None and board_member.role == BoardRole.ADMIN
 
     if is_creator or is_board_admin:
         return board, board_member
 
-    # Workspace owners are also allowed to manage boards in their workspace.
     workspace_repo = WorkspaceRepository(db)
     workspace = await workspace_repo.get_by_id(board.workspace_id)
     if workspace and workspace.owner_id == current_user.id:
@@ -237,124 +210,112 @@ async def require_board_admin(
     )
 
 
-# ---------------------------------------------------------------------------
-# List access control
-# ---------------------------------------------------------------------------
+async def require_board_writer(
+    board_and_member: Annotated[
+        tuple[Board, BoardMember | None], Depends(require_board_member)
+    ],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> tuple[Board, BoardMember | None]:
+    """Verify that user has write (edit) permissions on the board."""
+    board, member = board_and_member
+    if board.created_by == current_user.id:
+        return board, member
 
-# A list inherits access from its parent board. These dependencies resolve
-# the list first, then reuse board-level membership and writer checks.
-from app.models.list import List as ListModel
-from app.repositories.list_repository import ListRepository
+    workspace_repo = WorkspaceRepository(db)
+    workspace = await workspace_repo.get_by_id(board.workspace_id)
+    if workspace and workspace.owner_id == current_user.id:
+        return board, member
 
+    if member is not None:
+        observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
+        if member.role == observer_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Write permission required for this board",
+            )
+        return board, member
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Write permission required for this board",
+    )
+
+
+# ---------------------------------------------------------------------------
+# List Access Dependencies
+# ---------------------------------------------------------------------------
 async def get_list_or_404(
-        list_id: UUID,
-        db: Annotated[AsyncSession, Depends(get_db)],
+    list_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ListModel:
-    """ Fetch list by ID or raise 404."""
+    """Find list by ID or return 404 if not found."""
     repo = ListRepository(db)
     list_obj = await repo.get_by_id(list_id)
     if not list_obj:
         raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail= " List not found "
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="List not found",
         )
     return list_obj
 
+
 async def require_list_board_member(
-        list_id: UUID,
-        current_user: Annotated[User, Depends(get_current_user)],
-        db: Annotated[AsyncSession, Depends(get_db)],
+    list_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[ListModel, BoardMember | None]:
-    """ Verify user is an active board member ( or workspace owner ) for this list."""
-    # Resolve list -> board and reuse the board membership dependency.
+    """Verify that user is a member of the board containing this list."""
     list_obj = await get_list_or_404(list_id, db)
     board, member = await require_board_member(list_obj.board_id, current_user, db)
     return list_obj, member
 
+
 async def require_list_board_writer(
-        list_and_member: Annotated [
-            tuple[ListModel, BoardMember | None],
-            Depends(require_list_board_member)
-            ],
-        current_user: Annotated[User, Depends(get_current_user)],
-        db: Annotated[AsyncSession, Depends(get_db)],
+    list_and_member: Annotated[
+        tuple[ListModel, BoardMember | None],
+        Depends(require_list_board_member),
+    ],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[ListModel, BoardMember | None]:
-    """ Verify write permission ( rejects OBSERVER/VIEWER roles)."""
+    """Verify that user has write permissions on the board for this list."""
     list_obj, member = list_and_member
-    # Workspace owners and board creators retain full write permissions.
-    Workspace_repo = WorkspaceRepository(db)
+    workspace_repo = WorkspaceRepository(db)
     board_repo = BoardRepository(db)
     board = await board_repo.get_by_id(list_obj.board_id)
 
     if board and board.created_by == current_user.id:
         return list_obj, member
 
-    if board: 
-        workspace = await Workspace_repo.get_by_id(board.workspace_id)
+    if board:
+        workspace = await workspace_repo.get_by_id(board.workspace_id)
         if workspace and workspace.owner_id == current_user.id:
             return list_obj, member
 
-    # Regular members may write, but observer/viewer roles are read-only.
-    if member is not None: 
-        observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
-        if member.role == observer_role:
-            raise HTTPException(
-                status_code = status.HTTP_403_FORBIDDEN,
-                detail = "write permisson required for this board",
-            )
-        return list_obj, member
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail= "Writer permission required for this board"
-    )
-async def require_board_writer(
-        board_and_member: Annotated[
-            tuple[Board, BoardMember | None], Depends(require_board_member)
-        ],
-        current_user: Annotated[User, Depends(get_current_user)],
-        db: Annotated[AsyncSession, Depends(get_db)],
-) -> tuple[Board, BoardMember | None]:
-    """ Verify write permission diretly on a board."""
-    board, member = board_and_member
-    # Board creators and workspace owners bypass ordinary member role checks.
-    if board.created_by == current_user.id:
-        return board, member
-    workspace_repo = WorkspaceRepository(db)
-    workspace = await workspace_repo.get_by_id(board.workspace_id)
-    if workspace and workspace.owner_id == current_user.id:
-        return board, member
     if member is not None:
         observer_role = getattr(BoardRole, "OBSERVER", getattr(BoardRole, "VIEWER", None))
         if member.role == observer_role:
             raise HTTPException(
-                status_code= status.HTTP_403_FORBIDDEN,
-                detail= "Write permission required for this board"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Write permission required for this board",
             )
-        return board, member
+        return list_obj, member
+
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail= "Write permission required for this board",
+        detail="Writer permission required for this board",
     )
 
 
-
-
 # ---------------------------------------------------------------------------
-# Card access control
+# Card Access Dependencies
 # ---------------------------------------------------------------------------
-
-
-# Cards inherit permissions through their parent list and board. The card
-# dependencies therefore resolve card -> list -> board before checking access.
-from app.models.card import Card
-from app.repositories.card_repository import CardRepository
-
-
 async def get_card_or_404(
     card_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Card:
-    """Fetch card by ID or raise 404."""
+    """Find card by ID or return 404 if not found."""
     repo = CardRepository(db)
     card = await repo.get_by_id(card_id)
     if not card:
@@ -370,8 +331,7 @@ async def require_card_board_member(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Card, BoardMember | None]:
-    """Resolve card -> list -> board and ensure read access."""
-    # Reuse list/board membership logic instead of duplicating access rules.
+    """Verify user can view this card by checking board membership."""
     card = await get_card_or_404(card_id, db)
     _, member = await require_list_board_member(card.list_id, current_user, db)
     return card, member
@@ -384,10 +344,8 @@ async def require_card_board_writer(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Card, BoardMember | None]:
-    """Ensure user has write permissions (rejects OBSERVER/VIEWER)."""
+    """Verify user has write permission to edit this card."""
     card, member = card_and_member
-
-    # Reuse list writer logic so board role rules stay consistent for cards.
     list_repo = ListRepository(db)
     list_obj = await list_repo.get_by_id(card.list_id)
     if not list_obj:
@@ -400,22 +358,14 @@ async def require_card_board_writer(
     return card, member
 
 
-
 # ---------------------------------------------------------------------------
-# Labels, checklists, and checklist-item access control
+# Label & Checklist Dependencies
 # ---------------------------------------------------------------------------
-from app.models.checklist import Checklist
-from app.models.checklist_item import ChecklistItem
-from app.models.label import Label
-from app.repositories.checklist_repository import ChecklistRepository
-from app.repositories.label_repository import LabelRepository
-
-
 async def get_label_or_404(
     label_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Label:
-    """Fetch label by primary key or raise 404."""
+    """Find label by ID or return 404 if not found."""
     repo = LabelRepository(db)
     label = await repo.get_by_id(label_id)
     if not label:
@@ -431,7 +381,7 @@ async def require_label_board_writer(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Label, BoardMember | None]:
-    """Ensure user has write permissions on the board owning this label."""
+    """Verify write permission on the board owning this label."""
     label = await get_label_or_404(label_id, db)
     board_and_member = await require_board_member(label.board_id, current_user, db)
     await require_board_writer(board_and_member, current_user, db)
@@ -442,7 +392,7 @@ async def get_checklist_or_404(
     checklist_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Checklist:
-    """Fetch checklist by primary key or raise 404."""
+    """Find checklist by ID or return 404 if not found."""
     repo = ChecklistRepository(db)
     checklist = await repo.get_checklist_by_id(checklist_id)
     if not checklist:
@@ -458,7 +408,7 @@ async def require_checklist_board_writer(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[Checklist, BoardMember | None]:
-    """Ensure user has write access on the board owning this checklist."""
+    """Verify write permission on the card owning this checklist."""
     checklist = await get_checklist_or_404(checklist_id, db)
     card_and_member = await require_card_board_member(checklist.card_id, current_user, db)
     await require_card_board_writer(card_and_member, current_user, db)
@@ -469,7 +419,7 @@ async def get_checklist_item_or_404(
     item_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ChecklistItem:
-    """Fetch checklist item by primary key or raise 404."""
+    """Find checklist item by ID or return 404 if not found."""
     repo = ChecklistRepository(db)
     item = await repo.get_item_by_id(item_id)
     if not item:
@@ -485,25 +435,20 @@ async def require_checklist_item_board_writer(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> tuple[ChecklistItem, BoardMember | None]:
-    """Ensure user has write access on the board owning this checklist item."""
+    """Verify write permission on the checklist owning this item."""
     item = await get_checklist_item_or_404(item_id, db)
     checklist_and_member = await require_checklist_board_writer(item.checklist_id, current_user, db)
     return item, checklist_and_member[1]
 
 
-
-# In app/api/deps.py
-from app.models.attachment import Attachment
-from app.models.comment import Comment
-from app.repositories.attachment_repository import AttachmentRepository
-from app.repositories.comment_repository import CommentRepository
-
-
+# ---------------------------------------------------------------------------
+# Comment & Attachment Dependencies
+# ---------------------------------------------------------------------------
 async def get_comment_or_404(
     comment_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Comment:
-    """Fetch comment by ID or raise 404."""
+    """Find comment by ID or return 404 if not found."""
     repo = CommentRepository(db)
     comment = await repo.get_by_id(comment_id)
     if not comment:
@@ -518,7 +463,7 @@ async def get_attachment_or_404(
     attachment_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Attachment:
-    """Fetch attachment by ID or raise 404."""
+    """Find attachment by ID or return 404 if not found."""
     repo = AttachmentRepository(db)
     attachment = await repo.get_by_id(attachment_id)
     if not attachment:
@@ -530,16 +475,12 @@ async def get_attachment_or_404(
 
 
 # ---------------------------------------------------------------------------
-# Invitation service and repository dependencies
+# Invitation Service Dependencies
 # ---------------------------------------------------------------------------
-from app.repositories.invitation_repository import InvitationRepository
-from app.services.invitation_service import InvitationService
-
-
 async def get_invitation_repository(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> InvitationRepository:
-    """Provide an InvitationRepository scoped to the active request session."""
+    """Create and return an InvitationRepository instance."""
     return InvitationRepository(db)
 
 
@@ -547,7 +488,7 @@ async def get_invitation_service(
     db: Annotated[AsyncSession, Depends(get_db)],
     invitation_repo: Annotated[InvitationRepository, Depends(get_invitation_repository)],
 ) -> InvitationService:
-    """Assemble and inject the domain service for workspace invitations."""
+    """Create and return an InvitationService instance with required repositories."""
     workspace_repo = WorkspaceRepository(db)
     user_repo = UserRepository(db)
     return InvitationService(

@@ -1,4 +1,9 @@
-# app/models/__init__.py
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Model Imports
+# ---------------------------------------------------------------------------
 from app.models.activity_log import ActivityLog
 from app.models.attachment import Attachment
 from app.models.board import Board
@@ -16,6 +21,9 @@ from app.models.workspace import Workspace
 from app.models.workspace_invitation import WorkspaceInvitation
 from app.models.workspace_member import WorkspaceMember
 
+# ---------------------------------------------------------------------------
+# Exported Models
+# ---------------------------------------------------------------------------
 __all__ = [
     "User",
     "Workspace",

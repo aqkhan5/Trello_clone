@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import secrets
 from uuid import UUID
@@ -18,7 +24,10 @@ from app.schemas.workspace_invitation import (
     InvitationStatus,
 )
 
-
+# ---------------------------------------------------------------------------
+# Service: InvitationService
+# ---------------------------------------------------------------------------
+# Handles workspace invitations and acceptance workflows.
 class InvitationService:
     def __init__(
         self,

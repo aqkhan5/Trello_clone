@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -25,9 +31,14 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.comment import CommentCreate, CommentResponse, CommentUpdate
 from app.services.collaboration_service import CollaborationService
 
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Comments"])
 
-
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 def get_collaboration_service(db: AsyncSession) -> CollaborationService:
     return CollaborationService(
         comment_repo=CommentRepository(db),
@@ -39,7 +50,6 @@ def get_collaboration_service(db: AsyncSession) -> CollaborationService:
         workspace_repo=WorkspaceRepository(db),
         db=db,
     )
-
 
 @router.post(
     "/cards/{card_id}/comments",
@@ -57,7 +67,6 @@ async def create_comment(
     service = get_collaboration_service(db)
     return await service.add_comment(card_id, current_user.id, payload)
 
-
 @router.get(
     "/cards/{card_id}/comments",
     response_model=list[CommentResponse],
@@ -71,7 +80,6 @@ async def list_card_comments(
 ) -> list[Comment]:
     repo = CommentRepository(db)
     return await repo.list_for_card(card_id)
-
 
 @router.patch(
     "/comments/{comment_id}",
@@ -87,7 +95,6 @@ async def update_comment(
 ) -> Comment:
     service = get_collaboration_service(db)
     return await service.update_comment(comment, current_user.id, payload)
-
 
 @router.delete(
     "/comments/{comment_id}",

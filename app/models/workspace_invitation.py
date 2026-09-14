@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -11,7 +17,10 @@ if TYPE_CHECKING:
     from app.models.workspace import Workspace
     from app.models.user import User
 
-# Invitation model for pending workspace membership requests.
+# ---------------------------------------------------------------------------
+# Database Model: WorkspaceInvitation
+# ---------------------------------------------------------------------------
+# Database table for pending email invitations to join a workspace.
 class WorkspaceInvitation(Base):
     __tablename__ = "workspace_invitations"
     __table_args__ = (

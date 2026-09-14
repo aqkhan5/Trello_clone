@@ -1,14 +1,15 @@
-# Purpose: Define API routes for checklists and checklist items attached to cards.
-# Working: Access dependencies protect each resource, repositories handle reads, and CardDetailService handles writes.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Typed route parameters and FastAPI dependency/response helpers.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Dependencies enforce board membership or write access through the parent card.
 from app.api.deps import (
     require_card_board_member,
     require_card_board_writer,
@@ -17,13 +18,11 @@ from app.api.deps import (
 )
 from app.db.session import get_db
 
-# ORM models returned by authorization dependencies and route handlers.
 from app.models.board_member import BoardMember
 from app.models.card import Card
 from app.models.checklist import Checklist
 from app.models.checklist_item import ChecklistItem
 
-# Repositories required by the shared card-detail service.
 from app.repositories.board_repository import BoardRepository
 from app.repositories.card_member_repository import CardMemberRepository
 from app.repositories.checklist_repository import ChecklistRepository
@@ -39,11 +38,14 @@ from app.schemas.checklist import (
 )
 from app.services.card_detail_service import CardDetailService
 
-# Checklist routes are grouped under the Checklists tag in API documentation.
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Checklists"])
 
-
-# Build one service with a shared session and all repositories it coordinates.
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 def get_card_detail_service(db: AsyncSession) -> CardDetailService:
     return CardDetailService(
         label_repo=LabelRepository(db),
@@ -53,7 +55,6 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
         list_repo=ListRepository(db),
         db=db,
     )
-
 
 # Checklist endpoints
 
@@ -74,7 +75,6 @@ async def create_checklist(
     service = get_card_detail_service(db)
     return await service.create_checklist(card_id, payload)
 
-
 # List checklists with their items; board-member access is sufficient.
 @router.get(
     "/cards/{card_id}/checklists",
@@ -90,7 +90,6 @@ async def list_card_checklists(
     # This read-only operation uses the repository directly.
     repo = ChecklistRepository(db)
     return await repo.list_checklists_for_card(card_id)
-
 
 # Update a checklist after resolving it through its parent card and board.
 @router.patch(
@@ -109,7 +108,6 @@ async def update_checklist(
     service = get_card_detail_service(db)
     return await service.update_checklist(checklist, payload)
 
-
 # Delete a checklist and its dependent items.
 @router.delete(
     "/checklists/{checklist_id}",
@@ -125,8 +123,6 @@ async def delete_checklist(
     service = get_card_detail_service(db)
     await service.delete_checklist(checklist)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
 
 # Checklist-item endpoints
 
@@ -147,7 +143,6 @@ async def create_checklist_item(
     service = get_card_detail_service(db)
     return await service.create_checklist_item(checklist_id, payload)
 
-
 # Update item content, completion state, or position.
 @router.patch(
     "/checklists/items/{item_id}",
@@ -164,7 +159,6 @@ async def update_checklist_item(
     item, _ = item_and_member
     service = get_card_detail_service(db)
     return await service.update_checklist_item(item, payload)
-
 
 # Permanently delete a checklist item.
 @router.delete(

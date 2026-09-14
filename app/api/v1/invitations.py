@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, status
 
@@ -17,9 +23,14 @@ from app.schemas.workspace_invitation import (
 from app.schemas.workspace_member import WorkspaceMemberResponse
 from app.services.invitation_service import InvitationService
 
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Invitations & Notifications"])
 
-
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 @router.post(
     "/workspaces/{workspace_id}/invitations",
     response_model=InvitationResponse,
@@ -51,7 +62,6 @@ async def invite_workspace_member(
 
     return invitation
 
-
 @router.get(
     "/invitations/my-pending",
     response_model=list[TrelloNotificationItemResponse],
@@ -63,7 +73,6 @@ async def get_my_pending_invitations(
 ):
     """Retrieve all active, unexpired pending invitations addressed to the logged-in user."""
     return await service.list_pending_invitations_for_user(current_user)
-
 
 @router.post(
     "/invitations/{token}/accept",
@@ -78,7 +87,6 @@ async def accept_invitation(
 ):
     """Accept invitation and become an active workspace member."""
     return await service.accept_invitation(token=token, current_user=current_user)
-
 
 @router.post(
     "/invitations/{token}/decline",

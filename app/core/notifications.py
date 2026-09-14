@@ -1,18 +1,21 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports & Logger Setup
+# ---------------------------------------------------------------------------
 import logging
 
-# Using the existing Uvicorn logger so messages appear cleanly in the active terminal
 logger = logging.getLogger("uvicorn")
 
-
+# ---------------------------------------------------------------------------
+# Email Notifications
+# ---------------------------------------------------------------------------
+# Sends transactional invitation emails with an acceptance link
 async def send_invitation_email(
     recipient_email: str, workspace_name: str, token: str
 ) -> None:
-    """Dispatches a transactional invitation email containing an actionable URL.
-
-    During development, this outputs the email to the terminal corkboard.
-    In production, this is the single place to plug in SendGrid, Resend, or AWS SES.
-    """
-    # Actionable URL pointing to your frontend client
+    
     invite_url = f"http://localhost:3000/invitations/accept?token={token}"
 
     logger.info(

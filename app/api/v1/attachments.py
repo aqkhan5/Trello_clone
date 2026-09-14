@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
@@ -25,9 +31,14 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.attachment import AttachmentCreate, AttachmentResponse
 from app.services.collaboration_service import CollaborationService
 
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Attachments"])
 
-
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 def get_collaboration_service(db: AsyncSession) -> CollaborationService:
     return CollaborationService(
         comment_repo=CommentRepository(db),
@@ -39,7 +50,6 @@ def get_collaboration_service(db: AsyncSession) -> CollaborationService:
         workspace_repo=WorkspaceRepository(db),
         db=db,
     )
-
 
 @router.post(
     "/cards/{card_id}/attachments",
@@ -57,7 +67,6 @@ async def create_attachment(
     service = get_collaboration_service(db)
     return await service.add_attachment(card_id, current_user.id, payload)
 
-
 @router.get(
     "/cards/{card_id}/attachments",
     response_model=list[AttachmentResponse],
@@ -72,7 +81,6 @@ async def list_card_attachments(
     repo = AttachmentRepository(db)
     return await repo.list_for_card(card_id)
 
-
 @router.delete(
     "/attachments/{attachment_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -83,7 +91,6 @@ async def delete_attachment(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
-    # Verify write access on parent card
     await require_card_board_writer((await CardRepository(db).get_by_id(attachment.card_id), None), current_user, db)
     service = get_collaboration_service(db)
     await service.delete_attachment(attachment)

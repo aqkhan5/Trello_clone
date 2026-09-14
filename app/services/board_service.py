@@ -1,23 +1,26 @@
-# Standard library and framework imports used by the service layer.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Database models used by board and membership operations.
 from app.models.board import Board
 from app.models.board_member import BoardMember, BoardRole
 
-# Repositories provide database access while this service enforces business rules.
 from app.repositories.board_repository import BoardRepository
 from app.repositories.workspace_repository import WorkspaceRepository
 
-# Request schemas used for board creation and partial updates.
 from app.schemas.board import BoardCreate, BoardUpdate
 
-
-# Business logic for boards and their memberships.
-# The service coordinates repositories and controls transaction commits.
+# ---------------------------------------------------------------------------
+# Service: BoardService
+# ---------------------------------------------------------------------------
+# Handles business logic for boards and board membership.
 class BoardService:
     def __init__(
         self,
@@ -25,7 +28,6 @@ class BoardService:
         workspace_repo: WorkspaceRepository,
         db: AsyncSession,
     ):
-        # Repositories share the same request-scoped database session.
         self.board_repo = board_repo
         self.workspace_repo = workspace_repo
         self.db = db
@@ -34,7 +36,6 @@ class BoardService:
         self, workspace_id: UUID, user_id: UUID, data: BoardCreate
     ) -> Board:
         """Create board and register creator as ADMIN in a single transaction."""
-        # Create the board with the authenticated user recorded as its creator.
         board = Board(
             workspace_id=workspace_id,
             created_by=user_id,
@@ -44,7 +45,6 @@ class BoardService:
         )
         await self.board_repo.create(board)
 
-        # Every board creator also receives an explicit ADMIN membership.
         creator_member = BoardMember(
             board_id=board.id,
             user_id=user_id,
@@ -52,26 +52,22 @@ class BoardService:
         )
         await self.board_repo.add_member(creator_member)
 
-        # Commit board and creator membership together, then reload the board.
         await self.db.commit()
         await self.db.refresh(board)
         return board
 
     async def update_board(self, board: Board, data: BoardUpdate) -> Board:
         """Apply non-null updates to board entity and commit."""
-        # exclude_unset keeps omitted fields unchanged during a partial update.
         update_data = data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(board, field, value)
 
-        # Persist the update and refresh the returned entity from the database.
         await self.db.commit()
         await self.db.refresh(board)
         return board
 
     async def delete_board(self, board: Board) -> None:
         """Delete board and cascade dependent lists/cards."""
-        # Database cascade rules remove dependent board data where configured.
         await self.board_repo.delete(board)
         await self.db.commit()
 
@@ -131,7 +127,6 @@ class BoardService:
             )
 
         member.role = new_role
-        # Save and reload the updated membership.
         await self.db.commit()
         await self.db.refresh(member)
         return member
@@ -153,6 +148,5 @@ class BoardService:
                 detail="Board member not found",
             )
 
-        # Delete and commit the membership removal.
         await self.board_repo.remove_member(member)
         await self.db.commit()

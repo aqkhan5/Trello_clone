@@ -1,14 +1,15 @@
-# Purpose: Define API routes for managing labels that belong to a board.
-# Working: Authorization dependencies protect each route, while CardDetailService handles label business logic.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Typed route parameters and FastAPI dependency/response helpers.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Authorization dependencies for board-level read and write access.
 from app.api.deps import (
     require_board_member,
     require_board_writer,
@@ -16,12 +17,10 @@ from app.api.deps import (
 )
 from app.db.session import get_db
 
-# ORM models returned by authorization dependencies and route handlers.
 from app.models.board import Board
 from app.models.board_member import BoardMember
 from app.models.label import Label
 
-# Repositories required by the shared card-detail service.
 from app.repositories.board_repository import BoardRepository
 from app.repositories.card_member_repository import CardMemberRepository
 from app.repositories.checklist_repository import ChecklistRepository
@@ -30,11 +29,14 @@ from app.repositories.list_repository import ListRepository
 from app.schemas.label import LabelCreate, LabelResponse, LabelUpdate
 from app.services.card_detail_service import CardDetailService
 
-# Label routes are grouped under the Labels tag in API documentation.
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Labels"])
 
-
-# Build the service with one shared database session and all repositories it needs.
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 def get_card_detail_service(db: AsyncSession) -> CardDetailService:
     return CardDetailService(
         label_repo=LabelRepository(db),
@@ -45,9 +47,7 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
         db=db,
     )
 
-
 # Board label taxonomy endpoints
-
 
 # Create a label definition for a board; writer access is required.
 @router.post(
@@ -66,7 +66,6 @@ async def create_board_label(
     service = get_card_detail_service(db)
     return await service.create_board_label(board_id, payload)
 
-
 # List all label definitions on a board; member access is sufficient.
 @router.get(
     "/boards/{board_id}/labels",
@@ -82,7 +81,6 @@ async def list_board_labels(
     # This read-only operation uses the repository directly.
     repo = LabelRepository(db)
     return await repo.list_for_board(board_id)
-
 
 # Update a label after verifying write access to its owning board.
 @router.patch(
@@ -101,7 +99,6 @@ async def update_label(
     service = get_card_detail_service(db)
     return await service.update_label(label, payload)
 
-
 # Delete a label definition; existing card links are handled by model relationships.
 @router.delete(
     "/labels/{label_id}",
@@ -117,4 +114,3 @@ async def delete_label(
     service = get_card_detail_service(db)
     await service.delete_label(label)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-    

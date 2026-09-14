@@ -1,16 +1,22 @@
-# Standard library and SQLAlchemy imports used for typed database queries.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-# Invitation entity and the enum used to identify active invitations.
 from app.models.workspace_invitation import WorkspaceInvitation
 from app.schemas.workspace_invitation import InvitationStatus
 
-
-# Data-access layer for creating and querying workspace invitations.
+# ---------------------------------------------------------------------------
+# Repository: InvitationRepository
+# ---------------------------------------------------------------------------
+# Handles database operations for workspace invitations.
 class InvitationRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

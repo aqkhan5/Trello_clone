@@ -1,22 +1,24 @@
-# app/repositories/board_repository.py
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Typed identifiers and SQLAlchemy query/session helpers.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-# Database models accessed by this repository.
 from app.models.board import Board
 from app.models.board_member import BoardMember
 
-
-# Data-access layer for boards and board memberships.
-# Transaction commits are intentionally handled by the service layer.
+# ---------------------------------------------------------------------------
+# Repository: BoardRepository
+# ---------------------------------------------------------------------------
+# Handles database operations for boards and board memberships.
 class BoardRepository:
     def __init__(self, db: AsyncSession):
-        # All operations use the request-scoped async database session.
         self.db = db
 
     async def create(self, board: Board) -> Board:
@@ -36,7 +38,6 @@ class BoardRepository:
 
     async def list_for_workspace(self, workspace_id: UUID, user_id: UUID) -> list[Board]:
         """Fetch boards in the workspace where the user is either the creator or an assigned member."""
-        # Join memberships so access can be granted either through board ownership
         # or an explicit board-member record.
         query = (
             select(Board)
@@ -48,9 +49,7 @@ class BoardRepository:
                     BoardMember.user_id == user_id,
                 ),
             )
-            # A user may match both access paths, so remove duplicate board rows.
             .distinct()
-            # Show recently created boards first.
             .order_by(Board.created_at.desc())
         )
         result = await self.db.execute(query)
@@ -58,16 +57,13 @@ class BoardRepository:
 
     async def add_member(self, member: BoardMember) -> BoardMember:
         """Add board member, flush, and refresh."""
-        # Add membership without committing; the caller controls the transaction.
         self.db.add(member)
         await self.db.flush()
-        # Reload generated membership fields such as id and joined_at.
         await self.db.refresh(member)
         return member
 
     async def get_member(self, board_id: UUID, user_id: UUID) -> BoardMember | None:
         """Query board_members by composite (board_id, user_id)."""
-        # The pair of IDs identifies one user's membership on one board.
         query = select(BoardMember).where(
             BoardMember.board_id == board_id,
             BoardMember.user_id == user_id,
@@ -77,12 +73,10 @@ class BoardRepository:
 
     async def list_members(self, board_id: UUID) -> list[BoardMember]:
         """Query all members of a board, eager-loading profile data."""
-        # Eager loading avoids one extra query per member when responses include users.
         query = (
             select(BoardMember)
             .where(BoardMember.board_id == board_id)
             .options(selectinload(BoardMember.user))
-            # Preserve the order in which members joined the board.
             .order_by(BoardMember.joined_at.asc())
         )
         result = await self.db.execute(query)
@@ -90,12 +84,10 @@ class BoardRepository:
 
     async def remove_member(self, member: BoardMember) -> None:
         """Delete member record from session."""
-        # Flush the DELETE so later operations in the same transaction see the change.
         await self.db.delete(member)
         await self.db.flush()
 
     async def delete(self, board: Board) -> None:
         """Delete board record from session."""
-        # Database cascade rules remove dependent board records where configured.
         await self.db.delete(board)
         await self.db.flush()

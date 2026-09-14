@@ -1,7 +1,9 @@
-# Purpose: Manage labels, card members, checklists, and checklist items attached to cards.
-# Working: Validates cross-resource rules, delegates persistence to repositories, and commits each workflow.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Position values let new checklists/items be inserted without renumbering siblings.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -26,12 +28,12 @@ from app.schemas.checklist import (
 )
 from app.schemas.label import LabelCreate, LabelUpdate
 
-# Default spacing used when a checklist or item position is not supplied.
 DEFAULT_POSITION_STEP = Decimal("65536.0")
 
-
-# Business logic for the detailed resources that belong to a card.
-# All repositories share the same session, while this service controls commits.
+# ---------------------------------------------------------------------------
+# Service: CardDetailService
+# ---------------------------------------------------------------------------
+# Handles labels, checklists, and member assignments on cards.
 class CardDetailService:
     def __init__(
         self,
@@ -42,7 +44,6 @@ class CardDetailService:
         list_repo: ListRepository,
         db: AsyncSession,
     ):
-        # Keep all related repositories available for cross-resource validation.
         self.label_repo = label_repo
         self.card_member_repo = card_member_repo
         self.checklist_repo = checklist_repo
@@ -53,7 +54,6 @@ class CardDetailService:
     
     # Labels
 
-    # Board labels must be created and managed independently from card links.
     async def create_board_label(self, board_id: UUID, data: LabelCreate) -> Label:
         label = Label(board_id=board_id, name=data.name, color=data.color)
         await self.label_repo.create(label)
@@ -158,8 +158,6 @@ class CardDetailService:
 
     # Checklists & Items
 
-
-    # Checklists and items use the same position strategy as cards: use an
     # explicit position when provided, otherwise append after the current maximum.
     async def create_checklist(
         self, card_id: UUID, data: ChecklistCreate

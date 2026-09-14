@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from decimal import Decimal
 from uuid import UUID
 
@@ -7,6 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import board
 from app.models.list import List as ListModel
 
+# ---------------------------------------------------------------------------
+# Repository: ListRepository
+# ---------------------------------------------------------------------------
+# Handles database operations for lists (columns) on boards.
 class ListRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

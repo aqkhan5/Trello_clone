@@ -1,16 +1,15 @@
-# API routes for creating, reading, updating, and deleting boards and board members.
-# Authentication and authorization are handled by FastAPI dependencies; business
-# rules and database mutations are delegated to BoardService.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Standard library and FastAPI imports for typed route definitions.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Authorization dependencies. They load the relevant resource and enforce
-# workspace or board membership/admin permissions before handlers run.
 from app.api.deps import (
     get_current_user,
     require_board_admin,
@@ -19,14 +18,12 @@ from app.api.deps import (
 )
 from app.db.session import get_db
 
-# ORM models used as dependency results and endpoint return types.
 from app.models.board import Board
 from app.models.board_member import BoardMember
 from app.models.user import User
 from app.models.workspace import Workspace
 from app.models.workspace_member import WorkspaceMember
 
-# Repositories handle database queries; the service handles business rules.
 from app.repositories.board_repository import BoardRepository
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.board import BoardCreate, BoardResponse, BoardUpdate
@@ -37,11 +34,14 @@ from app.schemas.board_member import (
 )
 from app.services.board_service import BoardService
 
-# Board routes are grouped under the Boards tag in the OpenAPI documentation.
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Boards"])
 
-
-
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 # Workspace-scoped Board Endpoints
 
 # Create a board inside a workspace where the caller is a member.
@@ -71,7 +71,6 @@ async def create_board(
     service = BoardService(board_repo, workspace_repo, db)
     return await service.create_board(workspace.id, current_user.id, payload)
 
-
 # List only boards accessible to the current user in the workspace.
 @router.get(
     "/workspaces/{workspace_id}/boards",
@@ -93,10 +92,7 @@ async def list_workspace_boards(
     # This is a read-only query, so the repository can serve it directly.
     return await board_repo.list_for_workspace(workspace_id, current_user.id)
 
-
-
 # Direct Board Endpoints
-
 
 # Return board details after member-level access has been verified.
 @router.get(
@@ -114,7 +110,6 @@ async def get_board(
     # The dependency performs lookup and authorization before this handler runs.
     board, _ = board_and_member
     return board
-
 
 # Update board fields; board admins, creators, and eligible workspace owners may do this.
 @router.patch(
@@ -138,7 +133,6 @@ async def update_board(
     service = BoardService(board_repo, workspace_repo, db)
     return await service.update_board(board, payload)
 
-
 # Delete a board and its dependent records.
 @router.delete(
     "/boards/{board_id}",
@@ -160,10 +154,7 @@ async def delete_board(
     await service.delete_board(board)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-
 # Board Member Endpoints
-
 
 # List members after verifying the caller can access the board.
 @router.get(
@@ -183,7 +174,6 @@ async def list_board_members(
     # The authorization dependency result is not needed by the listing query.
     board_repo = BoardRepository(db)
     return await board_repo.list_members(board_id)
-
 
 # Add a workspace member to this board with the requested board role.
 @router.post(
@@ -208,7 +198,6 @@ async def add_board_member(
     service = BoardService(board_repo, workspace_repo, db)
     return await service.add_board_member(board, payload.user_id, payload.role)
 
-
 # Change a board member's role; the creator cannot be demoted.
 @router.patch(
     "/boards/{board_id}/members/{user_id}",
@@ -231,7 +220,6 @@ async def update_board_member_role(
     workspace_repo = WorkspaceRepository(db)
     service = BoardService(board_repo, workspace_repo, db)
     return await service.update_member_role(board, user_id, payload.role)
-
 
 # Remove a board member; the creator cannot be removed.
 @router.delete(

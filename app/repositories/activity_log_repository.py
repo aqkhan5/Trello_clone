@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from uuid import UUID
 
 from sqlalchemy import select
@@ -6,7 +12,10 @@ from sqlalchemy.orm import selectinload
 
 from app.models.activity_log import ActivityLog
 
-
+# ---------------------------------------------------------------------------
+# Repository: ActivityLogRepository
+# ---------------------------------------------------------------------------
+# Handles database operations for activity logs and audit history.
 class ActivityLogRepository:
     def __init__(self, db: AsyncSession):
         self.db = db

@@ -1,36 +1,38 @@
-# app/schemas/board.py
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Standard library types used for board ownership and timestamps.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from datetime import datetime
 from uuid import UUID
 
-# Pydantic provides validation, defaults, and response serialization.
 from pydantic import BaseModel, ConfigDict, Field
 
-
-# Fields shared by board creation and board responses.
-# Title is required and bounded; description is optional with a length limit.
+# ---------------------------------------------------------------------------
+# Shared Base Schemas
+# ---------------------------------------------------------------------------
+# Shared properties common to both requests and responses
 class BoardBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
     visibility: str = Field(default="WORKSPACE", max_length=50)
 
-
-# Request body for creating a board.
-# It inherits the shared title and description fields without adding new ones.
+# ---------------------------------------------------------------------------
+# Request Schemas
+# ---------------------------------------------------------------------------
+# Schemas for validating incoming request data
 class BoardCreate(BoardBase):
     pass
 
-
-# Partial request body for updating a board.
-# Fields default to None so callers can update only the values they provide.
 class BoardUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=100)
     visibility: str | None = Field(default=None, max_length=50)
     is_archived: bool | None = None
 
-
-# Response returned for a board.
-# Includes ownership, lifecycle, and audit timestamps in addition to shared fields.
+# ---------------------------------------------------------------------------
+# Response Schemas
+# ---------------------------------------------------------------------------
+# Schemas for formatting outgoing API responses
 class BoardResponse(BoardBase):
     id: UUID
     workspace_id: UUID
@@ -39,5 +41,4 @@ class BoardResponse(BoardBase):
     created_at: datetime
     updated_at: datetime
 
-    # Allow Pydantic to serialize a SQLAlchemy Board instance directly.
     model_config = ConfigDict(from_attributes=True)

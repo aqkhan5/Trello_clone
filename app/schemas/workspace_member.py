@@ -1,21 +1,28 @@
-# app/schemas/workspace_member.py
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-# Import your existing enum from the model or enum module to keep single-source-of-truth:
-# e.g., from app.models.workspace_member import WorkspaceRole
 from app.models.workspace_member import WorkspaceRole
 from app.schemas.user import UserResponse
 
-
-# Payload for changing a member's workspace role.
+# ---------------------------------------------------------------------------
+# Request Schemas
+# ---------------------------------------------------------------------------
+# Schemas for validating incoming request data
 class WorkspaceMemberUpdate(BaseModel):
     role: WorkspaceRole
 
-
-# Workspace member representation returned by the API.
+# ---------------------------------------------------------------------------
+# Response Schemas
+# ---------------------------------------------------------------------------
+# Schemas for formatting outgoing API responses
 class WorkspaceMemberResponse(BaseModel):
     id: UUID
     workspace_id: UUID

@@ -1,15 +1,15 @@
-# API routes for creating, reading, moving, updating, and deleting cards.
-# Access checks are handled by dependencies; business rules are delegated to
-# CardService and read-only queries use CardRepository directly.
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
 
-# Standard library and FastAPI imports for typed route definitions.
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Reader/writer dependencies enforce access through the card's parent board.
 from app.api.deps import (
     get_current_user,
     require_card_board_member,
@@ -19,7 +19,6 @@ from app.api.deps import (
 )
 from app.db.session import get_db
 
-# ORM models used by dependency results and route return types.
 from app.models.board_member import BoardMember
 from app.models.card import Card
 from app.models.card_member import CardMember
@@ -27,7 +26,6 @@ from app.models.label import Label
 from app.models.list import List as ListModel
 from app.models.user import User
 
-# Repository and service layers used to execute card operations.
 from app.repositories.board_repository import BoardRepository
 from app.repositories.card_member_repository import CardMemberRepository
 from app.repositories.card_repository import CardRepository
@@ -40,10 +38,14 @@ from app.schemas.label import LabelResponse
 from app.services.card_detail_service import CardDetailService
 from app.services.card_service import CardService
 
-# Card routes are grouped under the Cards tag in API documentation.
+# ---------------------------------------------------------------------------
+# Router Configuration
+# ---------------------------------------------------------------------------
 router = APIRouter(tags=["Cards"])
 
-
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 def get_card_detail_service(db: AsyncSession) -> CardDetailService:
     return CardDetailService(
         label_repo=LabelRepository(db),
@@ -53,7 +55,6 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
         list_repo=ListRepository(db),
         db=db,
     )
-
 
 # List-scoped Card Endpoints
 
@@ -80,7 +81,6 @@ async def create_card(
     service = CardService(card_repo, list_repo, db)
     return await service.create_card(list_id, current_user.id, payload)
 
-
 # Read cards in a list; readers may optionally include archived cards.
 @router.get(
     "/lists/{list_id}/cards",
@@ -103,7 +103,6 @@ async def list_cards_in_list(
     card_repo = CardRepository(db)
     return await card_repo.list_for_list(list_id, include_archived=include_archived)
 
-
 # Direct Card Endpoints
 
 # Return one card after board-member authorization has succeeded.
@@ -122,7 +121,6 @@ async def get_card(
     # The dependency performs the card lookup and access check before this handler.
     card, _ = card_and_member
     return card
-
 
 # Update card content or state; writer access is required.
 @router.patch(
@@ -146,7 +144,6 @@ async def update_card(
     service = CardService(card_repo, list_repo, db)
     return await service.update_card(card, payload)
 
-
 # Move a card between lists or assign a new position within its current list.
 @router.post(
     "/cards/{card_id}/move",
@@ -169,7 +166,6 @@ async def move_card(
     service = CardService(card_repo, list_repo, db)
     return await service.move_card(card, payload)
 
-
 # Permanently remove a card; writer access is required.
 @router.delete(
     "/cards/{card_id}",
@@ -191,11 +187,7 @@ async def delete_card(
     await service.delete_card(card)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-# ---------------------------------------------------------------------------
 # Card Member Endpoints
-# ---------------------------------------------------------------------------
-
 
 @router.get(
     "/cards/{card_id}/members",
@@ -210,7 +202,6 @@ async def list_card_members(
 ) -> list[CardMember]:
     repo = CardMemberRepository(db)
     return await repo.list_card_members(card_id)
-
 
 @router.post(
     "/cards/{card_id}/members",
@@ -228,7 +219,6 @@ async def assign_card_member(
     service = get_card_detail_service(db)
     return await service.assign_card_member(card, payload.user_id)
 
-
 @router.delete(
     "/cards/{card_id}/members/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -244,11 +234,7 @@ async def remove_card_member(
     await service.remove_card_member(card_id, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-# ---------------------------------------------------------------------------
 # Card Label Endpoints
-# ---------------------------------------------------------------------------
-
 
 @router.get(
     "/cards/{card_id}/labels",
@@ -263,7 +249,6 @@ async def list_card_labels(
 ) -> list[Label]:
     repo = LabelRepository(db)
     return await repo.list_for_card(card_id)
-
 
 @router.post(
     "/cards/{card_id}/labels/{label_id}",
@@ -280,7 +265,6 @@ async def attach_card_label(
     service = get_card_detail_service(db)
     await service.attach_label_to_card(card, label_id)
     return Response(status_code=status.HTTP_201_CREATED)
-
 
 @router.delete(
     "/cards/{card_id}/labels/{label_id}",

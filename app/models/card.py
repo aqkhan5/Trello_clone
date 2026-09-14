@@ -1,3 +1,9 @@
+# This project is a backend API for a Trello-like task and project management application.
+# It allows users to manage workspaces, boards, lists, cards, and team collaboration.
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -7,7 +13,10 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
 
-# Card model and ordering, status, and scheduling fields.
+# ---------------------------------------------------------------------------
+# Database Model: Card
+# ---------------------------------------------------------------------------
+# Database table for cards (tasks) that belong to a list.
 class Card(Base):
     __tablename__ = "cards"
     __table_args__ = (
