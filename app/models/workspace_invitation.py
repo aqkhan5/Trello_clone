@@ -1,10 +1,15 @@
 import uuid
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import DateTime, Index, String, func, ForeignKey, UniqueConstraint, text
+from typing import TYPE_CHECKING
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import DateTime, Index, String, func, ForeignKey, text
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.workspace import Workspace
+    from app.models.user import User
 
 # Invitation model for pending workspace membership requests.
 class WorkspaceInvitation(Base):
@@ -35,7 +40,7 @@ class WorkspaceInvitation(Base):
         nullable = False
     )
     email: Mapped[str] = mapped_column(String(255), nullable = False)
-    role: Mapped[str] = mapped_column(String(50), nullable = False)
+    role: Mapped[str] = mapped_column(String(50), default= "MEMBER", nullable = False)
     token: Mapped[str] = mapped_column(
         String(255), 
         unique=True, 
@@ -61,3 +66,8 @@ class WorkspaceInvitation(Base):
         server_default=func.now(),
         nullable=False
     )
+
+    # Add these relationship:
+    workspace: Mapped["Workspace"] = relationship("Workspace", lazy="selectin")
+    # Recommended for showing who sent the invite
+    inviter: Mapped["User"] = relationship("User", foreign_keys=[invited_by], lazy="selectin")
