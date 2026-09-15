@@ -147,6 +147,7 @@ class InvitationService:
         await self.db.refresh(member)
         return member
 
+
     async def decline_invitation(
         self, token: str, current_user: User
     ) -> None:
@@ -173,3 +174,10 @@ class InvitationService:
         invitation.status = InvitationStatus.DECLINED
         await self.invitation_repo.update(invitation)
         await self.db.commit()
+
+
+    async def list_workspace_invitations(
+        self, workspace_id: UUID
+    ) -> list[WorkspaceInvitation]:
+        """Fetch all invitations issued for a workspace (Admin view)."""
+        return await self.invitation_repo.list_for_workspace(workspace_id)
