@@ -92,3 +92,17 @@ async def decline_invitation(
     """Decline and dismiss an active invitation."""
     await service.decline_invitation(token=token, current_user=current_user)
     return None
+
+@router.get(
+    "/workspaces/{workspace_id}/invitations",
+    response_model=list[InvitationResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List all invitations for a workspace (Admin/Owner only)",
+)
+async def list_workspace_invitations(
+    workspace_id: UUID,
+    workspace_and_member: tuple[Workspace, WorkspaceMember] = Depends(require_workspace_admin),
+    service: InvitationService = Depends(get_invitation_service),
+):
+    """Retrieve the audit list of all invitations issued for this workspace."""
+    return await service.list_workspace_invitations(workspace_id)
