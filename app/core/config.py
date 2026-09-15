@@ -28,4 +28,13 @@ class Settings(BaseSettings):
         )
         return v
 
+
+    SMPT_HOST: str
+    SMTP_PORT: int
+    SMTP_USER:  str
+    SMTP_PASSWORD: str
+    SMTP_FROM_NAME:  str
+    SMTP_FROM_EMAIL: str
+    SMTP_STARTTLS: str
+
 settings = Settings()
