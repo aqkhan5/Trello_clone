@@ -29,7 +29,7 @@ class Settings(BaseSettings):
         return v
 
 
-    SMPT_HOST: str
+    SMTP_HOST: str
     SMTP_PORT: int
     SMTP_USER:  str
     SMTP_PASSWORD: str
