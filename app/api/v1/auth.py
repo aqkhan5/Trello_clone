@@ -1,35 +1,46 @@
 import json
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request, status
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.core.notifications import send_login_alert_email, send_welcome_email, send_password_reset_email
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import LoginRequest, TokenResponse, ForgotPasswordRequest, MessageResponse, ResetPasswordRequest
 from app.schemas.user import UserCreate, UserResponse
-
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+
 @router.post(
     "/register",
     response_model=UserResponse,
-    status_code= status.HTTP_201_CREATED,
-    summary="Register a new user"
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user",
 )
 async def register(
     payload: UserCreate,
-    db: Annotated[AsyncSession, Depends(get_db)]
+    background_tasks: BackgroundTasks,
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     user_repo = UserRepository(db)
     auth_service = AuthService(user_repo, db)
-    return await auth_service.register_user(payload)
+    user = await auth_service.register_user(payload)
+
+    # Dispatch welcome email asynchronously
+    background_tasks.add_task(
+        send_welcome_email,
+        recipient_email=user.email,
+        full_name=user.full_name,
+    )
+
+    return user
+
 
 class OAuth2LoginForm:
     """OAuth2 login form containing only username (email) and password."""
@@ -48,16 +59,18 @@ class OAuth2LoginForm:
         self.username = username
         self.password = password
 
+
 @router.post(
     "/login",
     response_model=TokenResponse,
     status_code=status.HTTP_200_OK,
-    summary="Authenticate user and return JWT access token"
+    summary="Authenticate user and return JWT access token",
 )
 async def login(
     request: Request,
     form_data: Annotated[OAuth2LoginForm, Depends()],
-    db: Annotated[AsyncSession, Depends(get_db)]
+    background_tasks: BackgroundTasks,
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
     """Authenticate via OAuth2 form data (for Swagger UI Authorize) or JSON body, and issue a Bearer token."""
     email = form_data.username
@@ -107,16 +120,85 @@ async def login(
 
     user_repo = UserRepository(db)
     auth_service = AuthService(user_repo, db)
-    return await auth_service.authenticate_user(credentials)
+    token_response = await auth_service.authenticate_user(credentials)
+
+    # Fetch user to extract full_name and send login alert
+    user = await user_repo.get_by_email(credentials.email.lower())
+    if user:
+        client_ip = (
+            request.headers.get("x-forwarded-for")
+            or (request.client.host if request.client else "Unknown")
+        )
+        background_tasks.add_task(
+            send_login_alert_email,
+            recipient_email=user.email,
+            full_name=user.full_name,
+            ip_address=client_ip,
+        )
+
+    return token_response
+
 
 @router.get(
     "/me",
-    response_model= UserResponse,
+    response_model=UserResponse,
     status_code=status.HTTP_200_OK,
-    summary= "Retrieve current authenticated User"
+    summary="Retrieve current authenticated User",
 )
 async def get_me(
-    current_user : Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> User:
     """Return the profile information of the currently authenticated user."""
     return current_user
+
+
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Request a password reset link",
+)
+async def forgot_password(
+    payload: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> MessageResponse:
+    user_repo = UserRepository(db)
+    auth_service = AuthService(user_repo, db)
+
+    user, raw_token = await auth_service.request_password_reset(payload.email)
+
+    if user and raw_token:
+        background_tasks.add_task(
+            send_password_reset_email,
+            recipient_email=user.email,
+            full_name=user.full_name,
+            token=raw_token,
+        )
+
+    return MessageResponse(
+        message="If an account exists with this email, a password reset link has been dispatched."
+    )
+
+
+@router.post(
+    "/reset-password",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Reset password using token",
+)
+async def reset_password(
+    payload: ResetPasswordRequest,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> MessageResponse:
+    user_repo = UserRepository(db)
+    auth_service = AuthService(user_repo, db)
+
+    await auth_service.reset_password(
+        raw_token=payload.token,
+        new_password=payload.new_password,
+    )
+
+    return MessageResponse(
+        message="Password has been successfully updated. You may now log in."
+    )
