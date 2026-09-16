@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta, timezone
+import hashlib
+import secrets
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,8 +11,9 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.user import UserCreate
 
+
 class AuthService:
-    def __init__ (self, user_repo: UserRepository, db: AsyncSession):
+    def __init__(self, user_repo: UserRepository, db: AsyncSession):
         self.user_repo = user_repo
         self.db = db
 
@@ -22,23 +27,56 @@ class AuthService:
 
         hashed_password = get_password_hash(user_in.password)
         new_user = User(
-            email = user_in.email,
-            full_name = user_in.full_name,
-            hashed_password = hashed_password,
+            email=user_in.email,
+            full_name=user_in.full_name,
+            hashed_password=hashed_password,
         )
 
         user = await self.user_repo.create(new_user)
         await self.db.commit()
         await self.db.refresh(user)
         return user
-    
+
     async def authenticate_user(self, credentials: LoginRequest) -> TokenResponse:
         user = await self.user_repo.get_by_email(credentials.email)
         if not user or not verify_password(credentials.password, user.hashed_password):
             raise HTTPException(
-                status_code= status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
-                headers = {"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
-        access_token = create_access_token(subject = str(user.id))
-        return TokenResponse(access_token=access_token, token_type = "bearer")
+        access_token = create_access_token(subject=str(user.id))
+        return TokenResponse(access_token=access_token, token_type="bearer")
+
+    async def request_password_reset(self, email: str) -> tuple[User | None, str | None]:
+        """Generate a random reset token, persist its SHA-256 hash, and return the raw token."""
+        user = await self.user_repo.get_by_email(email.lower())
+        if not user:
+            return None, None
+
+        raw_token = secrets.token_urlsafe(32)
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+
+        user.reset_token_hash = token_hash
+        user.reset_token_expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user, raw_token
+
+    async def reset_password(self, raw_token: str, new_password: str) -> None:
+        """Verify the raw token against stored SHA-256 hashes and update the user's password."""
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+        user = await self.user_repo.get_by_reset_token_hash(token_hash)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset token.",
+            )
+
+        user.hashed_password = get_password_hash(new_password)
+        user.reset_token_hash = None
+        user.reset_token_expires_at = None
+
+        await self.db.commit()
