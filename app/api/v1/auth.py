@@ -109,7 +109,7 @@ async def login(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Email (username) and password are required",
         )
-
+    
     try:
         credentials = LoginRequest(email=email, password=password)
     except ValidationError as exc:
