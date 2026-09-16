@@ -25,7 +25,7 @@ async def _send_smtp_email(
     
     msg = EmailMessage()
     from_name = getattr(settings, "SMTP_FROM_NAME", "Trello clone")
-    from_email = getattr(settings, "SMTP_From_EMAIL", None) or settings.SMTP_USER
+    from_email = getattr(settings, "SMTP_FROM_EMAIL", None) or settings.SMTP_USER
     msg["From"] = f"{from_name}<{from_email}>"
     msg["To"] = to_email
     msg["Subject"] = subject
@@ -36,12 +36,12 @@ async def _send_smtp_email(
     try:
         await aiosmtplib.send(
             msg,
-            hostname= settings.SMTP_HOST,
-            port= settings.SMTP_PORT,
-            username= settings.SMTP_USER,
-            password= settings.SMTP_PASSWORD,
-            start_tls= getattr(settings, "SMTP_STARTTLS", True),
-            )
+            hostname=settings.SMTP_HOST,
+            port=int(settings.SMTP_PORT),
+            username=settings.SMTP_USER,
+            password=settings.SMTP_PASSWORD,
+            start_tls=True,  # Hardcode True so STARTTLS is guaranteed over port 587
+        )
         logger.info(f"Notification info has successfully dispatched to {to_email}")
     except Exception as exc:
         logger.error(f"failed to dispatch email to {to_email}: {exc}")
@@ -87,7 +87,8 @@ async def send_invitation_email(
 
 # Registion Notification
 async def send_welcome_email(
-        recipient_emial: str, full_name: str
+        recipient_email: str, 
+        full_name: str
 ) ->  None:
     """Dispatching a welcome email upon the successfull registration of the user"""
     subject = "Welcome to trello"
@@ -106,12 +107,14 @@ async def send_welcome_email(
         </p>
     </div>
     """
-    await _send_smtp_email(recipient_emial, subject, html_content, text_content)
+    await _send_smtp_email(recipient_email, subject, html_content, text_content)
 
 
 # Login Notification
 async def send_login_alert_email(
-        recipient_email: str, full_name: str, ip_address: str = "unknown"
+        recipient_email: str, 
+        full_name: str, 
+        ip_address: str = "unknown"
 ) -> None:
     """ Dispatching the security notification email for user sign-in"""
     subject = f" Security alert!  A new sign-in to your Trello account "
@@ -134,4 +137,46 @@ async def send_login_alert_email(
         </p>
     </div>
     """
+    await _send_smtp_email(recipient_email, subject, html_content, text_content)
+
+
+# Password Reset Notification
+async def send_password_reset_email(
+    recipient_email: str,
+    full_name: str,
+    token: str,
+) -> None:
+    """Dispatches a password reset link with a 15-minute expiration."""
+    reset_url = f"http://localhost:3000/reset-password?token={token}"
+    subject = "Password Reset Request for Trello Clone"
+
+    text_content = (
+        f"Hi {full_name},\n\n"
+        f"A password reset request was initiated for your account.\n"
+        f"Click the link below to set a new password:\n"
+        f"{reset_url}\n\n"
+        f"This link will expire in 15 minutes. If you did not make this request, you can safely ignore this email."
+    )
+
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <h2 style="color: #0052cc; margin-top: 0;">Password Reset Request</h2>
+        <p style="font-size: 15px; color: #334155;">Hi {full_name},</p>
+        <p style="font-size: 15px; color: #334155;">
+            We received a request to reset your password. Click the button below to choose a new password:
+        </p>
+        <div style="margin: 30px 0;">
+            <a href="{reset_url}" style="background-color: #0052cc; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+                Reset Password
+            </a>
+        </div>
+        <p style="color: #64748b; font-size: 13px;">
+            Or copy and paste this link into your browser:<br/>
+            <a href="{reset_url}" style="color: #0052cc;">{reset_url}</a>
+        </p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+        <p style="color: #94a3b8; font-size: 12px;">This link will expire in 15 minutes. If you did not make this request, please disregard this email.</p>
+    </div>
+    """
+
     await _send_smtp_email(recipient_email, subject, html_content, text_content)
