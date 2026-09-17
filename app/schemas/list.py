@@ -24,3 +24,7 @@ class ListResponse(ListBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes = True)
+
+
+class ListMove(BaseModel):
+    position: float = Field(..., description="Target fractional or index position of the list on the board")
