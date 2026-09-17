@@ -15,7 +15,7 @@ from app.models.board import Board
 from app.models.board_member import BoardMember
 from app.models.list import List as ListModel
 from app.repositories.list_repository import ListRepository
-from app.schemas.list import ListCreate, ListResponse, ListUpdate
+from app.schemas.list import ListCreate, ListResponse, ListUpdate, ListMove
 from app.services.list_service import ListService
 
 router = APIRouter(tags=["Lists"])
@@ -95,6 +95,26 @@ async def update_list(
     list_repo = ListRepository(db)
     service = ListService(list_repo, db)
     return await service.update_list(list_obj, payload)
+
+@router.post(
+    "/lists/{list_id}/move",
+    response_model=ListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Move or reorder a list",
+)
+async def move_list(
+    payload: ListMove,
+    list_and_member: Annotated[
+        tuple[ListModel, BoardMember | None], Depends(require_list_board_writer)
+    ],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ListModel:
+    """Assign a new fractional or index position to a board list."""
+    board_list, _ = list_and_member
+    list_repo = ListRepository(db)
+    service = ListService(list_repo, db)
+    return await service.move_list(board_list, payload)
+
 
 @router.delete(
     "/lists/{list_id}",
