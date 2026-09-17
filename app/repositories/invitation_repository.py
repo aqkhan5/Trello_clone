@@ -73,3 +73,15 @@ class InvitationRepository:
         await self.db.flush()
         await self.db.refresh(invitation)
         return invitation
+
+    async def get_by_id(self, invitation_id: UUID) -> WorkspaceInvitation | None:
+        """Fetch invitation by primary key ID."""
+        result = await self.db.execute(
+            select(WorkspaceInvitation).where(WorkspaceInvitation.id == invitation_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def delete(self, invitation: WorkspaceInvitation) -> None:
+        """Delete an invitation."""
+        await self.db.delete(invitation)
+        await self.db.flush()
