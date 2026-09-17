@@ -42,6 +42,8 @@ class CardService:
             description=data.description,
             due_date=data.due_date,
             is_completed=data.is_completed,
+            cover_color=data.cover_color,
+            cover_image=data.cover_image,
             position=assigned_position,
             is_archived=False,
         )

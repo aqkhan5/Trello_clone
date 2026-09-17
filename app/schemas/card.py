@@ -9,6 +9,8 @@ class CardBase(BaseModel):
     description: str | None = Field(default=None, max_length=5000)
     due_date: datetime | None = None
     is_completed: bool = False
+    cover_color: str | None = None
+    cover_image: str | None = None
 
 class CardCreate(CardBase):
     position: Decimal | None = None
@@ -19,6 +21,8 @@ class CardUpdate(BaseModel):
     due_date: datetime | None = None
     is_completed: bool | None = None
     is_archived: bool | None = None
+    cover_color: str | None = None
+    cover_image: str | None = None
 
 class CardMove(BaseModel):
     target_list_id : UUID

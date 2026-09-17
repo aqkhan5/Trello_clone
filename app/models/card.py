@@ -53,6 +53,14 @@ class Card(Base):
         default=False,
         nullable=False
     )
+    cover_color: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True
+    )
+    cover_image: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

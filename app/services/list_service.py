@@ -28,6 +28,7 @@ class ListService:
         list_obj = ListModel(
             board_id=board_id,
             title=data.title,
+            color=data.color,
             position=assigned_position,
             is_archived=False,
         )

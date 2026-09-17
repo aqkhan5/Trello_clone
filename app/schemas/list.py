@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class ListBase(BaseModel):
     title: str = Field(..., min_length= 1, max_length = 100)
+    color: str | None = None
 
 class ListCreate(ListBase):
     position: Decimal | None = None
@@ -14,6 +15,7 @@ class ListUpdate(BaseModel):
     title: str | None = Field(default = None, min_length = 1, max_length = 100)
     position: Decimal | None = None
     is_archived: bool | None = None
+    color: str | None = None
 
 class ListResponse(ListBase):
     id: UUID
