@@ -36,5 +36,6 @@ class Settings(BaseSettings):
     SMTP_FROM_NAME:  str
     SMTP_FROM_EMAIL: str
     SMTP_STARTTLS: str
+    FRONTEND_URL: str = "http://localhost:5173"
 
 settings = Settings()
