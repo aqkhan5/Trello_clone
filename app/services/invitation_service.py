@@ -181,3 +181,16 @@ class InvitationService:
     ) -> list[WorkspaceInvitation]:
         """Fetch all invitations issued for a workspace (Admin view)."""
         return await self.invitation_repo.list_for_workspace(workspace_id)
+
+    async def revoke_invitation(
+        self, workspace_id: UUID, invitation_id: UUID
+    ) -> None:
+        """Revoke and remove a pending invitation."""
+        invitation = await self.invitation_repo.get_by_id(invitation_id)
+        if not invitation or invitation.workspace_id != workspace_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invitation not found in this workspace",
+            )
+        await self.invitation_repo.delete(invitation)
+        await self.db.commit()
