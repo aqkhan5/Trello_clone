@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.list import List as ListModel
 from app.repositories.list_repository import ListRepository
-from app.schemas.list import ListCreate, ListUpdate
+from app.schemas.list import ListCreate, ListUpdate, ListMove
 
 DEFAULT_POSITION_STEP = Decimal("65536.0")
 
@@ -42,6 +42,13 @@ class ListService:
         for key, value in update_dict.items():
             setattr(list_obj, key, value)
 
+        await self.db.commit()
+        await self.db.refresh(list_obj)
+        return list_obj
+
+    async def move_list(self, list_obj: ListModel, payload: ListMove) -> ListModel:
+        """Assign a new fractional or index position to a board list."""
+        list_obj.position = payload.position
         await self.db.commit()
         await self.db.refresh(list_obj)
         return list_obj
