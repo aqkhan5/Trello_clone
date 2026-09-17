@@ -106,3 +106,19 @@ async def list_workspace_invitations(
 ):
     """Retrieve the audit list of all invitations issued for this workspace."""
     return await service.list_workspace_invitations(workspace_id)
+
+
+@router.delete(
+    "/workspaces/{workspace_id}/invitations/{invitation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Revoke an invitation (Admin/Owner only)",
+)
+async def revoke_invitation(
+    workspace_id: UUID,
+    invitation_id: UUID,
+    workspace_and_member: tuple[Workspace, WorkspaceMember] = Depends(require_workspace_admin),
+    service: InvitationService = Depends(get_invitation_service),
+):
+    """Revoke and delete a pending workspace invitation."""
+    await service.revoke_invitation(workspace_id=workspace_id, invitation_id=invitation_id)
+    return None
