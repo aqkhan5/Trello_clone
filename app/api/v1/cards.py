@@ -44,6 +44,7 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
         db=db,
     )
 
+# Create a new card in a list
 @router.post(
     "/lists/{list_id}/cards",
     response_model=CardResponse,
@@ -65,6 +66,7 @@ async def create_card(
     service = CardService(card_repo, list_repo, db)
     return await service.create_card(list_id, current_user.id, payload)
 
+# Retrieve all cards in a list
 @router.get(
     "/lists/{list_id}/cards",
     response_model=list[CardResponse],
@@ -85,6 +87,7 @@ async def list_cards_in_list(
     card_repo = CardRepository(db)
     return await card_repo.list_for_list(list_id, include_archived=include_archived)
 
+# Retrieve details of a specific card
 @router.get(
     "/cards/{card_id}",
     response_model=CardResponse,
@@ -100,6 +103,7 @@ async def get_card(
     card, _ = card_and_member
     return card
 
+# Update details of an existing card
 @router.patch(
     "/cards/{card_id}",
     response_model=CardResponse,
@@ -120,6 +124,7 @@ async def update_card(
     service = CardService(card_repo, list_repo, db)
     return await service.update_card(card, payload)
 
+# Move or reorder a card within or between lists
 @router.post(
     "/cards/{card_id}/move",
     response_model=CardResponse,
@@ -140,6 +145,7 @@ async def move_card(
     service = CardService(card_repo, list_repo, db)
     return await service.move_card(card, payload)
 
+# Delete a card permanently
 @router.delete(
     "/cards/{card_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -159,6 +165,7 @@ async def delete_card(
     await service.delete_card(card)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+# Retrieve all members assigned to a card
 @router.get(
     "/cards/{card_id}/members",
     response_model=list[CardMemberResponse],
@@ -173,6 +180,7 @@ async def list_card_members(
     repo = CardMemberRepository(db)
     return await repo.list_card_members(card_id)
 
+# Assign a member to a card
 @router.post(
     "/cards/{card_id}/members",
     response_model=CardMemberResponse,
@@ -189,6 +197,7 @@ async def assign_card_member(
     service = get_card_detail_service(db)
     return await service.assign_card_member(card, payload.user_id)
 
+# Remove an assigned member from a card
 @router.delete(
     "/cards/{card_id}/members/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -204,6 +213,7 @@ async def remove_card_member(
     await service.remove_card_member(card_id, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+# Retrieve all labels attached to a card
 @router.get(
     "/cards/{card_id}/labels",
     response_model=list[LabelResponse],
@@ -218,6 +228,7 @@ async def list_card_labels(
     repo = LabelRepository(db)
     return await repo.list_for_card(card_id)
 
+# Attach a label to a card
 @router.post(
     "/cards/{card_id}/labels/{label_id}",
     status_code=status.HTTP_201_CREATED,
@@ -234,6 +245,7 @@ async def attach_card_label(
     await service.attach_label_to_card(card, label_id)
     return Response(status_code=status.HTTP_201_CREATED)
 
+# Detach a label from a card
 @router.delete(
     "/cards/{card_id}/labels/{label_id}",
     status_code=status.HTTP_204_NO_CONTENT,
