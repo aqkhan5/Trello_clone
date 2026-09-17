@@ -53,7 +53,8 @@ async def send_invitation_email(
         recipient_email: str, workspace_name: str, token: str
 ) -> None:
     """Dispatching transactional email with the Dispatching URL"""
-    invite_url = f"http://localhost:3000/invitations/accept?token={token}"
+    frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5173").rstrip("/")
+    invite_url = f"{frontend_url}/invitations/accept?token={token}"
     subject = f"You have been invited to join the {workspace_name} workspace"
 
     text_content = (
