@@ -11,7 +11,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginRequest, TokenResponse, ForgotPasswordRequest, MessageResponse, ResetPasswordRequest
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -150,6 +150,26 @@ async def get_me(
 ) -> User:
     """Return the profile information of the currently authenticated user."""
     return current_user
+
+
+@router.patch(
+    "/me",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update current authenticated User profile",
+)
+async def update_me(
+    payload: UserUpdate,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> User:
+    """Update profile information of the currently authenticated user."""
+    if payload.full_name is not None and payload.full_name.strip():
+        current_user.full_name = payload.full_name.strip()
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user
+
 
 
 @router.post(
