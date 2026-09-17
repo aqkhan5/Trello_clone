@@ -99,10 +99,20 @@ async def require_workspace_member(
     member = await repo.get_member(workspace_id, current_user.id)
 
     if not member:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not a member of this workspace",
-        )
+        if workspace.owner_id == current_user.id:
+            member = WorkspaceMember(
+                workspace_id=workspace.id,
+                user_id=current_user.id,
+                role=WorkspaceRole.ADMIN,
+            )
+            await repo.add_member(member)
+            await db.commit()
+            await db.refresh(member)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not a member of this workspace",
+            )
     return workspace, member
 
 async def require_workspace_admin(
