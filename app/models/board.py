@@ -28,6 +28,14 @@ class Board(Base):
         String(100),
         nullable = False
     )
+    description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+    background: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
     visibility: Mapped[str] = mapped_column(
         String(50),
         default = "WORKSPACE",
