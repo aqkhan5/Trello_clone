@@ -31,6 +31,8 @@ class BoardService:
             created_by=user_id,
             title=data.title,
             visibility=data.visibility or "WORKSPACE",
+            description=data.description,
+            background=data.background,
             is_archived=False,
         )
         await self.board_repo.create(board)
