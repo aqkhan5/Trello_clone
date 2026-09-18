@@ -1,7 +1,9 @@
+import os
+import uuid
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, File, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import (
@@ -52,6 +54,44 @@ async def create_attachment(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Attachment:
+    service = get_collaboration_service(db)
+    return await service.add_attachment(card_id, current_user.id, payload)
+
+@router.post(
+    "/cards/{card_id}/attachments/upload",
+    response_model=AttachmentResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload a file attachment to a card",
+)
+async def upload_attachment(
+    card_id: UUID,
+    file: Annotated[UploadFile, File(...)],
+    _: Annotated[tuple[Card, BoardMember | None], Depends(require_card_board_writer)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> Attachment:
+    uploads_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../../../uploads/attachments")
+    )
+    os.makedirs(uploads_dir, exist_ok=True)
+
+    file_ext = os.path.splitext(file.filename or "")[1]
+    safe_id = str(uuid.uuid4())
+    stored_name = f"{safe_id}{file_ext}"
+    dest_path = os.path.join(uploads_dir, stored_name)
+
+    content = await file.read()
+    with open(dest_path, "wb") as f:
+        f.write(content)
+
+    file_url = f"http://localhost:8000/uploads/attachments/{stored_name}"
+    payload = AttachmentCreate(
+        file_name=file.filename or "attachment",
+        file_url=file_url,
+        file_size=len(content),
+        content_type=file.content_type or "application/octet-stream",
+    )
+
     service = get_collaboration_service(db)
     return await service.add_attachment(card_id, current_user.id, payload)
 
