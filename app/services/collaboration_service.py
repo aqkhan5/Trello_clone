@@ -153,7 +153,7 @@ class CollaborationService:
             file_name=data.file_name,
             file_url=data.file_url,
             file_size=data.file_size,
-            file_type=data.content_type,
+            file_type=data.content_type or "application/octet-stream",
         )
         await self.attachment_repo.create(attachment)
 
