@@ -2,6 +2,8 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import (
@@ -12,15 +14,21 @@ from app.api.deps import (
 )
 from app.db.session import get_db
 
+from app.models.attachment import Attachment
 from app.models.board import Board
 from app.models.board_member import BoardMember
+from app.models.card import Card
+from app.models.card_label import CardLabel
+from app.models.card_member import CardMember
+from app.models.label import Label
+from app.models.list import List as ListModel
 from app.models.user import User
 from app.models.workspace import Workspace
 from app.models.workspace_member import WorkspaceMember
 
 from app.repositories.board_repository import BoardRepository
 from app.repositories.workspace_repository import WorkspaceRepository
-from app.schemas.board import BoardCreate, BoardResponse, BoardUpdate
+from app.schemas.board import BoardCreate, BoardResponse, BoardUpdate, BoardDetailResponse
 from app.schemas.board_member import (
     BoardMemberCreate,
     BoardMemberResponse,
@@ -73,18 +81,120 @@ async def list_workspace_boards(
 
 @router.get(
     "/boards/{board_id}",
-    response_model=BoardResponse,
+    response_model=BoardDetailResponse,
     status_code=status.HTTP_200_OK,
-    summary="Get board details",
+    summary="Get board details with pre-loaded lists and cards",
 )
 async def get_board(
     board_and_member: Annotated[
         tuple[Board, BoardMember | None], Depends(require_board_member)
     ],
-) -> Board:
-    """Fetch board details if user has access."""
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> BoardDetailResponse:
+    """Fetch board details including lists and cards in an optimized multi-query join."""
     board, _ = board_and_member
-    return board
+
+    list_stmt = (
+        select(ListModel)
+        .where(ListModel.board_id == board.id, ListModel.is_archived.is_(False))
+        .order_by(ListModel.position.asc())
+    )
+    list_res = await db.execute(list_stmt)
+    lists = list(list_res.scalars().all())
+
+    list_ids = [l.id for l in lists]
+    cards_by_list: dict[UUID, list[dict]] = {l.id: [] for l in lists}
+
+    if list_ids:
+        card_stmt = (
+            select(Card)
+            .where(Card.list_id.in_(list_ids), Card.is_archived.is_(False))
+            .order_by(Card.position.asc())
+        )
+        card_res = await db.execute(card_stmt)
+        all_cards = list(card_res.scalars().all())
+        card_ids = [c.id for c in all_cards]
+
+        labels_by_card: dict[UUID, list[Label]] = {c.id: [] for c in all_cards}
+        members_by_card: dict[UUID, list[CardMember]] = {c.id: [] for c in all_cards}
+        attachments_by_card: dict[UUID, list[Attachment]] = {c.id: [] for c in all_cards}
+
+        if card_ids:
+            label_stmt = (
+                select(CardLabel.card_id, Label)
+                .join(Label, CardLabel.label_id == Label.id)
+                .where(CardLabel.card_id.in_(card_ids))
+                .order_by(Label.name.asc())
+            )
+            for cid, lbl in (await db.execute(label_stmt)).all():
+                labels_by_card[cid].append(lbl)
+
+            member_stmt = (
+                select(CardMember)
+                .where(CardMember.card_id.in_(card_ids))
+                .options(selectinload(CardMember.user))
+                .order_by(CardMember.assigned_at.asc())
+            )
+            for cm in (await db.execute(member_stmt)).scalars().all():
+                members_by_card[cm.card_id].append(cm)
+
+            att_stmt = (
+                select(Attachment)
+                .where(Attachment.card_id.in_(card_ids))
+                .order_by(Attachment.created_at.desc())
+            )
+            for att in (await db.execute(att_stmt)).scalars().all():
+                attachments_by_card[att.card_id].append(att)
+
+        for card in all_cards:
+            card_dict = {
+                "id": card.id,
+                "list_id": card.list_id,
+                "created_by": card.created_by,
+                "title": card.title,
+                "description": card.description,
+                "position": card.position,
+                "due_date": card.due_date,
+                "is_completed": card.is_completed,
+                "is_archived": card.is_archived,
+                "cover_color": card.cover_color,
+                "cover_image": card.cover_image,
+                "created_at": card.created_at,
+                "updated_at": card.updated_at,
+                "labels": labels_by_card.get(card.id, []),
+                "members": members_by_card.get(card.id, []),
+                "attachments": attachments_by_card.get(card.id, []),
+            }
+            cards_by_list[card.list_id].append(card_dict)
+
+    lists_with_cards = []
+    for l in lists:
+        list_dict = {
+            "id": l.id,
+            "board_id": l.board_id,
+            "title": l.title,
+            "color": l.color,
+            "position": l.position,
+            "is_archived": l.is_archived,
+            "created_at": l.created_at,
+            "updated_at": l.updated_at,
+            "cards": cards_by_list.get(l.id, []),
+        }
+        lists_with_cards.append(list_dict)
+
+    return BoardDetailResponse(
+        id=board.id,
+        workspace_id=board.workspace_id,
+        created_by=board.created_by,
+        title=board.title,
+        description=board.description,
+        background=board.background,
+        visibility=board.visibility,
+        is_archived=board.is_archived,
+        created_at=board.created_at,
+        updated_at=board.updated_at,
+        lists=lists_with_cards,
+    )
 
 @router.patch(
     "/boards/{board_id}",
