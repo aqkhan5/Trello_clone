@@ -29,13 +29,13 @@ class Settings(BaseSettings):
         return v
 
 
-    SMTP_HOST: str
-    SMTP_PORT: int
-    SMTP_USER:  str
-    SMTP_PASSWORD: str
-    SMTP_FROM_NAME:  str
-    SMTP_FROM_EMAIL: str
-    SMTP_STARTTLS: str
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_NAME: str = "Trello Clone"
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_STARTTLS: str = "True"
     FRONTEND_URL: str = "http://localhost:5173"
 
 settings = Settings()
