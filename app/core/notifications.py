@@ -148,7 +148,8 @@ async def send_password_reset_email(
     token: str,
 ) -> None:
     """Dispatches a password reset link with a 15-minute expiration."""
-    reset_url = f"http://localhost:3000/reset-password?token={token}"
+    frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5173").rstrip("/")
+    reset_url = f"{frontend_url}/reset-password?token={token}"
     subject = "Password Reset Request for Trello Clone"
 
     text_content = (

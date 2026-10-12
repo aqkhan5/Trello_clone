@@ -84,7 +84,7 @@ async def upload_attachment(
     with open(dest_path, "wb") as f:
         f.write(content)
 
-    file_url = f"http://localhost:8000/uploads/attachments/{stored_name}"
+    file_url = f"/uploads/attachments/{stored_name}"
     payload = AttachmentCreate(
         file_name=file.filename or "attachment",
         file_url=file_url,
