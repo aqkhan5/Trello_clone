@@ -16,12 +16,19 @@ from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
+import os
+
 origins = [
+    settings.FRONTEND_URL,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
 ]
+extra_origins = os.getenv("ADDITIONAL_CORS_ORIGINS", "")
+if extra_origins:
+    origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
+origins = list(dict.fromkeys(origins))
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +38,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-import os
 from starlette.staticfiles import StaticFiles
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")

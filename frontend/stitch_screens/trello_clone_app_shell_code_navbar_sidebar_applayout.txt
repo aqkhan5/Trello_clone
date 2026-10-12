@@ -1,0 +1,500 @@
+import React, { useState } from 'react';
+import {
+  Trello,
+  Search,
+  Plus,
+  Bell,
+  HelpCircle,
+  ChevronDown,
+  Layout,
+  FileText,
+  Home,
+  Briefcase,
+  Settings,
+  Users,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Menu,
+  X,
+  Star,
+  Lock,
+  ExternalLink,
+  Command,
+  CheckCircle2,
+  Clock,
+  LogOut,
+  User as UserIcon,
+  ChevronRight
+} from 'lucide-react';
+
+// ==========================================
+// 1. TYPES & INTERFACES
+// ==========================================
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  avatarUrl: string;
+  status?: 'online' | 'busy' | 'away';
+}
+
+export interface WorkspaceItem {
+  id: string;
+  name: string;
+  iconBg: string;
+  initials: string;
+  isPrivate: boolean;
+}
+
+export interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string | number;
+  href?: string;
+}
+
+export interface AppLayoutProps {
+  children: React.ReactNode;
+  currentUser?: UserProfile;
+}
+
+// ==========================================
+// 2. TOP NAVBAR COMPONENT (`Navbar.tsx`)
+// ==========================================
+
+export interface NavbarProps {
+  currentUser: UserProfile;
+  onMobileMenuToggle: () => void;
+  onCreateClick?: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({
+  currentUser,
+  onMobileMenuToggle,
+  onCreateClick
+}) => {
+  const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [unreadNotifications] = useState(3);
+
+  return (
+    <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-4 shadow-xs">
+      {/* Left section: Logo & Primary Actions */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Mobile Hamburger toggle */}
+        <button
+          onClick={onMobileMenuToggle}
+          className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 md:hidden"
+          aria-label="Toggle mobile menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        {/* Brand Logo & Title */}
+        <a href="#dashboard" className="flex items-center gap-2 group transition-opacity hover:opacity-90">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0052cc] text-white shadow-xs">
+            <Trello className="h-4.5 w-4.5" />
+          </div>
+          <span className="font-bold text-lg tracking-tight text-slate-900 hidden sm:inline-block">
+            Trello
+          </span>
+        </a>
+
+        {/* Workspaces Menu Dropdown */}
+        <div className="relative hidden md:block">
+          <button
+            onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
+            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <span>Workspaces</span>
+            <ChevronDown className="h-4 w-4 text-slate-500" />
+          </button>
+
+          {isWorkspaceMenuOpen && (
+            <div className="absolute left-0 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-lg z-50">
+              <div className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Current Workspace
+              </div>
+              <div className="flex items-center gap-2.5 rounded-lg p-2 hover:bg-slate-50 cursor-pointer">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600 text-xs font-bold text-white">
+                  PE
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium text-slate-800 truncate">Product & Engineering</div>
+                  <div className="text-xs text-slate-500">Premium plan</div>
+                </div>
+              </div>
+              <div className="my-1 border-t border-slate-100" />
+              <div className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Your Workspaces
+              </div>
+              <div className="flex items-center gap-2.5 rounded-lg p-2 hover:bg-slate-50 cursor-pointer">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-purple-600 text-xs font-bold text-white">
+                  MK
+                </div>
+                <span className="text-sm font-medium text-slate-700">Marketing & Growth</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* + Create Action Button */}
+        <button
+          onClick={onCreateClick}
+          className="flex items-center gap-1.5 rounded-md bg-[#0052cc] hover:bg-[#0047b3] active:bg-[#003d99] px-3 py-1.5 text-sm font-medium text-white shadow-xs transition-all"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Create</span>
+        </button>
+      </div>
+
+      {/* Center section: Global Search Bar with Keyboard Shortcut */}
+      <div className="mx-4 hidden sm:flex max-w-md flex-1 items-center">
+        <div className="relative w-full">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search boards, cards, or teams..."
+            className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50/70 pl-9 pr-14 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-[#0052cc] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0052cc]"
+          />
+          <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 shadow-2xs">
+            <span>Ctrl</span>
+            <span>K</span>
+          </kbd>
+        </div>
+      </div>
+
+      {/* Right section: Notifications, Help, Profile Avatar */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        {/* Mobile Search Icon Button */}
+        <button className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 sm:hidden">
+          <Search className="h-4 w-4" />
+        </button>
+
+        {/* Notification Bell with Badge */}
+        <div className="relative">
+          <button
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            aria-label="View notifications"
+          >
+            <Bell className="h-4.5 w-4.5" />
+            {unreadNotifications > 0 && (
+              <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                {unreadNotifications}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Help icon */}
+        <button
+          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+          aria-label="Get help"
+        >
+          <HelpCircle className="h-4.5 w-4.5" />
+        </button>
+
+        {/* User Profile Avatar & Dropdown */}
+        <div className="relative ml-1">
+          <button
+            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+            className="flex items-center rounded-full ring-2 ring-transparent hover:ring-[#0052cc] transition-all focus:outline-none"
+          >
+            <img
+              src={currentUser.avatarUrl}
+              alt={currentUser.name}
+              className="h-8 w-8 rounded-full object-cover border border-slate-200"
+            />
+          </button>
+
+          {isProfileMenuOpen && (
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50">
+              <div className="px-3 py-2 border-b border-slate-100">
+                <p className="text-sm font-semibold text-slate-900">{currentUser.name}</p>
+                <p className="text-xs text-slate-500 truncate">{currentUser.email}</p>
+              </div>
+              <div className="py-1">
+                <a
+                  href="#profile"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
+                  <UserIcon className="h-4 w-4 text-slate-500" />
+                  <span>Profile & Visibility</span>
+                </a>
+                <a
+                  href="#settings"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
+                  <Settings className="h-4 w-4 text-slate-500" />
+                  <span>Settings & Preferences</span>
+                </a>
+              </div>
+              <div className="border-t border-slate-100 pt-1">
+                <button
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+};
+
+// ==========================================
+// 3. COLLAPSIBLE SIDEBAR COMPONENT (`Sidebar.tsx`)
+// ==========================================
+
+export interface SidebarProps {
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+  activeRoute?: string;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  isCollapsed,
+  onToggleCollapse,
+  activeRoute = 'boards'
+}) => {
+  const [isWorkspacesExpanded, setIsWorkspacesExpanded] = useState(true);
+
+  const mainNavItems: NavItem[] = [
+    { id: 'boards', label: 'Boards', icon: Layout, badge: '12' },
+    { id: 'templates', label: 'Templates', icon: FileText },
+    { id: 'home', label: 'Home Feed', icon: Home }
+  ];
+
+  const workspaces: WorkspaceItem[] = [
+    { id: 'ws-1', name: 'Product & Engineering', initials: 'PE', iconBg: 'bg-[#0052cc]', isPrivate: true },
+    { id: 'ws-2', name: 'Marketing Campaign Q3', initials: 'MC', iconBg: 'bg-emerald-600', isPrivate: false },
+    { id: 'ws-3', name: 'Design Systems', initials: 'DS', iconBg: 'bg-violet-600', isPrivate: true }
+  ];
+
+  return (
+    <aside
+      className={`group/sidebar relative flex flex-col border-r border-slate-200 bg-white transition-[width] duration-200 ease-in-out select-none ${
+        isCollapsed ? 'w-16' : 'w-64'
+      }`}
+    >
+      {/* Top Header / Collapse Trigger */}
+      <div className="flex h-12 items-center justify-between px-3 border-b border-slate-100">
+        {!isCollapsed && (
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Workspace Hub
+          </span>
+        )}
+        <button
+          onClick={onToggleCollapse}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors ${
+            isCollapsed ? 'mx-auto' : ''
+          }`}
+        >
+          {isCollapsed ? (
+            <PanelLeftOpen className="h-4.5 w-4.5" />
+          ) : (
+            <PanelLeftClose className="h-4.5 w-4.5" />
+          )}
+        </button>
+      </div>
+
+      {/* Main Navigation Links */}
+      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
+        {mainNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeRoute === item.id;
+          return (
+            <button
+              key={item.id}
+              className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-blue-50 text-[#0052cc] font-semibold'
+                  : 'text-slate-700 hover:bg-slate-100'
+              } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+              title={isCollapsed ? item.label : undefined}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-[#0052cc]' : 'text-slate-500'}`} />
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
+              </div>
+              {!isCollapsed && item.badge && (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+
+        <div className="my-3 border-t border-slate-100" />
+
+        {/* Workspaces Accordion */}
+        <div className="space-y-1">
+          {!isCollapsed ? (
+            <div className="flex items-center justify-between px-2 py-1">
+              <button
+                onClick={() => setIsWorkspacesExpanded(!isWorkspacesExpanded)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 uppercase tracking-wider"
+              >
+                <span>Workspaces</span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${
+                    isWorkspacesExpanded ? '' : '-rotate-90'
+                  }`}
+                />
+              </button>
+              <button
+                title="Add Workspace"
+                className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-center py-1">
+              <Briefcase className="h-4 w-4 text-slate-400" />
+            </div>
+          )}
+
+          {(!isCollapsed ? isWorkspacesExpanded : true) && (
+            <div className="space-y-0.5">
+              {workspaces.map((ws) => (
+                <button
+                  key={ws.id}
+                  className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm text-slate-700 hover:bg-slate-100 transition-colors ${
+                    isCollapsed ? 'justify-center' : ''
+                  }`}
+                  title={isCollapsed ? ws.name : undefined}
+                >
+                  <div
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded text-[11px] font-bold text-white ${ws.iconBg}`}
+                  >
+                    {ws.initials}
+                  </div>
+                  {!isCollapsed && (
+                    <div className="flex flex-1 items-center justify-between truncate">
+                      <span className="truncate text-xs font-medium text-slate-800">{ws.name}</span>
+                      {ws.isPrivate && <Lock className="h-3 w-3 text-slate-400 shrink-0 ml-1" />}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Utility Links */}
+      <div className="border-t border-slate-200 p-2 space-y-0.5 bg-slate-50/50">
+        <button
+          className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+          title={isCollapsed ? 'Members & Access' : undefined}
+        >
+          <Users className="h-4 w-4 text-slate-500 shrink-0" />
+          {!isCollapsed && <span>Members & Access</span>}
+        </button>
+
+        <button
+          className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+          title={isCollapsed ? 'Workspace Settings' : undefined}
+        >
+          <Settings className="h-4 w-4 text-slate-500 shrink-0" />
+          {!isCollapsed && <span>Workspace Settings</span>}
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+// ==========================================
+// 4. ROOT LAYOUT WRAPPER (`AppLayout.tsx`)
+// ==========================================
+
+export const AppLayout: React.FC<AppLayoutProps> = ({
+  children,
+  currentUser = {
+    name: 'Sarah Connor',
+    email: 'sarah.connor@acme.corp',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop',
+    status: 'online'
+  }
+}) => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  return (
+    <div className="flex h-screen w-full flex-col bg-[#faf9ff] text-slate-900 font-sans antialiased overflow-hidden">
+      {/* 1. Persistent Top Navbar */}
+      <Navbar
+        currentUser={currentUser}
+        onMobileMenuToggle={() => setIsMobileMenuOpen(true)}
+        onCreateClick={() => alert('Open Create Board/Workspace Modal')}
+      />
+
+      {/* 2. Main Shell Layout Container */}
+      <div className="relative flex flex-1 overflow-hidden">
+        {/* Desktop Sticky Sidebar */}
+        <div className="hidden md:flex h-full shrink-0">
+          <Sidebar
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            activeRoute="boards"
+          />
+        </div>
+
+        {/* Mobile Sliding Drawer / Sheet */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 flex md:hidden">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Drawer Content */}
+            <div className="relative flex w-72 max-w-xs flex-col bg-white shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+              <div className="flex h-14 items-center justify-between px-4 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0052cc] text-white">
+                    <Trello className="h-4 w-4" />
+                  </div>
+                  <span className="font-bold text-slate-900">Trello Navigation</span>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <Sidebar
+                  isCollapsed={false}
+                  onToggleCollapse={() => setIsMobileMenuOpen(false)}
+                  activeRoute="boards"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3. Flexible Main Content Viewport */}
+        <main className="flex-1 overflow-y-auto bg-[#faf9ff] p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default AppLayout;

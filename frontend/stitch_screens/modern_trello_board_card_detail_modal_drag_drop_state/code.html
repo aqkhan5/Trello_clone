@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trello - Backend Build Plan</title>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+    }
+    /* Sleek custom scrollbars for columns and board canvas */
+    ::-webkit-scrollbar {
+      height: 8px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#0052cc",
+            "primary-hover": "#0065ff",
+            "trello-blue": "#0c66e4",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="h-screen w-screen overflow-hidden font-sans text-slate-100 select-none bg-zinc-950">
+<!-- Full-Bleed Wallpaper Canvas with Atmospheric Dusk Overlay -->
+<div class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat transition-all duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_JV3GEptgXL4PXW7RrfAdGl3HybLENHh5eNDeYCOn7C3iWsJkrEPiNkDVAWBlBCy8q7EN4wlW6OfMBmEKOZ7x0jFkLxnOJsIKmwi10y99tu2snn7Cs5Nc7xnO0Sy4aVxIhiBcHXAgo9kfGGTnDH1FBCXrXPSfRJKyTRApCIsf5yj6ZNYn4cnvXVD2e8BDvuKzM2dG9fJAfWMlGHgKys2hRwug2oJgOrgFBo8V6UU-JHBmw_k58yg-eg');">
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/75 backdrop-blur-[2px]"></div>
+</div>
+<div class="flex h-full flex-col">
+<!-- 1. Top Main Navigation Bar -->
+<header class="h-12 w-full shrink-0 bg-black/40 backdrop-blur-md border-b border-white/10 text-white px-3 flex items-center justify-between gap-3 z-30">
+<!-- Left Controls: Brand + Navigation Dropdowns -->
+<div class="flex items-center gap-2">
+<!-- Logo & Title -->
+<a class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/10 transition-colors" href="#">
+<svg class="h-5 w-5 text-[#579dff]" fill="currentColor" viewbox="0 0 24 24">
+<rect fill="currentColor" fill-opacity="0.2" height="20" rx="4" width="20" x="2" y="2"></rect>
+<rect fill="currentColor" height="12" rx="1.5" width="5" x="5.5" y="5.5"></rect>
+<rect fill="currentColor" height="8" rx="1.5" width="5" x="13.5" y="5.5"></rect>
+</svg>
+<span class="font-bold text-base tracking-tight text-white">Trello</span>
+</a>
+<!-- Workspace & Filter dropdowns -->
+<nav class="hidden md:flex items-center gap-1 text-sm text-slate-200">
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-white/10 text-slate-200 hover:text-white transition-colors font-medium text-xs" type="button">
+<span>Workspaces</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-white/10 text-slate-200 hover:text-white transition-colors font-medium text-xs" type="button">
+<span>Recent</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-white/10 text-slate-200 hover:text-white transition-colors font-medium text-xs" type="button">
+<span>Starred</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-white/10 text-slate-200 hover:text-white transition-colors font-medium text-xs" type="button">
+<span>Templates</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</nav>
+<!-- Global Create Button -->
+<button class="flex items-center gap-1 px-3 py-1 bg-[#0c66e4] hover:bg-[#0052cc] text-white font-medium text-xs rounded-md shadow-sm transition-all ml-1" type="button">
+<span class="material-symbols-outlined text-sm font-semibold">add</span>
+<span class="hidden sm:inline">Create</span>
+</button>
+</div>
+<!-- Center Search Input -->
+<div class="flex-1 max-w-md hidden sm:block">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-2.5 text-slate-400 text-sm pointer-events-none">search</span>
+<input class="w-full h-8 pl-8 pr-16 bg-white/10 border border-white/10 rounded-md text-xs text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#579dff] focus:bg-zinc-900/80 transition-all" placeholder="Search..." type="text"/>
+<div class="absolute right-2 flex items-center gap-0.5 pointer-events-none">
+<kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-slate-300 font-mono">Ctrl K</kbd>
+</div>
+</div>
+</div>
+<!-- Right Utility Actions -->
+<div class="flex items-center gap-1.5">
+<button class="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-slate-300 hover:bg-white/10 hover:text-white" type="button">
+<span class="material-symbols-outlined text-base">search</span>
+</button>
+<div class="relative">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-base">notifications</span>
+</button>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-zinc-900"></span>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-300 hover:bg-white/10 hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-base">help_outline</span>
+</button>
+<!-- User Profile Avatar -->
+<button class="ml-1 relative rounded-full focus:outline-none focus:ring-2 focus:ring-[#579dff] ring-1 ring-white/20" type="button">
+<img alt="User Profile" class="w-7 h-7 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/>
+<span class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full ring-1 ring-black"></span>
+</button>
+</div>
+</header>
+<!-- 2. Board Sub-Header (Floating Frosted Glass Bar) -->
+<section class="h-12 w-full shrink-0 bg-black/25 backdrop-blur-md border-b border-white/10 px-4 flex items-center justify-between text-white z-20">
+<!-- Left Board Identity & Views -->
+<div class="flex items-center gap-2 overflow-hidden">
+<h1 class="text-base font-bold text-white tracking-tight truncate pl-1 hover:bg-white/10 px-2 py-1 rounded cursor-pointer transition-colors">
+          Trello Backend Build Plan
+        </h1>
+<!-- Star toggle -->
+<button class="p-1 rounded hover:bg-white/15 text-amber-400 transition-colors" title="Starred" type="button">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<!-- Workspace Visibility Pill -->
+<div class="h-4 w-px bg-white/20 mx-1 hidden sm:block"></div>
+<button class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded hover:bg-white/15 text-xs text-slate-200 transition-colors" type="button">
+<span class="material-symbols-outlined text-emerald-400 text-sm">lock_open</span>
+<span>Workspace visible</span>
+</button>
+<!-- View Switcher (Board active) -->
+<div class="h-4 w-px bg-white/20 mx-1 hidden md:block"></div>
+<button class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/15 text-xs font-semibold text-white shadow-sm hover:bg-white/20 transition-all" type="button">
+<span class="material-symbols-outlined text-sm">dashboard</span>
+<span>Board</span>
+<span class="material-symbols-outlined text-xs text-slate-300">expand_more</span>
+</button>
+</div>
+<!-- Right Actions: Members & Sharing -->
+<div class="flex items-center gap-2">
+<!-- Avatar Stack -->
+<div class="flex items-center -space-x-1.5 overflow-hidden">
+<img alt="Elena PM" class="w-7 h-7 rounded-full ring-2 ring-black/40 object-cover shadow" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH" title="Elena (Product Lead)"/>
+<div class="w-7 h-7 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-black/40 shadow" title="Marcus Dev">
+            MD
+          </div>
+<div class="w-7 h-7 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-black/40 shadow" title="Sarah QA">
+            SQ
+          </div>
+<div class="w-7 h-7 rounded-full bg-amber-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-black/40 shadow" title="Alex Ops">
+            AO
+          </div>
+<div class="w-7 h-7 rounded-full bg-white/20 text-white text-[10px] font-semibold flex items-center justify-center ring-2 ring-black/40 backdrop-blur-sm">
+            +5
+          </div>
+</div>
+<!-- Share Board Button -->
+<button class="flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-slate-100 text-zinc-900 font-semibold text-xs rounded-md shadow-sm transition-all ml-1" type="button">
+<span class="material-symbols-outlined text-sm">person_add</span>
+<span>Share</span>
+</button>
+<!-- Filter Action -->
+<button class="flex items-center gap-1 px-2.5 py-1 rounded hover:bg-white/15 text-xs text-slate-200 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+<span class="hidden sm:inline">Filters</span>
+</button>
+<!-- More Options -->
+<button class="w-7 h-7 rounded hover:bg-white/15 text-slate-200 flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-base">more_horiz</span>
+</button>
+</div>
+</section>
+<!-- 3. Core Workplace Stage (Drawer + Kanban Scroll Area) -->
+<div class="flex-1 flex overflow-hidden relative">
+<!-- Collapsible Left Drawer ("Inbox") -->
+<aside class="w-64 shrink-0 bg-zinc-900/85 backdrop-blur-xl border-r border-white/10 flex flex-col justify-between transition-all duration-300 z-10" id="inbox-drawer">
+<div class="flex flex-col h-full">
+<!-- Drawer Header -->
+<div class="h-11 px-3 border-b border-white/10 flex items-center justify-between">
+<div class="flex items-center gap-2 text-slate-200">
+<span class="material-symbols-outlined text-base text-[#579dff]">inbox</span>
+<span class="font-semibold text-xs uppercase tracking-wider text-slate-300">Inbox</span>
+<span class="px-1.5 py-0.5 rounded-full bg-primary/30 text-[#85b8ff] text-[10px] font-bold border border-primary/40">3</span>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors" onclick="document.getElementById('inbox-drawer').classList.toggle('-ml-64')" title="Collapse Drawer" type="button">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</button>
+</div>
+<!-- Inbox Cards Quick List -->
+<div class="flex-1 overflow-y-auto p-2.5 flex flex-col gap-2">
+<div class="text-[11px] font-medium text-slate-400 px-1">Quick capture items</div>
+<!-- Inbox Item 1 -->
+<div class="p-2.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 border border-white/5 shadow-sm transition-all cursor-pointer group">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium text-slate-200 group-hover:text-white leading-snug">Review Redis cluster replica sizing</span>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">drive_file_move</span>
+</div>
+<div class="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium">Capture</span>
+<span>20m ago</span>
+</div>
+</div>
+<!-- Inbox Item 2 -->
+<div class="p-2.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 border border-white/5 shadow-sm transition-all cursor-pointer group">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium text-slate-200 group-hover:text-white leading-snug">Generate OpenAPI v3 client specs</span>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">drive_file_move</span>
+</div>
+<div class="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+<span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-medium">Docs</span>
+<span>1h ago</span>
+</div>
+</div>
+<!-- Inbox Item 3 -->
+<div class="p-2.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 border border-white/5 shadow-sm transition-all cursor-pointer group">
+<div class="flex items-start justify-between gap-1">
+<span class="text-xs font-medium text-slate-200 group-hover:text-white leading-snug">Test WebSocket reconnect jitter logic</span>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">drive_file_move</span>
+</div>
+<div class="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+<span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-medium">Bug triage</span>
+<span>3h ago</span>
+</div>
+</div>
+<!-- Quick Capture Button -->
+<button class="mt-1 w-full py-2 px-3 rounded-lg border border-dashed border-white/20 hover:border-[#579dff] text-slate-400 hover:text-white hover:bg-white/5 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Drop in Inbox</span>
+</button>
+</div>
+<!-- Bottom status -->
+<div class="p-2.5 border-t border-white/10 bg-black/20 text-[11px] text-slate-400 flex items-center justify-between">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Sync
+            </span>
+<span class="font-mono text-[10px]">v2.4-rc1</span>
+</div>
+</div>
+</aside>
+<!-- Horizontal-Scrolling Kanban Board Canvas -->
+<main class="flex-1 overflow-x-auto overflow-y-hidden p-4 pb-20 flex items-start gap-3.5">
+<!-- Column 1: Start Here -->
+<div class="w-72 shrink-0 max-h-full rounded-xl bg-zinc-900/85 backdrop-blur-md border border-white/10 shadow-xl flex flex-col">
+<!-- Column Header -->
+<div class="p-3 pb-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-sm font-semibold text-slate-100">Start Here</h2>
+<span class="w-5 h-5 rounded-full bg-white/10 text-slate-300 text-[11px] font-semibold flex items-center justify-center">2</span>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+<!-- Cards Stack -->
+<div class="flex-1 overflow-y-auto px-2.5 pb-2 flex flex-col gap-2">
+<!-- Card 1 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Orientation</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                Architectural Blueprint &amp; API Contract Guidelines
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<div class="flex items-center gap-2">
+<span class="flex items-center gap-0.5 text-emerald-400 text-[11px]">
+<span class="material-symbols-outlined text-sm">check_box</span>
+<span>4/4</span>
+</span>
+<span class="flex items-center gap-0.5 text-[11px]">
+<span class="material-symbols-outlined text-xs">chat_bubble</span> 6
+                  </span>
+</div>
+<img alt="Assignee" class="w-5 h-5 rounded-full object-cover ring-1 ring-white/20" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30">DevOps</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                Local Docker Compose &amp; PostgreSQL 16 Replica Init
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<div class="flex items-center gap-2">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-medium">
+<span class="material-symbols-outlined text-[11px]">schedule</span> Oct 22
+                  </span>
+</div>
+<div class="w-5 h-5 rounded-full bg-indigo-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  MD
+                </div>
+</div>
+</div>
+</div>
+<!-- Column Footer -->
+<div class="p-2 border-t border-white/5">
+<button class="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add a card</span>
+</button>
+</div>
+</div>
+<!-- Column 2: Project Foundation -->
+<div class="w-72 shrink-0 max-h-full rounded-xl bg-zinc-900/85 backdrop-blur-md border border-white/10 shadow-xl flex flex-col">
+<!-- Column Header -->
+<div class="p-3 pb-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-sm font-semibold text-slate-100">Project Foundation</h2>
+<span class="w-5 h-5 rounded-full bg-white/10 text-slate-300 text-[11px] font-semibold flex items-center justify-center">3</span>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+<!-- Cards Stack -->
+<div class="flex-1 overflow-y-auto px-2.5 pb-2 flex flex-col gap-2">
+<!-- Card 1 with Cover image -->
+<div class="rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] overflow-hidden flex flex-col">
+<!-- Cover Image Preview -->
+<div class="h-28 w-full bg-cover bg-center relative" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_JV3GEptgXL4PXW7RrfAdGl3HybLENHh5eNDeYCOn7C3iWsJkrEPiNkDVAWBlBCy8q7EN4wlW6OfMBmEKOZ7x0jFkLxnOJsIKmwi10y99tu2snn7Cs5Nc7xnO0Sy4aVxIhiBcHXAgo9kfGGTnDH1FBCXrXPSfRJKyTRApCIsf5yj6ZNYn4cnvXVD2e8BDvuKzM2dG9fJAfWMlGHgKys2hRwug2oJgOrgFBo8V6UU-JHBmw_k58yg-eg');">
+<div class="absolute inset-0 bg-gradient-to-t from-zinc-900/90 to-transparent"></div>
+<div class="absolute top-2 left-2">
+<span class="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-rose-300 border border-rose-400/30">Database</span>
+</div>
+</div>
+<div class="p-3 pt-2 flex flex-col gap-2">
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                  Schema Migration Engine: Prisma ORM vs Kysely Query Builder
+                </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<div class="flex items-center gap-2">
+<span class="flex items-center gap-0.5 text-xs text-slate-300">
+<span class="material-symbols-outlined text-sm">attachment</span> 3
+                    </span>
+<span class="flex items-center gap-0.5 text-slate-300 text-[11px]">
+<span class="material-symbols-outlined text-sm">check_box</span> 5/7
+                    </span>
+</div>
+<div class="flex items-center -space-x-1">
+<img alt="Elena" class="w-5 h-5 rounded-full object-cover ring-1 ring-zinc-900" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/>
+<div class="w-5 h-5 rounded-full bg-indigo-600 text-[9px] font-bold text-white flex items-center justify-center ring-1 ring-zinc-900">
+                      MD
+                    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30">DevOps</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">P1 High</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                GitHub Actions CI pipeline: Linter, unit tests &amp; container build
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-medium">
+<span class="material-symbols-outlined text-[11px]">event</span> Tomorrow
+                </span>
+<div class="w-5 h-5 rounded-full bg-amber-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  AO
+                </div>
+</div>
+</div><div class="h-20 rounded-lg border-2 border-dashed border-[#579dff]/60 bg-[#579dff]/10 flex items-center justify-center gap-2 text-xs font-semibold text-[#85b8ff] transition-all animate-pulse"><span class="material-symbols-outlined text-sm">arrow_downward</span><span>Drop card here</span></div>
+<!-- Card 3 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30">Config</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                Strict TypeScript compiler configs and shared Zod contracts
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<span class="text-[11px] text-slate-400">Card updated 2h ago</span>
+<div class="w-5 h-5 rounded-full bg-emerald-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  SQ
+                </div>
+</div>
+</div>
+</div>
+<!-- Column Footer -->
+<div class="p-2 border-t border-white/5">
+<button class="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add a card</span>
+</button>
+</div>
+</div>
+<!-- Column 3: Auth & Access Control -->
+<div class="w-72 shrink-0 max-h-full rounded-xl bg-zinc-900/85 backdrop-blur-md border border-white/10 shadow-xl flex flex-col">
+<!-- Column Header -->
+<div class="p-3 pb-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-sm font-semibold text-slate-100">Auth &amp; Access Control</h2>
+<span class="w-5 h-5 rounded-full bg-white/10 text-slate-300 text-[11px] font-semibold flex items-center justify-center">2</span>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+<div class="relative"><div class="absolute right-0 top-6 w-56 bg-zinc-900 border border-white/15 rounded-xl shadow-2xl z-30 p-1.5 flex flex-col gap-0.5 text-xs text-slate-200 backdrop-blur-xl animate-in fade-in zoom-in-95"><div class="px-2.5 py-1.5 text-[11px] font-bold text-slate-400 border-b border-white/10 uppercase tracking-wider flex items-center justify-between"><span>List Actions</span><span class="material-symbols-outlined text-sm text-slate-400 cursor-pointer hover:text-white">close</span></div><button class="flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-white/10 text-left transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-400">add_card</span><span>Add card...</span></button><button class="flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-white/10 text-left transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-400">content_copy</span><span>Copy list...</span></button><button class="flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-white/10 text-left transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-400">drive_file_move</span><span>Move list...</span></button><button class="flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-white/10 text-left transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-400">sort</span><span>Sort by date</span></button><div class="my-1 border-t border-white/10"></div><button class="flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-rose-500/20 text-rose-300 text-left transition-colors" type="button"><span class="material-symbols-outlined text-sm">archive</span><span>Archive list</span></button></div></div></div>
+<!-- Cards Stack -->
+<div class="flex-1 overflow-y-auto px-2.5 pb-2 flex flex-col gap-2">
+<!-- Card 1 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2" style="transform: rotate(-2.5deg) scale(1.03) translate(-8px, -4px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); z-index: 25;">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Security</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                OAuth2 / SAML SSO Integration with WorkOS &amp; JWT rotation
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 text-slate-300 text-[10px] font-medium">
+<span class="material-symbols-outlined text-[11px]">schedule</span> Oct 26
+                </span>
+<img alt="Elena" class="w-5 h-5 rounded-full object-cover ring-1 ring-white/20" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Security</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">P1 High</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                Role-Based Access Control (RBAC): Admin, Member, Observer roles
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<div class="flex items-center gap-1 text-[11px] text-slate-300">
+<span class="material-symbols-outlined text-sm">checklist</span> 3/3
+                </div>
+<div class="w-5 h-5 rounded-full bg-emerald-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  SQ
+                </div>
+</div>
+</div>
+</div>
+<!-- Column Footer -->
+<div class="p-2 border-t border-white/5">
+<button class="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add a card</span>
+</button>
+</div>
+</div>
+<!-- Column 4: Real-time & WebSockets -->
+<div class="w-72 shrink-0 max-h-full rounded-xl bg-zinc-900/85 backdrop-blur-md border border-white/10 shadow-xl flex flex-col">
+<!-- Column Header -->
+<div class="p-3 pb-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-sm font-semibold text-slate-100">Real-time &amp; WebSockets</h2>
+<span class="w-5 h-5 rounded-full bg-white/10 text-slate-300 text-[11px] font-semibold flex items-center justify-center">2</span>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+<!-- Cards Stack -->
+<div class="flex-1 overflow-y-auto px-2.5 pb-2 flex flex-col gap-2">
+<!-- Card 1 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">Performance</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                Redis Pub/Sub Event Broadcast for Multi-Instance Card Drag Updates
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<div class="flex items-center gap-2">
+<span class="flex items-center gap-0.5 text-xs text-amber-400">
+<span class="material-symbols-outlined text-sm">bolt</span> Sub-50ms
+                  </span>
+</div>
+<div class="w-5 h-5 rounded-full bg-amber-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  AO
+                </div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-white/5 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">P1 High</span>
+</div>
+<p class="text-xs font-semibold text-slate-100 leading-snug">
+                Optimistic UI Reconciliation &amp; Conflict Resolution (LWW)
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<span class="flex items-center gap-1 text-[11px] text-slate-300">
+<span class="material-symbols-outlined text-sm">chat_bubble</span> 4
+                </span>
+<div class="w-5 h-5 rounded-full bg-indigo-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  MD
+                </div>
+</div>
+</div>
+</div>
+<!-- Column Footer: Active Add Card Input Demo -->
+<div class="p-2.5 border-t border-white/5 flex flex-col gap-2">
+<textarea class="w-full text-xs p-2 rounded-md bg-zinc-950/80 border border-white/15 text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#579dff] resize-none" placeholder="Enter a title or paste a link..." rows="2"></textarea>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<button class="px-3 py-1 bg-[#0c66e4] hover:bg-[#0052cc] text-white text-xs font-semibold rounded transition-colors shadow-sm" type="button">
+                  Add card
+                </button>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Column 5: Completed & Verified -->
+<div class="w-72 shrink-0 max-h-full rounded-xl bg-zinc-900/85 backdrop-blur-md border border-white/10 shadow-xl flex flex-col">
+<!-- Column Header -->
+<div class="p-3 pb-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h2 class="text-sm font-semibold text-slate-100">Completed &amp; Verified</h2>
+<span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold flex items-center justify-center border border-emerald-500/30">2</span>
+</div>
+<button class="w-6 h-6 rounded hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</button>
+</div>
+<!-- Cards Stack -->
+<div class="flex-1 overflow-y-auto px-2.5 pb-2 flex flex-col gap-2">
+<!-- Card 1 (Done) -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-emerald-500/30 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2 relative">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Production Ready</span>
+<span class="material-symbols-outlined text-emerald-400 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-xs font-semibold text-slate-200 leading-snug line-through opacity-85">
+                Core RESTful Controller Scaffolding &amp; Healthchecks
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<span class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">verified</span> Shipped v1.0
+                </span>
+<img alt="Elena" class="w-5 h-5 rounded-full object-cover ring-1 ring-white/20" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/>
+</div>
+</div>
+<!-- Card 2 (Done) -->
+<div class="p-3 rounded-lg bg-zinc-800/90 hover:bg-zinc-700/80 border border-emerald-500/30 shadow cursor-pointer transition-all hover:scale-[1.01] flex flex-col gap-2 relative">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30">DevOps</span>
+<span class="material-symbols-outlined text-emerald-400 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-xs font-semibold text-slate-200 leading-snug line-through opacity-85">
+                AWS ECS Fargate Cluster Provisioning via Terraform
+              </p>
+<div class="flex items-center justify-between pt-1 text-slate-400 text-xs">
+<span class="text-[10px] text-slate-400">Deployed staging</span>
+<div class="w-5 h-5 rounded-full bg-amber-600 text-[9px] font-bold text-white flex items-center justify-center">
+                  AO
+                </div>
+</div>
+</div>
+</div>
+<!-- Column Footer -->
+<div class="p-2 border-t border-white/5">
+<button class="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add a card</span>
+</button>
+</div>
+</div>
+<!-- Ghost "Add another list" Container -->
+<div class="w-72 shrink-0">
+<button class="w-full h-12 rounded-xl bg-white/15 hover:bg-white/20 backdrop-blur-md border border-white/15 text-slate-100 font-semibold text-xs flex items-center gap-2 px-4 shadow-lg transition-all" type="button">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Add another list</span>
+</button>
+</div>
+</main>
+</div>
+<!-- 4. Floating Bottom Navigation Dock -->
+<div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+<nav class="flex items-center gap-1 rounded-full border border-white/15 bg-black/60 px-2 py-1.5 shadow-2xl backdrop-blur-xl">
+<!-- Drawer Toggle Tab -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" onclick="document.getElementById('inbox-drawer').classList.toggle('-ml-64')" type="button">
+<span class="material-symbols-outlined text-base">inbox</span>
+<span>Inbox</span>
+<span class="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">3</span>
+</button>
+<!-- Planner Tab -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-base">calendar_month</span>
+<span>Planner</span>
+</button>
+<!-- Active Board Tab -->
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-[#0052cc] shadow-md transition-all" type="button">
+<span class="material-symbols-outlined text-base">space_dashboard</span>
+<span>Board</span>
+</button>
+<!-- Switch Boards Tab -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-base">swap_horiz</span>
+<span class="hidden sm:inline">Switch boards</span>
+</button>
+</nav>
+</div>
+</div>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/75 backdrop-blur-md"><div class="relative w-full max-w-4xl bg-zinc-900 border border-white/15 rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto"><div class="h-36 sm:h-44 w-full bg-cover bg-center relative shrink-0" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_JV3GEptgXL4PXW7RrfAdGl3HybLENHh5eNDeYCOn7C3iWsJkrEPiNkDVAWBlBCy8q7EN4wlW6OfMBmEKOZ7x0jFkLxnOJsIKmwi10y99tu2snn7Cs5Nc7xnO0Sy4aVxIhiBcHXAgo9kfGGTnDH1FBCXrXPSfRJKyTRApCIsf5yj6ZNYn4cnvXVD2e8BDvuKzM2dG9fJAfWMlGHgKys2hRwug2oJgOrgFBo8V6UU-JHBmw_k58yg-eg');"><div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-black/30 to-transparent"></div><button class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md border border-white/10 transition-colors shadow-lg" type="button"><span class="material-symbols-outlined text-base">close</span></button><div class="absolute bottom-3 right-3"><button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white text-xs font-semibold backdrop-blur-md border border-white/15 transition-all shadow-md" type="button"><span class="material-symbols-outlined text-sm">image</span><span>Cover</span></button></div></div><div class="p-6 max-h-[75vh] overflow-y-auto flex flex-col md:flex-row gap-6"><div class="flex-1 flex flex-col gap-6"><div class="flex flex-col gap-1.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[#579dff] text-xl">web_stories</span><h2 class="text-lg font-bold text-white tracking-tight leading-snug">Schema Migration Engine: Prisma ORM vs Kysely Query Builder</h2></div><div class="flex items-center gap-3 text-xs text-slate-400 pl-7"><span>in list <span class="underline font-semibold text-slate-200 cursor-pointer">Project Foundation</span></span><button class="flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-medium transition-colors" type="button"><span class="material-symbols-outlined text-xs text-emerald-400">check</span><span>Watching</span></button></div></div><div class="flex flex-wrap items-center gap-6 pl-7"><div class="flex flex-col gap-1.5"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Members</span><div class="flex items-center gap-1.5"><img alt="Elena" class="w-7 h-7 rounded-full object-cover ring-2 ring-zinc-900 shadow" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/><div class="w-7 h-7 rounded-full bg-indigo-600 text-[10px] font-bold text-white flex items-center justify-center ring-2 ring-zinc-900 shadow">MD</div><button class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-sm">add</span></button></div></div><div class="flex flex-col gap-1.5"><span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Labels</span><div class="flex items-center gap-1.5 flex-wrap"><span class="px-2.5 py-1 rounded bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/30">Database</span><span class="px-2.5 py-1 rounded bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/30">P1 High</span><span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">Architecture</span><button class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-sm">add</span></button></div></div></div><div class="flex flex-col gap-2 pl-7"><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-slate-200 font-semibold text-sm"><span class="material-symbols-outlined text-base">description</span><span>Description</span></div><button class="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-xs text-slate-200 font-medium transition-colors" type="button">Edit</button></div><div class="p-3.5 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-300 leading-relaxed font-mono">Evaluating zero-downtime schema evolution under concurrent write pressure (12k writes/sec). Comparing Prisma Migrate locking semantics against Kysely type-safe dialect with raw Postgres DDL pipelines. Target: sub-10ms migration locks on partition splits.</div></div><div class="flex flex-col gap-3 pl-7"><div class="flex items-center justify-between"><div class="flex items-center gap-2 text-slate-200 font-semibold text-sm"><span class="material-symbols-outlined text-base">check_circle</span><span>Implementation Checklist</span></div><button class="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-xs text-slate-200 font-medium transition-colors" type="button">Delete</button></div><div class="flex items-center gap-3"><span class="text-xs font-bold text-slate-300 font-mono">71%</span><div class="flex-1 h-2 rounded-full bg-white/10 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-[#0c66e4] to-emerald-400" style="width: 71%"></div></div></div><div class="flex flex-col gap-2 pt-1"><label class="flex items-center gap-2.5 text-xs text-slate-400 cursor-pointer line-through"><input checked="" class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Benchmark cold compile overhead for generated clients</span></label><label class="flex items-center gap-2.5 text-xs text-slate-400 cursor-pointer line-through"><input checked="" class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Prototype JSONB complex field indexing and queries</span></label><label class="flex items-center gap-2.5 text-xs text-slate-400 cursor-pointer line-through"><input checked="" class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Verify connection pooling behavior under AWS Aurora auto-scale</span></label><label class="flex items-center gap-2.5 text-xs text-slate-400 cursor-pointer line-through"><input checked="" class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Write zero-downtime backfill script for user tenants</span></label><label class="flex items-center gap-2.5 text-xs text-slate-400 cursor-pointer line-through"><input checked="" class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Load test read replica lag during DDL ALTER TABLE</span></label><label class="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer"><input class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Finalize RFC proposal document for Tech Review</span></label><label class="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer"><input class="rounded bg-zinc-800 border-white/20 text-[#0c66e4] focus:ring-0 w-4 h-4" type="checkbox"/><span>Team voting &amp; migration tooling approval</span></label></div><button class="self-start flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-slate-200 font-medium transition-colors mt-1" type="button"><span class="material-symbols-outlined text-sm">add</span><span>Add an item</span></button></div><div class="flex flex-col gap-3 pl-7 pt-2"><div class="flex items-center gap-2 text-slate-200 font-semibold text-sm"><span class="material-symbols-outlined text-base">comment</span><span>Activity &amp; Comments</span></div><div class="flex items-start gap-2.5"><img alt="User" class="w-7 h-7 rounded-full object-cover ring-1 ring-white/20 shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1W8vh5kJJApbtH874CdUk5ejctROeTgscVcsSqe6MUT8U33UxkFb8H-aMipgq4YhyLXnjZ9LxGoUSz_2xG9anRj_lsbjXeg6K1_6by9PqVGtFofwGuVgGlfAyz9VAhavA7WqT6iQUuekxeot4e0muqf4eISv5VdSc_UxMk2q3wkIMDXV77kE3HuZmXXw2jZrJ226Pfa9uYppidfUtpyLNzpmkvWWiHRzY4JJdAmayOiO_KB8GeJuo-Ev7CH"/><div class="flex-1 flex flex-col gap-2"><input class="w-full text-xs p-2.5 rounded-xl bg-zinc-950/80 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#579dff]" placeholder="Write a comment..." type="text"/></div></div><div class="flex items-start gap-2.5 mt-2"><div class="w-7 h-7 rounded-full bg-indigo-600 text-[10px] font-bold text-white flex items-center justify-center shrink-0 shadow">MD</div><div class="flex-1 flex flex-col gap-1"><div class="flex items-center gap-2 text-[11px]"><span class="font-bold text-slate-200">Marcus Dev</span><span class="text-slate-400">32m ago</span></div><div class="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-200">Ran test runs against local replica cluster: Kysely has nearly 0ms overhead during query builds compared to Prisma engine binary socket calls. Benchmark logs attached.</div><div class="flex items-center gap-3 text-[10px] text-slate-400 pl-1"><span class="hover:text-white cursor-pointer">Reply</span><span class="hover:text-white cursor-pointer">Edit</span></div></div></div></div></div><div class="w-full md:w-48 shrink-0 flex flex-col gap-4"><div class="flex flex-col gap-1.5"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Add to card</span><div class="flex flex-col gap-1.5"><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">person</span><span>Members</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">label</span><span>Labels</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">checklist</span><span>Checklist</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">schedule</span><span>Dates</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">attachment</span><span>Attachment</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">image</span><span>Cover</span></button></div></div><div class="flex flex-col gap-1.5 pt-2"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Actions</span><div class="flex flex-col gap-1.5"><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">arrow_forward</span><span>Move</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">content_copy</span><span>Copy</span></button><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-medium text-slate-200 hover:text-white transition-colors" type="button"><span class="material-symbols-outlined text-sm text-slate-300">share</span><span>Share</span></button><div class="my-1 border-t border-white/10"></div><button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-rose-500/20 text-xs font-medium text-slate-200 hover:text-rose-300 transition-colors" type="button"><span class="material-symbols-outlined text-sm">archive</span><span>Archive</span></button></div></div></div></div></div></div></body></html>

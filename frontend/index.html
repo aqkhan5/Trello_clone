@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trello Clone</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- Tailwind CSS with Stitch Design DNA -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#003d9b',
+              'primary-container': '#0052cc',
+              'on-primary': '#ffffff',
+              'on-primary-container': '#c4d2ff',
+              'secondary': '#285ab9',
+              'secondary-container': '#709bfe',
+              'on-secondary': '#ffffff',
+              'on-secondary-container': '#003179',
+              'tertiary': '#004e32',
+              'tertiary-container': '#006844',
+              'on-tertiary': '#ffffff',
+              'on-tertiary-container': '#7de7b2',
+              'surface': '#faf9ff',
+              'on-surface': '#051a3e',
+              'surface-container': '#e9edff',
+              'surface-container-low': '#f1f3ff',
+              'surface-container-high': '#e1e8ff',
+              'surface-container-highest': '#d8e2ff',
+              'surface-container-lowest': '#ffffff',
+              'surface-variant': '#d8e2ff',
+              'on-surface-variant': '#434654',
+              'inverse-surface': '#1d3054',
+              'inverse-on-surface': '#edf0ff',
+              'tertiary-fixed': '#8df7c1',
+              'tertiary-fixed-dim': '#71dba6',
+              'outline': '#737685',
+              'outline-variant': '#c3c6d6',
+              'error': '#ba1a1a',
+              'error-container': '#ffdad6',
+              'on-error': '#ffffff',
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body class="bg-surface text-on-surface antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
