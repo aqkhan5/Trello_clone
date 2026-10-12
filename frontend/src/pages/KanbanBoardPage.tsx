@@ -451,20 +451,19 @@ export const KanbanBoardPage: React.FC = () => {
   }, [isViewSwitcherOpen]);
 
   // Fetch board, lists, cards, and current user
-  const fetchBoardData = async () => {
+  const fetchBoardData = async (isSilent: boolean = false) => {
     if (!boardId) return;
-    setIsLoading(true);
+    if (!isSilent && columns.length === 0) {
+      setIsLoading(true);
+    }
     setErrorMessage(null);
 
     try {
       // Concurrently fetch user profile in background
       authService.getMe().then((u) => setCurrentUser(u)).catch(() => null);
 
-      // 1. Fetch board and lists in parallel (eliminate sequential waterfall requests)
-      const [boardRes, listsRes] = await Promise.all([
-        boardService.getBoardById(boardId),
-        listService.getListsByBoard(boardId),
-      ]);
+      // 1. Fetch unified board tree (pre-loads lists, cards, labels, members, attachments)
+      const boardRes = await boardService.getBoardById(boardId);
 
       if (boardRes?.workspace_id) {
         workspaceService.getWorkspaceById(boardRes.workspace_id).then((ws) => {
@@ -482,19 +481,36 @@ export const KanbanBoardPage: React.FC = () => {
       }
 
       // 2. Single Board Payload Check:
-      // If boardService.getBoardById(boardId) already includes lists and cards in its response model,
-      // use that directly without firing separate list/card requests.
+      // If boardService.getBoardById(boardId) includes lists and cards in its response model,
+      // use that directly without firing separate waterfall requests.
       const boardPayload = boardRes as any;
-      if (
-        boardPayload?.lists &&
-        Array.isArray(boardPayload.lists) &&
-        boardPayload.lists.length > 0 &&
-        boardPayload.lists[0]?.cards !== undefined
-      ) {
-        const directCols: KanbanColumnItem[] = boardPayload.lists.map((list: any) => ({
+      if (boardPayload?.lists && Array.isArray(boardPayload.lists)) {
+        const loadedListColors: Record<string, string> = {};
+        boardPayload.lists.forEach((l: any) => {
+          if (l.color) {
+            loadedListColors[l.id] = l.color;
+          }
+        });
+        if (Object.keys(loadedListColors).length > 0) {
+          setListColors((prev) => ({ ...prev, ...loadedListColors }));
+        }
+
+        const directCols: KanbanColumnItem[] = boardPayload.lists.map((list: any, idx: number) => ({
           id: list.id,
           title: list.title,
+          position: typeof list.position === 'number' ? list.position : Number(list.position) || (idx + 1) * 65536,
           cards: (list.cards || []).map((c: any) => {
+            const tags: CardTag[] = (c.labels || []).map((l: any) => {
+              const col = getLabelColorClasses(l.color);
+              return {
+                id: l.id,
+                label: l.name,
+                colorClass: `${col.bg} ${col.text} ${col.border}`,
+              };
+            });
+            const assignees: string[] = (c.members || []).map(
+              (m: any) => m.user?.avatar_url || m.user?.full_name || 'Member'
+            );
             const storedAtts: CardAttachment[] = (() => {
               try {
                 const raw = localStorage.getItem('trello_card_attachments_' + c.id);
@@ -503,8 +519,25 @@ export const KanbanBoardPage: React.FC = () => {
                 return [];
               }
             })();
-            const attCount = storedAtts.length;
-            const coverImg = c.cover_image || (storedAtts.find((a) => a.type === 'image')?.url) || undefined;
+            const loadedAtts: CardAttachment[] = (c.attachments || []).map((a: any) => {
+              const isImg =
+                a.content_type?.startsWith('image/') ||
+                a.file_type?.startsWith('image/') ||
+                /\.(png|jpe?g|gif|webp|svg)$/i.test(a.file_name);
+              const rawUrl = a.file_url || '';
+              const fullUrl = getFullFileUrl(rawUrl);
+              return {
+                id: a.id,
+                name: a.file_name,
+                size: `${(a.file_size / 1024).toFixed(1)} KB`,
+                uploadedAt: new Date(a.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' }),
+                url: fullUrl,
+                type: isImg ? 'image' : (a.content_type === 'text/html' || a.file_type === 'text/html') ? 'link' : 'file',
+              };
+            });
+            const finalAtts = loadedAtts.length > 0 ? loadedAtts : storedAtts;
+            const attCount = finalAtts.length;
+            const coverImg = c.cover_image || (finalAtts.find((a) => a.type === 'image')?.url) || undefined;
             return {
               id: c.id,
               title: c.title,
@@ -517,8 +550,9 @@ export const KanbanBoardPage: React.FC = () => {
               coverColor: c.cover_color || undefined,
               coverImage: coverImg,
               attachmentsCount: attCount > 0 ? attCount : undefined,
-              attachments: storedAtts,
-              tags: [],
+              attachments: finalAtts,
+              tags,
+              assignees,
             };
           }),
         }));
@@ -541,7 +575,8 @@ export const KanbanBoardPage: React.FC = () => {
         return;
       }
 
-      // If no lists exist on this board, update state once and return immediately
+      // Fallback path if lists were not pre-loaded on board response
+      const listsRes = await listService.getListsByBoard(boardId);
       if (!listsRes || listsRes.length === 0) {
         setBoard(boardRes);
         setColumns([]);
@@ -565,8 +600,39 @@ export const KanbanBoardPage: React.FC = () => {
         setListColors((prev) => ({ ...prev, ...loadedListColors }));
       }
 
-      // Fetch labels, members, and attachments for cards in parallel
-      const cardsByListWithMeta = await Promise.all(
+      // 4. Instantly render board and columns without blocking on metadata
+      const initialCols: KanbanColumnItem[] = listsRes.map((list: any, idx: number) => {
+        const cards = cardsByList[idx] || [];
+        return {
+          id: list.id,
+          title: list.title,
+          position: typeof list.position === 'number' ? list.position : Number(list.position) || (idx + 1) * 65536,
+          cards: cards.map((c: any) => ({
+            id: c.id,
+            title: c.title,
+            list_id: c.list_id || list.id,
+            position: typeof c.position === 'number' ? c.position : Number(c.position) || undefined,
+            description: c.description || undefined,
+            completed: c.is_completed || false,
+            hasDescription: Boolean(c.description),
+            dueDate: c.due_date ? new Date(c.due_date).toLocaleDateString() : undefined,
+            coverColor: c.cover_color || undefined,
+            coverImage: c.cover_image || undefined,
+            tags: [],
+          })),
+        };
+      });
+
+      setBoard(boardRes);
+      if (boardRes?.background) {
+        setBoardBg(boardRes.background);
+        localStorage.setItem('board_bg_' + boardRes.id, boardRes.background);
+      }
+      setColumns(initialCols);
+      setIsLoading(false);
+
+      // 5. Asynchronously enrich cards with labels/members/attachments in background without blocking UI
+      Promise.all(
         cardsByList.map((cards: any[]) =>
           Promise.all(
             cards.map(async (c: any) => {
@@ -587,11 +653,9 @@ export const KanbanBoardPage: React.FC = () => {
             })
           )
         )
-      );
-
-      // Combine the lists with their cards
-      const combinedCols: KanbanColumnItem[] = listsRes.map((list: any, idx: number) => {
-        const cards = cardsByListWithMeta[idx] || [];
+      ).then((cardsByListWithMeta) => {
+        const enrichedCols: KanbanColumnItem[] = listsRes.map((list: any, idx: number) => {
+          const cards = cardsByListWithMeta[idx] || [];
         return {
           id: list.id,
           title: list.title,
@@ -655,25 +719,8 @@ export const KanbanBoardPage: React.FC = () => {
           }),
         };
       });
-
-      // Update state once, then immediately set isLoading(false)
-      setBoard(boardRes);
-      if (boardRes?.background) {
-        setBoardBg(boardRes.background);
-        localStorage.setItem('board_bg_' + boardRes.id, boardRes.background);
-      }
-      setColumns(combinedCols);
-      if (boardRes) {
-        setBoardStarred(isBoardStarred(boardRes.id));
-        recordRecentBoard({
-          id: boardRes.id,
-          title: boardRes.title,
-          workspaceId: boardRes.workspace_id,
-          workspaceName: workspaceData?.name || 'Workspace',
-          background: boardBg || (boardRes as any).background,
-        });
-      }
-      setIsLoading(false);
+      setColumns(enrichedCols);
+    }).catch(() => null);
     } catch (err: any) {
       console.warn('Failed to load board data:', err);
       const is404 = err?.response?.status === 404;
@@ -696,7 +743,7 @@ export const KanbanBoardPage: React.FC = () => {
     (event: BoardWebSocketEvent) => {
       // Whenever an update occurs on this board from another client or tab, sync silently
       if (event.type && event.type !== 'CONNECTED' && event.type !== 'pong') {
-        fetchBoardData();
+        fetchBoardData(true);
       }
     },
     [boardId]
@@ -1875,7 +1922,7 @@ export const KanbanBoardPage: React.FC = () => {
             <div className="flex items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={fetchBoardData}
+                onClick={() => fetchBoardData()}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/10 hover:bg-white/15 px-4 py-2 text-xs font-semibold text-white transition active:scale-95 cursor-pointer"
               >
                 <span>Retry</span>
@@ -2420,7 +2467,7 @@ export const KanbanBoardPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchBoardData}
+              onClick={() => fetchBoardData()}
               className="px-2 py-0.5 rounded bg-rose-500/30 hover:bg-rose-500/40 text-white transition cursor-pointer"
             >
               Retry
