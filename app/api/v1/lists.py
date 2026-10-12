@@ -17,6 +17,7 @@ from app.models.list import List as ListModel
 from app.repositories.list_repository import ListRepository
 from app.schemas.list import ListCreate, ListResponse, ListUpdate, ListMove
 from app.services.list_service import ListService
+from app.core.websocket import manager
 
 router = APIRouter(tags=["Lists"])
 
@@ -36,9 +37,16 @@ async def create_list(
      ) -> ListModel:
     """" Create a list on the board with automatic position assignment """
     list_repo = ListRepository(db)
-    service = ListService(list_repo, db)
-
-    return await service.create_list(board_id, payload)
+    new_list = await service.create_list(board_id, payload)
+    await manager.broadcast_to_board(
+        board_id,
+        {
+            "type": "LIST_CREATED",
+            "list_id": str(new_list.id),
+            "board_id": str(board_id),
+        },
+    )
+    return new_list
 
 @router.get(
     "/boards/{board_id}/lists",
@@ -94,7 +102,16 @@ async def update_list(
     list_obj, _ = list_and_member
     list_repo = ListRepository(db)
     service = ListService(list_repo, db)
-    return await service.update_list(list_obj, payload)
+    updated_list = await service.update_list(list_obj, payload)
+    await manager.broadcast_to_board(
+        list_obj.board_id,
+        {
+            "type": "LIST_UPDATED",
+            "list_id": str(updated_list.id),
+            "board_id": str(list_obj.board_id),
+        },
+    )
+    return updated_list
 
 @router.post(
     "/lists/{list_id}/move",
@@ -113,7 +130,16 @@ async def move_list(
     board_list, _ = list_and_member
     list_repo = ListRepository(db)
     service = ListService(list_repo, db)
-    return await service.move_list(board_list, payload)
+    moved_list = await service.move_list(board_list, payload)
+    await manager.broadcast_to_board(
+        board_list.board_id,
+        {
+            "type": "LIST_MOVED",
+            "list_id": str(moved_list.id),
+            "board_id": str(board_list.board_id),
+        },
+    )
+    return moved_list
 
 
 @router.delete(
@@ -132,4 +158,12 @@ async def delete_list(
     list_repo = ListRepository(db)
     service = ListService(list_repo, db)
     await service.delete_list(list_obj)
+    await manager.broadcast_to_board(
+        list_obj.board_id,
+        {
+            "type": "LIST_DELETED",
+            "list_id": str(list_obj.id),
+            "board_id": str(list_obj.board_id),
+        },
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)

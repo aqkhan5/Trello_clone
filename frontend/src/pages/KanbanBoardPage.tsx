@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Kanban,
@@ -70,6 +70,7 @@ import {
   recordRecentBoard,
   onBoardNavChange,
 } from '../services/boardNavService';
+import { useBoardWebSocket, type BoardWebSocketEvent } from '../services/useBoardWebSocket';
 
 export interface CardTag {
   id: string;
@@ -689,6 +690,19 @@ export const KanbanBoardPage: React.FC = () => {
   useEffect(() => {
     fetchBoardData();
   }, [boardId]);
+
+  // Handle Real-Time WebSocket Board Events
+  const handleWebSocketEvent = useCallback(
+    (event: BoardWebSocketEvent) => {
+      // Whenever an update occurs on this board from another client or tab, sync silently
+      if (event.type && event.type !== 'CONNECTED' && event.type !== 'pong') {
+        fetchBoardData();
+      }
+    },
+    [boardId]
+  );
+
+  const { isConnected: isLiveConnected } = useBoardWebSocket(boardId, handleWebSocketEvent);
 
   // ==========================================
   // Drag & Drop Reordering Handler (Lists & Cards)
@@ -2192,6 +2206,29 @@ export const KanbanBoardPage: React.FC = () => {
           >
             <Info className="h-4 w-4" />
           </button>
+
+          {/* Real-time WebSocket Live Badge */}
+          <div
+            className={`hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border transition-colors ${
+              isLiveConnected
+                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                : 'bg-white/5 text-white/50 border-white/10'
+            }`}
+            title={
+              isLiveConnected
+                ? 'Real-time WebSocket connected: changes sync live without reload'
+                : 'Real-time WebSocket connecting...'
+            }
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isLiveConnected ? 'bg-emerald-400 animate-pulse' : 'bg-white/40'
+              }`}
+            />
+            <span className="text-[11px] font-semibold tracking-wide">
+              {isLiveConnected ? 'Live' : 'Syncing'}
+            </span>
+          </div>
 
           {/* View Switcher Button & Authentic Popover */}
           <div className="relative shrink-0" ref={viewSwitcherRef}>

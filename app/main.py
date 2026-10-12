@@ -12,6 +12,7 @@ from app.api.v1.invitations import router as invitations_router
 from app.api.v1.labels import router as labels_router
 from app.api.v1.lists import router as lists_router
 from app.api.v1.workspaces import router as workspaces_router
+from app.api.v1.websockets import router as ws_router
 from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -56,3 +57,4 @@ app.include_router(checklists_router, prefix=settings.API_V1_STR)
 app.include_router(comments_router, prefix=settings.API_V1_STR)
 app.include_router(attachments_router, prefix=settings.API_V1_STR)
 app.include_router(activity_router, prefix=settings.API_V1_STR)
+app.include_router(ws_router, prefix=settings.API_V1_STR)

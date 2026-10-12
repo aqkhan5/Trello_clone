@@ -31,6 +31,7 @@ from app.schemas.card_member import CardMemberCreate, CardMemberResponse
 from app.schemas.label import LabelResponse
 from app.services.card_detail_service import CardDetailService
 from app.services.card_service import CardService
+from app.core.websocket import manager
 
 router = APIRouter(tags=["Cards"])
 
@@ -54,17 +55,28 @@ def get_card_detail_service(db: AsyncSession) -> CardDetailService:
 async def create_card(
     list_id: UUID,
     payload: CardCreate,
-    _: Annotated[
+    list_and_member: Annotated[
         tuple[ListModel, BoardMember | None], Depends(require_list_board_writer)
     ],
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Card:
     """Create a new card assigned to the specified list."""
+    list_obj, _ = list_and_member
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
-    return await service.create_card(list_id, current_user.id, payload)
+    new_card = await service.create_card(list_id, current_user.id, payload)
+    await manager.broadcast_to_board(
+        list_obj.board_id,
+        {
+            "type": "CARD_CREATED",
+            "card_id": str(new_card.id),
+            "list_id": str(list_id),
+            "board_id": str(list_obj.board_id),
+        },
+    )
+    return new_card
 
 # Retrieve all cards in a list
 @router.get(
@@ -122,7 +134,19 @@ async def update_card(
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
-    return await service.update_card(card, payload)
+    updated_card = await service.update_card(card, payload)
+    list_obj = await list_repo.get_by_id(updated_card.list_id)
+    if list_obj:
+        await manager.broadcast_to_board(
+            list_obj.board_id,
+            {
+                "type": "CARD_UPDATED",
+                "card_id": str(updated_card.id),
+                "list_id": str(updated_card.list_id),
+                "board_id": str(list_obj.board_id),
+            },
+        )
+    return updated_card
 
 # Move or reorder a card within or between lists
 @router.post(
@@ -143,7 +167,20 @@ async def move_card(
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
-    return await service.move_card(card, payload)
+    moved_card = await service.move_card(card, payload)
+    list_obj = await list_repo.get_by_id(moved_card.list_id)
+    if list_obj:
+        await manager.broadcast_to_board(
+            list_obj.board_id,
+            {
+                "type": "CARD_MOVED",
+                "card_id": str(moved_card.id),
+                "source_list_id": str(payload.source_list_id or card.list_id),
+                "target_list_id": str(payload.target_list_id),
+                "board_id": str(list_obj.board_id),
+            },
+        )
+    return moved_card
 
 # Delete a card permanently
 @router.delete(
@@ -161,8 +198,19 @@ async def delete_card(
     card, _ = card_and_member
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
+    list_obj = await list_repo.get_by_id(card.list_id)
     service = CardService(card_repo, list_repo, db)
     await service.delete_card(card)
+    if list_obj:
+        await manager.broadcast_to_board(
+            list_obj.board_id,
+            {
+                "type": "CARD_DELETED",
+                "card_id": str(card.id),
+                "list_id": str(card.list_id),
+                "board_id": str(list_obj.board_id),
+            },
+        )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # Retrieve all members assigned to a card
