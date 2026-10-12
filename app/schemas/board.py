@@ -28,3 +28,21 @@ class BoardResponse(BoardBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+from app.schemas.card import CardResponse
+from app.schemas.label import LabelResponse
+from app.schemas.card_member import CardMemberResponse
+from app.schemas.attachment import AttachmentResponse
+from app.schemas.list import ListResponse
+
+class CardWithMetaResponse(CardResponse):
+    labels: list[LabelResponse] = []
+    members: list[CardMemberResponse] = []
+    attachments: list[AttachmentResponse] = []
+
+class ListWithCardsResponse(ListResponse):
+    cards: list[CardWithMetaResponse] = []
+
+class BoardDetailResponse(BoardResponse):
+    lists: list[ListWithCardsResponse] = []
+
