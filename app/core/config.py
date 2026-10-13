@@ -2,7 +2,7 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Trello Clone Backend"
+    PROJECT_NAME: str = "Quasha Backend"
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str
 
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
-    SMTP_FROM_NAME: str = "Trello Clone"
+    SMTP_FROM_NAME: str = "Quasha"
     SMTP_FROM_EMAIL: str = ""
     SMTP_STARTTLS: str = "True"
     FRONTEND_URL: str = "http://localhost:5173"

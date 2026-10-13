@@ -37,7 +37,7 @@ class InvitationResponse(BaseModel):
     expires_at: datetime
     created_at: datetime
 
-class TrelloNotificationItemResponse(BaseModel):
+class QuashaNotificationItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
@@ -48,3 +48,5 @@ class TrelloNotificationItemResponse(BaseModel):
     expires_at: datetime
     created_at: datetime
     workspace: WorkspaceSummary
+
+TrelloNotificationItemResponse = QuashaNotificationItemResponse

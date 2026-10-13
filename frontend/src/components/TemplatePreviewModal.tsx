@@ -461,7 +461,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
       case 'workflow':
         return <Workflow className="w-4 h-4 text-emerald-400" />;
       case 'rotate':
-        return <RotateCcw className="w-4 h-4 text-blue-400" />;
+        return <RotateCcw className="w-4 h-4 text-emerald-400" />;
       case 'alert':
         return <AlertTriangle className="w-4 h-4 text-amber-400" />;
       case 'bug':
@@ -469,7 +469,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
       case 'rocket':
         return <Rocket className="w-4 h-4 text-cyan-400" />;
       default:
-        return <Sparkles className="w-4 h-4 text-blue-400" />;
+        return <Sparkles className="w-4 h-4 text-emerald-400" />;
     }
   };
 
@@ -487,7 +487,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
@@ -561,7 +561,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-white/60 flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-blue-400" />
+                  <Layers className="w-3.5 h-3.5 text-emerald-400" />
                   Starter Lists & Cards Included ({selectedTemplate.lists.length} lists)
                 </h4>
                 <span className="text-[10px] text-white/40">Scroll horizontally to inspect</span>
@@ -678,7 +678,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
         <div className="px-6 py-3.5 border-t border-white/10 bg-black/40 flex items-center justify-between shrink-0">
           <div className="text-xs text-white/50">
             {isCreating ? (
-              <span className="flex items-center gap-2 text-blue-400 font-medium">
+              <span className="flex items-center gap-2 text-emerald-400 font-medium">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 {statusMessage}
               </span>
@@ -700,7 +700,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               type="button"
               disabled={isCreating || !boardTitle.trim()}
               onClick={handleUseTemplate}
-              className="px-4 py-1.5 rounded-xl bg-[#0052cc] hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-semibold shadow transition cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-50 text-zinc-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center gap-1.5"
             >
               {isCreating ? (
                 <>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import {
-  Kanban,
   UserPlus,
   CheckCircle2,
   AlertCircle,
@@ -12,6 +11,7 @@ import {
 } from 'lucide-react';
 import invitationService from '../services/invitationService';
 import { authService } from '../services/auth';
+import quashaLogo from '../assets/quasha.png';
 
 export const AcceptInvitationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -84,7 +84,7 @@ export const AcceptInvitationPage: React.FC = () => {
           </p>
           <Link
             to="/dashboard"
-            className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#0052cc] hover:bg-blue-600 text-xs font-semibold transition"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-zinc-950 text-xs font-bold transition"
           >
             Go to Dashboard
           </Link>
@@ -98,17 +98,14 @@ export const AcceptInvitationPage: React.FC = () => {
       {/* Top Navbar Header */}
       <header className="flex items-center justify-between max-w-6xl w-full mx-auto py-2">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0052cc] text-white shadow-lg shadow-blue-500/30">
-            <Kanban className="h-5 w-5" />
-          </div>
-          <span className="text-base font-bold tracking-tight text-white">Trello</span>
+          <img src={quashaLogo} alt="Quasha" className="h-8 w-auto object-contain" />
         </Link>
       </header>
 
       {/* Main Invitation Box */}
       <main className="flex-1 flex items-center justify-center py-10">
         <div className="w-full max-w-lg p-8 rounded-2xl bg-zinc-900/90 border border-white/10 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95">
-          <div className="w-14 h-14 rounded-2xl bg-[#0052cc]/20 border border-blue-500/30 text-blue-400 mx-auto flex items-center justify-center mb-5 shadow-lg shadow-blue-500/10">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 mx-auto flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/10">
             <UserPlus className="w-7 h-7" />
           </div>
 
@@ -116,7 +113,7 @@ export const AcceptInvitationPage: React.FC = () => {
             Workspace Invitation
           </h1>
           <p className="text-xs text-center text-white/60 mb-6 max-w-sm mx-auto">
-            You've been invited to join and collaborate on a workspace in Trello.
+            You've been invited to join and collaborate on a workspace in Quasha.
           </p>
 
           {/* Error Message */}
@@ -150,7 +147,7 @@ export const AcceptInvitationPage: React.FC = () => {
               <div className="flex flex-col gap-2.5">
                 <Link
                   to={`/login?redirect=${encodeURIComponent(`/invitations/accept?token=${token}`)}`}
-                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-[#0052cc] hover:bg-blue-600 active:bg-blue-700 text-xs font-bold text-white shadow-lg transition active:scale-95"
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 active:scale-95 text-xs font-bold text-zinc-950 shadow-lg shadow-emerald-500/20 transition"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Log In to Accept</span>
@@ -171,7 +168,7 @@ export const AcceptInvitationPage: React.FC = () => {
                 type="button"
                 onClick={handleAccept}
                 disabled={isProcessing || Boolean(successMessage)}
-                className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-[#0052cc] hover:bg-blue-600 disabled:opacity-50 text-xs font-bold text-white shadow-lg transition cursor-pointer active:scale-95"
+                className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-50 text-xs font-bold text-zinc-950 shadow-lg shadow-emerald-500/20 transition cursor-pointer active:scale-95"
               >
                 {isProcessing ? (
                   <>
@@ -201,7 +198,7 @@ export const AcceptInvitationPage: React.FC = () => {
       </main>
 
       <footer className="py-4 text-center text-xs text-white/40">
-        Trello Workspace Collaboration
+        Quasha Workspace Collaboration
       </footer>
     </div>
   );

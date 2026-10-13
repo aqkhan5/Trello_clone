@@ -35,7 +35,7 @@ const BACKGROUND_PRESETS = [
 ];
 
 const GRADIENT_PRESETS = [
-  { id: 'blue', gradient: 'linear-gradient(135deg, #003d9b, #0052cc)', title: 'Atlassian Blue' },
+  { id: 'emerald', gradient: 'linear-gradient(135deg, #059669, #10e565)', title: 'Quasha Neon' },
   { id: 'teal', gradient: 'linear-gradient(135deg, #004e32, #006844)', title: 'Emerald Teal' },
   { id: 'purple', gradient: 'linear-gradient(135deg, #285ab9, #709bfe)', title: 'Royal Purple' },
   { id: 'twilight', gradient: 'linear-gradient(135deg, #003d9b, #004e32)', title: 'Warm Twilight' },
@@ -78,7 +78,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#0052cc] text-white flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center font-bold">
               <Layout className="w-4 h-4" />
             </div>
             <h2 className="text-base font-bold text-white">Create board</h2>
@@ -195,7 +195,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Sprint Backlog"
-              className="w-full h-9 px-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition"
+              className="w-full h-9 px-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-500 transition"
             />
           </div>
 
@@ -205,7 +205,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             <select
               value={visibility}
               onChange={(e) => setVisibility(e.target.value)}
-              className="w-full h-9 px-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white focus:outline-none focus:border-blue-500 transition cursor-pointer"
+              className="w-full h-9 px-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white focus:outline-none focus:border-emerald-500 transition cursor-pointer"
             >
               <option value="workspace">Workspace — anyone in workspace can view and edit</option>
               <option value="private">Private — only board members can view and edit</option>
@@ -225,7 +225,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             <button
               type="submit"
               disabled={!title.trim()}
-              className="px-4 py-2 rounded-lg bg-[#0052cc] hover:bg-blue-600 disabled:opacity-50 text-xs font-bold text-white shadow-md transition cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-50 text-xs font-bold text-zinc-950 shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Create</span>

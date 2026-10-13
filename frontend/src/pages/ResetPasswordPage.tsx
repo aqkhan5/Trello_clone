@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
-  Kanban,
   ShieldCheck,
   Lock,
   Key,
@@ -15,6 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { resetPassword } from '../services/auth';
+import quashaLogo from '../assets/quasha.png';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -75,10 +75,7 @@ export const ResetPasswordPage: React.FC = () => {
         <div className="h-16 w-full px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#0052cc] text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/30">
-                T
-              </div>
-              <span className="font-bold text-lg text-white">Trello</span>
+              <img src={quashaLogo} alt="Quasha" className="h-8 w-auto object-contain" />
             </Link>
             <div className="h-4 w-px bg-white/20" />
             <span className="px-2 py-0.5 rounded bg-white/10 text-white text-[11px] font-bold tracking-wider uppercase backdrop-blur-sm">
@@ -106,13 +103,13 @@ export const ResetPasswordPage: React.FC = () => {
       <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md my-4 relative">
           {/* Ambient Glows */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-green-500/20 rounded-full blur-3xl pointer-events-none" />
 
           {/* Elevated Reset Card */}
           <div className="relative bg-zinc-900/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl text-white overflow-hidden">
             {/* Token Pill */}
-            <div className="flex items-center justify-center gap-2 bg-blue-500/15 text-blue-300 py-1 px-3 rounded-full text-[11px] mb-5 border border-blue-500/20">
+            <div className="flex items-center justify-center gap-2 bg-emerald-500/15 text-emerald-300 py-1 px-3 rounded-full text-[11px] mb-5 border border-emerald-500/20">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -124,14 +121,7 @@ export const ResetPasswordPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="relative mb-3 flex items-center justify-center">
-                <div className="w-12 h-12 rounded-xl bg-[#0052cc] text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <Kanban className="w-6 h-6" />
-                </div>
-                <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center text-emerald-400">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                </span>
-              </div>
+              <img src={quashaLogo} alt="Quasha" className="h-12 w-auto object-contain mb-3" />
               <h1 className="text-xl font-bold text-white tracking-tight">Set a new password</h1>
               <p className="text-xs text-white/60 mt-1 max-w-xs">
                 Ensure your new password meets corporate compliance standards.
@@ -162,7 +152,7 @@ export const ResetPasswordPage: React.FC = () => {
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
                     />
                     <button
                       type="button"
@@ -187,7 +177,7 @@ export const ResetPasswordPage: React.FC = () => {
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                      className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
                     />
                     <button
                       type="button"
@@ -239,7 +229,7 @@ export const ResetPasswordPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading || !isMatch}
-                  className="w-full mt-2 h-10 flex items-center justify-center gap-2 bg-[#0052cc] hover:bg-blue-600 disabled:opacity-50 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition cursor-pointer"
+                  className="w-full mt-2 h-10 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-50 text-zinc-950 font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition cursor-pointer active:scale-[0.99]"
                 >
                   {isLoading ? (
                     <>
@@ -264,12 +254,12 @@ export const ResetPasswordPage: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white">Password successfully updated!</p>
                     <p className="text-xs text-white/70 mt-1">
-                      Your enterprise credentials have synced across Atlassian Cloud.
+                      Your credentials have been securely updated for Quasha.
                     </p>
                     <div className="mt-4">
                       <Link
                         to="/login"
-                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 px-4 rounded-lg shadow transition"
+                        className="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 text-xs font-bold py-2 px-4 rounded-xl shadow-md shadow-emerald-500/20 transition"
                       >
                         <span>Proceed to Login</span>
                         <ArrowRight className="w-3.5 h-3.5" />

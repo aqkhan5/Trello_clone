@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { register } from '../services/auth';
+import quashaLogo from '../assets/quasha.png';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -81,10 +82,7 @@ export const RegisterPage: React.FC = () => {
         <div className="h-16 w-full px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#0052cc] text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/30">
-                T
-              </div>
-              <span className="font-bold text-lg text-white">Trello</span>
+              <img src={quashaLogo} alt="Quasha" className="h-8 w-auto object-contain" />
             </Link>
             <div className="h-4 w-px bg-white/20" />
             <span className="px-2 py-0.5 rounded bg-white/10 text-white text-[11px] font-bold tracking-wider uppercase backdrop-blur-sm">
@@ -112,22 +110,17 @@ export const RegisterPage: React.FC = () => {
       <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md my-4 relative">
           {/* Ambient Glows */}
-          <div className="absolute -top-12 -left-12 w-48 h-48 bg-blue-600/25 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-12 -left-12 w-48 h-48 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-green-500/20 rounded-full blur-3xl pointer-events-none" />
 
           {/* Centered Glass Card */}
           <div className="relative bg-zinc-900/90 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl text-white">
             {/* Header Section */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-white/10 shadow-lg shadow-blue-500/20 flex items-center justify-center mb-3">
-                <div className="w-7 h-7 bg-[#0052cc] rounded-lg p-1 flex gap-1 justify-center items-start shadow-inner">
-                  <span className="w-2 h-4 bg-white rounded-xs inline-block" />
-                  <span className="w-2 h-2.5 bg-white rounded-xs inline-block" />
-                </div>
-              </div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Create your Trello account</h1>
+              <img src={quashaLogo} alt="Quasha" className="h-12 w-auto object-contain mb-3" />
+              <h1 className="text-xl font-bold text-white tracking-tight">Create your Quasha account</h1>
               <p className="text-xs text-white/60 mt-1 max-w-xs">
-                Join over 2,000,000 teams collaborating across the globe
+                Modern collaborative workspaces and boards for high-velocity teams
               </p>
             </div>
 
@@ -155,7 +148,7 @@ export const RegisterPage: React.FC = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Alex Morgan"
-                    className="w-full h-10 bg-zinc-950/80 border border-white/10 rounded-xl pl-9 pr-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                    className="w-full h-10 bg-zinc-950/80 border border-white/10 rounded-xl pl-9 pr-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
                   />
                 </div>
               </div>
@@ -180,7 +173,7 @@ export const RegisterPage: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full h-10 bg-zinc-950/80 border border-white/10 rounded-xl pl-9 pr-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                    className="w-full h-10 bg-zinc-950/80 border border-white/10 rounded-xl pl-9 pr-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
                   />
                 </div>
 
@@ -210,7 +203,7 @@ export const RegisterPage: React.FC = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-10 bg-zinc-950/80 border border-white/10 rounded-xl pl-9 pr-10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-blue-500 transition"
+                    className="w-full h-10 bg-zinc-950/80 border border-white/10 rounded-xl pl-9 pr-10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
                   />
                   <button
                     type="button"
@@ -269,10 +262,10 @@ export const RegisterPage: React.FC = () => {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded bg-zinc-950 border-white/20 text-[#0c66e4] accent-[#0c66e4] cursor-pointer"
+                    className="mt-0.5 w-4 h-4 rounded bg-zinc-950 border-white/20 text-emerald-500 accent-emerald-500 cursor-pointer"
                   />
                   <span className="text-white/70 leading-snug">
-                    I accept the <a href="#" className="text-blue-400 hover:underline">Atlassian Cloud Terms of Service</a> and <a href="#" className="text-blue-400 hover:underline">Privacy Policy</a>.
+                    I accept the <a href="#" className="text-emerald-400 hover:underline">Quasha Terms of Service</a> and <a href="#" className="text-emerald-400 hover:underline">Privacy Policy</a>.
                   </span>
                 </label>
               </div>
@@ -281,7 +274,7 @@ export const RegisterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-10 rounded-xl bg-[#0052cc] hover:bg-blue-600 disabled:opacity-75 text-white font-semibold text-sm shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                className="w-full h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-75 text-zinc-950 font-bold text-sm shadow-lg shadow-emerald-500/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
               >
                 {isLoading ? (
                   <>

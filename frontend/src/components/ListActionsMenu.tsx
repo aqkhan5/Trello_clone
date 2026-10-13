@@ -109,7 +109,7 @@ export const ListActionsMenu: React.FC<ListActionsMenuProps> = ({
       const menuWidth = 280;
       const margin = 8;
 
-      // In Trello (Image 1):
+      // In Quasha:
       // The popover starts around rect.left (or rect.right) and floats outwards.
       // If there's room on the right, position starting at rect.left:
       let left = rect.left;

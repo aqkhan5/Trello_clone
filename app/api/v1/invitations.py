@@ -13,7 +13,7 @@ from app.models.workspace_member import WorkspaceMember
 from app.schemas.workspace_invitation import (
     InvitationCreate,
     InvitationResponse,
-    TrelloNotificationItemResponse,
+    QuashaNotificationItemResponse,
 )
 from app.schemas.workspace_member import WorkspaceMemberResponse
 from app.services.invitation_service import InvitationService
@@ -54,7 +54,7 @@ async def invite_workspace_member(
 
 @router.get(
     "/invitations/my-pending",
-    response_model=list[TrelloNotificationItemResponse],
+    response_model=list[QuashaNotificationItemResponse],
     summary="Get pending invitations for in-app notification bell",
 )
 async def get_my_pending_invitations(

@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { login } from '../services/auth';
+import quashaLogo from '../assets/quasha.png';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,10 +65,7 @@ export const LoginPage: React.FC = () => {
         <div className="h-16 w-full px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#0052cc] text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/30">
-                T
-              </div>
-              <span className="font-bold text-lg text-white">Trello</span>
+              <img src={quashaLogo} alt="Quasha" className="h-8 w-auto object-contain" />
             </Link>
             <div className="h-4 w-px bg-white/20" />
             <span className="px-2 py-0.5 rounded bg-white/10 text-white text-[11px] font-bold tracking-wider uppercase backdrop-blur-sm">
@@ -95,25 +93,15 @@ export const LoginPage: React.FC = () => {
       <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md relative my-4">
           {/* Ambient back-glow */}
-          <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-600/30 via-indigo-600/20 to-blue-500/30 rounded-3xl blur-xl opacity-75 pointer-events-none" />
+          <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500/25 via-green-500/20 to-emerald-400/25 rounded-3xl blur-xl opacity-75 pointer-events-none" />
 
           {/* Centered Glass Card */}
           <div className="relative bg-zinc-900/90 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl text-white">
             {/* Top Brand Header */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#0c66e4] to-[#0040a2] shadow-lg shadow-blue-500/40 mb-3.5">
-                {/* Trello Tiles Icon */}
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <rect fill="currentColor" fillOpacity="0.2" height="18" rx="3.5" width="18" x="3" y="3" />
-                  <rect fill="white" height="11" rx="1.5" width="5.5" x="5.5" y="5.5" />
-                  <rect fill="white" height="7.5" rx="1.5" width="5.5" x="13" y="5.5" />
-                </svg>
-                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-zinc-900 flex items-center justify-center">
-                  <span className="block w-1.5 h-1.5 bg-[#004e32] rounded-full" />
-                </div>
-              </div>
+              <img src={quashaLogo} alt="Quasha" className="h-12 w-auto object-contain mb-3" />
               <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
-                Log in to Trello
+                Log in to Quasha
               </h1>
               <p className="text-xs text-white/60 max-w-xs">
                 Manage your boards, roadmaps, and collaborative workspaces
@@ -152,7 +140,7 @@ export const LoginPage: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs text-white placeholder-white/30 focus:border-[#0c66e4] focus:ring-1 focus:ring-[#0c66e4] focus:outline-none transition"
+                    className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-3.5 py-2.5 text-xs text-white placeholder-white/30 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 focus:outline-none transition"
                   />
                 </div>
               </div>
@@ -171,7 +159,7 @@ export const LoginPage: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-11 py-2.5 text-xs text-white placeholder-white/30 focus:border-[#0c66e4] focus:ring-1 focus:ring-[#0c66e4] focus:outline-none transition"
+                    className="w-full bg-zinc-950/80 border border-white/10 rounded-xl pl-10 pr-11 py-2.5 text-xs text-white placeholder-white/30 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 focus:outline-none transition"
                   />
                   <button
                     type="button"
@@ -191,7 +179,7 @@ export const LoginPage: React.FC = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded bg-zinc-950/80 border-white/20 text-[#0c66e4] accent-[#0c66e4] cursor-pointer"
+                    className="w-4 h-4 rounded bg-zinc-950/80 border-white/20 text-emerald-500 accent-emerald-500 cursor-pointer"
                   />
                   <span className="text-white/70 hover:text-white/90 transition-colors">
                     Remember this device
@@ -199,7 +187,7 @@ export const LoginPage: React.FC = () => {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-[#579dff] hover:underline transition-colors font-medium"
+                  className="text-emerald-400 hover:text-emerald-300 hover:underline transition-colors font-medium"
                 >
                   Forgot password?
                 </Link>
@@ -210,7 +198,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#0c66e4] hover:bg-[#0052cc] active:scale-[0.99] disabled:opacity-75 text-white font-semibold text-sm py-2.5 rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition cursor-pointer"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 font-bold text-sm py-2.5 rounded-xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition cursor-pointer active:scale-[0.99] disabled:opacity-75"
                 >
                   {isLoading ? (
                     <>

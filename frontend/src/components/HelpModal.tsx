@@ -40,7 +40,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">Help & Keyboard Shortcuts</h2>
-              <p className="text-[11px] text-white/50">Master Trello with shortcuts and productivity tips</p>
+              <p className="text-[11px] text-white/50">Master Quasha with shortcuts and productivity tips</p>
             </div>
           </div>
           <button
@@ -59,7 +59,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('shortcuts')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition cursor-pointer ${
               activeTab === 'shortcuts'
-                ? 'bg-[#0052cc] text-white shadow-sm'
+                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-sm'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -71,7 +71,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('tips')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition cursor-pointer ${
               activeTab === 'tips'
-                ? 'bg-[#0052cc] text-white shadow-sm'
+                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-sm'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -83,7 +83,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             onClick={() => setActiveTab('about')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition cursor-pointer ${
               activeTab === 'about'
-                ? 'bg-[#0052cc] text-white shadow-sm'
+                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-sm'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -208,14 +208,14 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-white text-sm flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-blue-400" />
-                    Trello Clone Engine
+                    Quasha Workspace Engine
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 text-[10px] font-mono font-bold">
                     v2.5.0
                   </span>
                 </div>
                 <p className="text-white/70 text-[11px] leading-relaxed">
-                  A high-performance fullstack clone of Trello built with FastAPI, PostgreSQL, React, Vite, and Tailwind CSS.
+                  A high-performance modern team collaboration platform built with FastAPI, PostgreSQL, React, Vite, and Tailwind CSS.
                 </p>
               </div>
 
@@ -247,7 +247,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-xl bg-[#0052cc] hover:bg-blue-600 text-white font-semibold transition cursor-pointer text-xs"
+            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 font-bold shadow-sm shadow-emerald-500/20 transition cursor-pointer text-xs"
           >
             Got it
           </button>

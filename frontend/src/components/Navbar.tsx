@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
-  Kanban,
   Search,
   Plus,
   Bell,
@@ -19,6 +18,7 @@ import { StarredBoardsPopover } from './StarredBoardsPopover';
 import GlobalSearchModal from './GlobalSearchModal';
 import NotificationsPopover from './NotificationsPopover';
 import HelpModal from './HelpModal';
+import quashaLogo from '../assets/quasha.png';
 
 export interface NavbarProps {
   onMobileMenuToggle?: () => void;
@@ -128,12 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Brand */}
         <Link to="/dashboard" className="flex items-center gap-2 group transition-opacity">
-          <div className="w-7 h-7 rounded-lg bg-[#0052cc] text-white flex items-center justify-center shadow-md shadow-blue-600/30">
-            <Kanban className="w-4 h-4" />
-          </div>
-          <span className="font-bold text-sm tracking-tight text-white/90 group-hover:text-white hidden sm:inline-block">
-            Trello
-          </span>
+          <img src={quashaLogo} alt="Quasha" className="h-7 w-auto object-contain" />
         </Link>
 
         {/* Workspaces Menu */}
@@ -169,7 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setIsWorkspaceMenuOpen(false);
                       onCreateWorkspaceClick();
                     }}
-                    className="flex items-center gap-1 text-[11px] text-blue-400 hover:text-white transition cursor-pointer"
+                    className="flex items-center gap-1 text-[11px] text-emerald-400 hover:text-white transition cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
                     <span>New</span>
@@ -191,12 +186,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setIsWorkspaceMenuOpen(false);
                         }}
                         className={`flex items-center gap-2.5 rounded-lg p-2 cursor-pointer transition ${
-                          isSelected ? 'bg-[#0052cc]/20 text-white border border-[#0052cc]/30' : 'hover:bg-white/5 text-white/80'
+                          isSelected ? 'bg-emerald-500/20 text-white border border-emerald-500/30' : 'hover:bg-white/5 text-white/80'
                         }`}
                       >
                         <div
                           className={`w-7 h-7 rounded-md ${
-                            isSelected ? 'bg-[#0052cc]' : 'bg-zinc-800 border border-white/10'
+                            isSelected ? 'bg-gradient-to-br from-emerald-500 to-green-600' : 'bg-zinc-800 border border-white/10'
                           } text-white font-bold text-xs flex items-center justify-center shrink-0`}
                         >
                           {initial}
@@ -267,9 +262,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           onClick={onCreateClick}
-          className="flex items-center gap-1 bg-[#0052cc] hover:bg-blue-600 active:bg-blue-700 px-2.5 py-1 rounded-md text-xs font-semibold text-white shadow-sm transition cursor-pointer"
+          className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 font-bold px-3 py-1 rounded-lg text-xs shadow-md shadow-emerald-500/20 transition cursor-pointer active:scale-95"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
           <span>Create</span>
         </button>
       </div>
@@ -349,7 +344,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             className="flex items-center rounded-full ring-2 ring-white/20 hover:ring-white/40 transition cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-full bg-[#0052cc] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 text-zinc-950 flex items-center justify-center font-bold text-xs shadow-sm">
               {userInitials}
             </div>
           </button>

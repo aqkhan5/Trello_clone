@@ -92,7 +92,7 @@ export const SwitchBoardsPopover: React.FC<SwitchBoardsPopoverProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-blue-400" />
+          <Layers className="h-4 w-4 text-emerald-400" />
           <span className="font-bold text-white text-xs">Switch Boards</span>
         </div>
         <button
@@ -147,7 +147,7 @@ export const SwitchBoardsPopover: React.FC<SwitchBoardsPopoverProps> = ({
                   <div
                     className="h-6 w-6 rounded-md shrink-0 flex items-center justify-center text-[10px] font-bold shadow-sm"
                     style={{
-                      background: b.background_color || 'linear-gradient(135deg, #0052cc, #0065ff)',
+                      background: b.background_color || 'linear-gradient(135deg, #059669, #10e565)',
                     }}
                   >
                     <Kanban className="h-3 w-3 text-white" />
@@ -183,7 +183,7 @@ export const SwitchBoardsPopover: React.FC<SwitchBoardsPopoverProps> = ({
               onClose();
               onOpenCreateBoard();
             }}
-            className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition cursor-pointer font-medium"
+            className="inline-flex items-center gap-1 text-emerald-400 hover:text-blue-300 transition cursor-pointer font-medium"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Create new board</span>

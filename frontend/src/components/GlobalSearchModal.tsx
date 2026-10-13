@@ -276,7 +276,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     onMouseEnter={() => setSelectedIndex(idx)}
                     className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition ${
                       isSelected
-                        ? 'bg-[#0052cc] text-white shadow-md'
+                        ? 'bg-emerald-500 text-zinc-950 font-bold shadow-md shadow-emerald-500/20'
                         : 'hover:bg-white/5 text-white/90'
                     }`}
                   >
@@ -286,7 +286,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                           isSelected
                             ? 'bg-white/20 text-white'
                             : item.type === 'card'
-                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                            ? 'bg-blue-500/20 text-emerald-400 border border-blue-500/30'
                             : item.type === 'list'
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                             : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'

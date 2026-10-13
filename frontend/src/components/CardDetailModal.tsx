@@ -893,7 +893,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
       } catch {}
     }
 
-    // Authentic Trello behavior: If it is an image and card has no cover, set as cover!
+    // Authentic Quasha behavior: If it is an image and card has no cover, set as cover!
     let newCoverImage = coverImage;
     if (isImg && !coverImage && !coverColor) {
       newCoverImage = fileUrl;
@@ -1394,7 +1394,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                             className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20"
                           />
                         ) : (
-                          <div className="h-6 w-6 rounded-full bg-[#0c66e4] text-white flex items-center justify-center text-[10px] font-bold">
+                          <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center text-[10px] font-bold">
                             {m.initials || m.name.slice(0, 2).toUpperCase()}
                           </div>
                         )}
@@ -1635,7 +1635,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
     >
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[200] rounded-lg bg-[#0c66e4] text-white px-4 py-2 text-xs font-semibold shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-6 right-6 z-[200] rounded-lg bg-emerald-500 text-zinc-950 px-4 py-2 text-xs font-bold shadow-2xl shadow-emerald-500/25 animate-in fade-in slide-in-from-bottom-2">
           {toastMessage}
         </div>
       )}
@@ -1917,7 +1917,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                           <div
                             key={m.id}
                             onClick={() => setActivePopover('members')}
-                            className="h-6 w-6 rounded-full bg-[#0c66e4] text-white flex items-center justify-center text-[10px] font-bold cursor-pointer ring-1 ring-white/20"
+                            className="h-6 w-6 rounded-full bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center text-[10px] font-bold cursor-pointer ring-1 ring-white/20"
                             title={m.name}
                           >
                             {m.initials || m.name.slice(0, 2).toUpperCase()}
@@ -2065,7 +2065,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       <button
                         type="button"
                         onClick={handleSaveDescription}
-                        className="rounded bg-[#0c66e4] hover:bg-[#0055cc] px-4 py-1.5 text-xs font-semibold text-white transition cursor-pointer"
+                        className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 px-4 py-1.5 text-xs font-bold text-zinc-950 shadow-sm shadow-emerald-500/20 transition cursor-pointer"
                       >
                         Save
                       </button>
@@ -2321,7 +2321,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleAddItem(cl.id)}
-                            className="rounded bg-[#0c66e4] hover:bg-[#0055cc] px-3 py-1 text-xs font-semibold text-white transition cursor-pointer"
+                            className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 px-3 py-1 text-xs font-bold text-zinc-950 shadow-sm shadow-emerald-500/20 transition cursor-pointer"
                           >
                             Add
                           </button>
@@ -2388,7 +2388,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                       type="button"
                       onClick={handleAddComment}
                       disabled={!newComment.trim()}
-                      className="rounded bg-[#0c66e4] hover:bg-[#0055cc] disabled:opacity-40 px-3.5 py-1.5 text-xs font-semibold text-white transition cursor-pointer"
+                      className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-40 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-sm shadow-emerald-500/20 transition cursor-pointer"
                     >
                       Save
                     </button>
@@ -2413,7 +2413,7 @@ export const CardDetailModal: React.FC<CardDetailModalProps> = ({
                   .map((item) => (
                     <div key={item.id} className="flex items-start gap-2.5 text-xs">
                       {/* User Avatar Circle (AK) */}
-                      <div className="h-7 w-7 rounded-full bg-[#0c66e4] text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
+                      <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
                         {item.authorInitials || 'AK'}
                       </div>
 

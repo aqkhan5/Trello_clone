@@ -57,7 +57,7 @@ export const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#0052cc] text-white flex items-center justify-center shadow-md shadow-blue-600/30">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center shadow-md shadow-emerald-500/20 font-bold">
               <Briefcase className="w-4 h-4" />
             </div>
             <div>
@@ -125,7 +125,7 @@ export const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({
             <button
               type="submit"
               disabled={isLoading || !name.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0052cc] hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-50 text-zinc-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer"
             >
               {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               <span>{isLoading ? 'Creating...' : 'Create Workspace'}</span>

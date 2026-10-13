@@ -147,7 +147,7 @@ export const BoardViewsPopover: React.FC<BoardViewsPopoverProps> = ({
               See your work in new ways
             </h4>
             <p className="text-[11px] text-white/60 leading-relaxed mt-1">
-              View key timelines, assignments, data, and more directly from your Trello board with Trello Premium.
+              View key timelines, assignments, data, and more directly from your Quasha board with Quasha Premium.
             </p>
           </div>
 
@@ -169,14 +169,14 @@ export const BoardViewsPopover: React.FC<BoardViewsPopoverProps> = ({
             }}
             className="w-full text-center text-[11px] text-white/60 hover:text-white underline cursor-pointer transition block"
           >
-            Learn more about Trello Premium
+            Learn more about Quasha Premium
           </button>
         </div>
       ) : (
         <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-emerald-400 px-1">
           <div className="flex items-center gap-1.5 font-semibold">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>Trello Premium Active</span>
+            <span>Quasha Premium Active</span>
           </div>
           <span className="text-[10px] text-white/40">All Views Unlocked</span>
         </div>

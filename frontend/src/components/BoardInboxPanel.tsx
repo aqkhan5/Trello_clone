@@ -289,7 +289,7 @@ export const BoardInboxPanel: React.FC<BoardInboxPanelProps> = ({
         </div>
       </div>
 
-      {/* Three-Dot Popover Menu (Trello-Style) */}
+      {/* Three-Dot Popover Menu (Quasha-Style) */}
       {isMenuOpen && (
         <div
           ref={menuRef}
@@ -513,7 +513,7 @@ export const BoardInboxPanel: React.FC<BoardInboxPanelProps> = ({
           {menuPanel === 'background' && (
             <div className="space-y-1.5 py-1">
               <p className="text-[11px] text-white/50 px-1 mb-1">
-                Select an authentic Trello background theme for your inbox:
+                Select an authentic Quasha background theme for your inbox:
               </p>
               <div className="grid grid-cols-1 gap-1">
                 {INBOX_BACKGROUNDS.map((bg) => {
@@ -768,7 +768,7 @@ export const BoardInboxPanel: React.FC<BoardInboxPanelProps> = ({
         {isConsolidateOpen && (
           <div className="mt-2 p-2.5 rounded-xl bg-black/40 border border-white/10 text-[11px] text-white/70 space-y-1.5 animate-in fade-in duration-150">
             <p className="font-semibold text-white flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3 text-amber-400" /> Bring all your work into Trello
+              <Sparkles className="h-3 w-3 text-amber-400" /> Bring all your work into Quasha
             </p>
             <p className="text-[10px] text-white/60 leading-relaxed">
               Forward emails from Gmail/Outlook or send Slack messages directly to this board's inbox.

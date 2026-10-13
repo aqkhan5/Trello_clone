@@ -89,7 +89,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
   const [newTaskInput, setNewTaskInput] = useState('');
   const [homeTasks, setHomeTasks] = useState<HomeTaskItem[]>(() => {
     try {
-      const saved = localStorage.getItem('trello_home_tasks');
+      const saved = localStorage.getItem('quasha_home_tasks');
       if (saved) return JSON.parse(saved);
     } catch {}
     return [
@@ -256,7 +256,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
         t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t
       );
       try {
-        localStorage.setItem('trello_home_tasks', JSON.stringify(updated));
+        localStorage.setItem('quasha_home_tasks', JSON.stringify(updated));
       } catch {}
       return updated;
     });
@@ -276,7 +276,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
     setHomeTasks((prev) => {
       const updated = [newTask, ...prev];
       try {
-        localStorage.setItem('trello_home_tasks', JSON.stringify(updated));
+        localStorage.setItem('quasha_home_tasks', JSON.stringify(updated));
       } catch {}
       return updated;
     });
@@ -431,7 +431,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
       case 'workflow':
         return <Workflow className="w-5 h-5 text-emerald-400" />;
       case 'rotate':
-        return <RotateCcw className="w-5 h-5 text-blue-400" />;
+        return <RotateCcw className="w-5 h-5 text-emerald-400" />;
       case 'alert':
         return <AlertTriangle className="w-5 h-5 text-rose-400" />;
       case 'bug':
@@ -513,7 +513,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                 <div className="bg-zinc-900/80 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="flex items-start sm:items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0052cc] via-[#285ab9] to-blue-800 text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 text-zinc-950 font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
                     {activeWorkspace?.name
                       ? activeWorkspace.name.trim().slice(0, 2).toUpperCase()
                       : 'WS'}
@@ -531,7 +531,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             if (e.key === 'Escape') setIsEditingWorkspaceName(false);
                           }}
                           autoFocus
-                          className="h-9 rounded-xl border border-blue-500 bg-zinc-950/90 px-3 text-xl font-bold text-white focus:outline-none shadow-lg"
+                          className="h-9 rounded-xl border border-emerald-500 bg-zinc-950/90 px-3 text-xl font-bold text-white focus:outline-none shadow-lg"
                         />
                       ) : (
                         <h1
@@ -575,7 +575,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsInviteModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0052cc] hover:bg-blue-600 text-white text-xs font-semibold shadow-md transition cursor-pointer"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer"
                   >
                     <Users className="w-4 h-4" />
                     <span>Invite Members</span>
@@ -646,7 +646,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSelectSection('boards')}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer bg-[#0052cc] text-white shadow-sm"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition cursor-pointer bg-gradient-to-r from-emerald-500 to-green-500 text-zinc-950 shadow-sm shadow-emerald-500/20"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
                   <span>Boards</span>
@@ -700,7 +700,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Filter boards by title..."
-                    className="w-full h-8 pl-8 pr-3 rounded-lg bg-white/10 border border-white/10 text-xs text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition"
+                    className="w-full h-8 pl-8 pr-3 rounded-lg bg-white/10 border border-white/10 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 transition"
                   />
                 </div>
 
@@ -709,7 +709,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     type="button"
                     onClick={() => setViewMode('grid')}
                     className={`p-1 rounded-md transition cursor-pointer ${
-                      viewMode === 'grid' ? 'bg-[#0052cc] text-white' : 'text-white/60 hover:text-white'
+                      viewMode === 'grid' ? 'bg-emerald-500 text-zinc-950 font-bold shadow-sm' : 'text-white/60 hover:text-white'
                     }`}
                     title="Grid View"
                   >
@@ -719,7 +719,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     type="button"
                     onClick={() => setViewMode('table')}
                     className={`p-1 rounded-md transition cursor-pointer ${
-                      viewMode === 'table' ? 'bg-[#0052cc] text-white' : 'text-white/60 hover:text-white'
+                      viewMode === 'table' ? 'bg-emerald-500 text-zinc-950 font-bold shadow-sm' : 'text-white/60 hover:text-white'
                     }`}
                     title="Table View"
                   >
@@ -773,7 +773,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                           {board.tags?.map((tag, idx) => (
                             <span
                               key={idx}
-                              className="px-2 py-0.5 rounded bg-[#0052cc] text-white text-[10px] font-bold uppercase tracking-wider shadow-sm"
+                              className="px-2 py-0.5 rounded bg-emerald-500 text-zinc-950 text-[10px] font-bold uppercase tracking-wider shadow-sm"
                             >
                               {tag}
                             </span>
@@ -789,7 +789,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                       </div>
 
                       <div className="relative z-10 p-4 space-y-2">
-                        <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition">
+                        <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition">
                           {board.title}
                         </h3>
                         <div className="flex items-center justify-between text-xs text-white/50">
@@ -797,7 +797,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             {Array.from({ length: Math.min(board.membersCount, 3) }).map((_, i) => (
                               <div
                                 key={i}
-                                className="w-5 h-5 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-zinc-900"
+                                className="w-5 h-5 rounded-full bg-emerald-600 text-zinc-950 text-[9px] font-bold flex items-center justify-center ring-2 ring-zinc-900"
                               >
                                 {i === 0 ? 'AM' : i === 1 ? 'SK' : '+'}
                               </div>
@@ -819,7 +819,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <LayoutGrid className="w-4 h-4 text-blue-400" />
+                  <LayoutGrid className="w-4 h-4 text-emerald-400" />
                   <h2 className="text-sm font-bold text-white tracking-tight">Your Boards</h2>
                 </div>
                 <span className="text-xs text-white/50">
@@ -831,13 +831,13 @@ export const WorkspaceDashboardPage: React.FC = () => {
                 {/* Create New Board Card */}
                 <div
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="group relative rounded-2xl p-6 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-dashed border-white/20 hover:border-blue-400 flex flex-col items-center justify-center text-center gap-3 h-44 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                  className="group relative rounded-2xl p-6 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-dashed border-white/20 hover:border-emerald-400 flex flex-col items-center justify-center text-center gap-3 h-44 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-blue-600/20 group-hover:bg-[#0052cc] text-blue-400 group-hover:text-white flex items-center justify-center shadow-inner transition">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 group-hover:bg-emerald-500 text-emerald-400 group-hover:text-zinc-950 flex items-center justify-center shadow-inner transition">
                     <Plus className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="block text-xs font-bold text-white group-hover:text-blue-300 transition">
+                    <span className="block text-xs font-bold text-white group-hover:text-emerald-400 transition">
                       Create new board
                     </span>
                     <span className="text-[11px] text-white/40">Synced with backend</span>
@@ -871,7 +871,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     </div>
 
                     <div className="relative z-10 p-3 space-y-1.5">
-                      <h3 className="text-xs font-bold text-white group-hover:text-blue-300 transition line-clamp-1">
+                      <h3 className="text-xs font-bold text-white group-hover:text-emerald-400 transition line-clamp-1">
                         {board.title}
                       </h3>
                       <div className="flex items-center justify-between text-[11px] text-white/40">
@@ -888,7 +888,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
             <div className="bg-zinc-900/70 backdrop-blur-md rounded-2xl p-5 border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-400" />
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs font-semibold text-white">
                     Get started quickly with proven engineering templates
                   </span>
@@ -896,7 +896,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSelectSection('templates')}
-                  className="text-xs text-blue-400 hover:text-white flex items-center gap-1 transition cursor-pointer"
+                  className="text-xs text-emerald-400 hover:text-white flex items-center gap-1 transition cursor-pointer"
                 >
                   <span>Explore templates</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -921,9 +921,9 @@ export const WorkspaceDashboardPage: React.FC = () => {
                   onClick={() => handleOpenTemplate('scrum-sprints')}
                   className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 cursor-pointer transition flex items-center gap-3 group"
                 >
-                  <RotateCcw className="w-5 h-5 text-blue-400 shrink-0 group-hover:scale-110 transition-transform" />
+                  <RotateCcw className="w-5 h-5 text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-white truncate group-hover:text-blue-300 transition-colors">
+                    <p className="text-xs font-bold text-white truncate group-hover:text-emerald-400 transition-colors">
                       Bi-Weekly Scrum Sprints
                     </p>
                     <p className="text-[10px] text-white/50 truncate">Backlog grooming, sprints & retros</p>
@@ -956,12 +956,12 @@ export const WorkspaceDashboardPage: React.FC = () => {
                 <div className="bg-zinc-900/80 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden">
                   <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
                         <Sparkles className="w-3.5 h-3.5" />
                         <span>Pre-built Engineering Workflows</span>
                       </div>
                       <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                        Trello Template Gallery
+                        Quasha Template Gallery
                       </h1>
                       <p className="text-xs sm:text-sm text-white/60 max-w-2xl leading-relaxed">
                         Kickstart your team's workflow with proven, pre-configured boards.
@@ -981,7 +981,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="px-4 py-2 rounded-xl bg-[#0052cc] hover:bg-blue-600 text-white text-xs font-semibold shadow-lg shadow-blue-500/30 transition cursor-pointer flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 text-xs font-bold shadow-lg shadow-emerald-500/25 transition cursor-pointer flex items-center gap-2"
                       >
                         <Plus className="w-4 h-4" />
                         <span>Blank Board</span>
@@ -1007,7 +1007,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleSelectSection('templates')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer bg-[#0052cc] text-white shadow-sm"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition cursor-pointer bg-gradient-to-r from-emerald-500 to-green-500 text-zinc-950 shadow-sm shadow-emerald-500/20"
                     >
                       <Kanban className="w-3.5 h-3.5" />
                       <span>Templates</span>
@@ -1050,7 +1050,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                       value={templateSearchQuery}
                       onChange={(e) => setTemplateSearchQuery(e.target.value)}
                       placeholder="Search templates..."
-                      className="w-full h-8 pl-8 pr-8 rounded-lg bg-white/10 border border-white/10 text-xs text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition"
+                      className="w-full h-8 pl-8 pr-8 rounded-lg bg-white/10 border border-white/10 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 transition"
                     />
                     {templateSearchQuery && (
                       <button
@@ -1079,7 +1079,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                         onClick={() => setSelectedTemplateCategory(cat.id)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
                           isActive
-                            ? 'bg-[#0052cc] text-white shadow-sm'
+                            ? 'bg-emerald-500 text-zinc-950 font-bold shadow-sm'
                             : 'bg-zinc-900/80 text-white/60 hover:text-white hover:bg-white/10 border border-white/10'
                         }`}
                       >
@@ -1129,7 +1129,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                           {/* Body Content */}
                           <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                             <div className="space-y-2">
-                              <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors">
+                              <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
                                 {template.title}
                               </h3>
                               <p className="text-xs text-white/60 line-clamp-3 leading-relaxed">
@@ -1173,7 +1173,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleOpenTemplate(template.id)}
-                                  className="px-3.5 py-1.5 rounded-lg bg-[#0052cc] hover:bg-blue-600 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition cursor-pointer flex items-center gap-1.5"
+                                  className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center gap-1.5"
                                 >
                                   <Sparkles className="w-3.5 h-3.5" />
                                   <span>Use Template</span>
@@ -1218,7 +1218,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                 <div className="bg-zinc-900/80 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-extrabold text-xl flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-zinc-950 font-extrabold text-xl flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
                         {currentUser?.full_name ? currentUser.full_name.slice(0, 2).toUpperCase() : 'ME'}
                       </div>
                       <div className="space-y-1">
@@ -1243,7 +1243,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="px-3.5 py-2 rounded-xl bg-[#0052cc] hover:bg-blue-600 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition cursor-pointer flex items-center gap-1.5"
+                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 text-xs font-bold shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center gap-1.5"
                       >
                         <Plus className="w-4 h-4" />
                         <span>New Board</span>
@@ -1280,7 +1280,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleSelectSection('home')}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer bg-[#0052cc] text-white shadow-sm"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition cursor-pointer bg-gradient-to-r from-emerald-500 to-green-500 text-zinc-950 shadow-sm shadow-emerald-500/20"
                     >
                       <Home className="w-3.5 h-3.5" />
                       <span>Home</span>
@@ -1331,7 +1331,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             onClick={() => setHomeTaskFilter('all')}
                             className={`px-2.5 py-1 rounded text-[11px] font-medium transition cursor-pointer ${
                               homeTaskFilter === 'all'
-                                ? 'bg-[#0052cc] text-white shadow-xs'
+                                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-xs'
                                 : 'text-white/60 hover:text-white'
                             }`}
                           >
@@ -1342,7 +1342,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             onClick={() => setHomeTaskFilter('pending')}
                             className={`px-2.5 py-1 rounded text-[11px] font-medium transition cursor-pointer ${
                               homeTaskFilter === 'pending'
-                                ? 'bg-[#0052cc] text-white shadow-xs'
+                                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-xs'
                                 : 'text-white/60 hover:text-white'
                             }`}
                           >
@@ -1353,7 +1353,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             onClick={() => setHomeTaskFilter('completed')}
                             className={`px-2.5 py-1 rounded text-[11px] font-medium transition cursor-pointer ${
                               homeTaskFilter === 'completed'
-                                ? 'bg-[#0052cc] text-white shadow-xs'
+                                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-xs'
                                 : 'text-white/60 hover:text-white'
                             }`}
                           >
@@ -1426,7 +1426,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                                     className={`text-xs font-medium truncate ${
                                       task.isCompleted
                                         ? 'line-through text-white/50'
-                                        : 'text-white group-hover:text-blue-300'
+                                        : 'text-white group-hover:text-emerald-400'
                                     }`}
                                   >
                                     {task.title}
@@ -1464,12 +1464,12 @@ export const WorkspaceDashboardPage: React.FC = () => {
                           value={newTaskInput}
                           onChange={(e) => setNewTaskInput(e.target.value)}
                           placeholder="Add a new quick task to Up Next..."
-                          className="flex-1 h-9 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition"
+                          className="flex-1 h-9 px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 transition"
                         />
                         <button
                           type="submit"
                           disabled={!newTaskInput.trim()}
-                          className="px-3.5 h-9 rounded-xl bg-[#0052cc] hover:bg-blue-600 disabled:opacity-40 disabled:hover:bg-[#0052cc] text-white text-xs font-semibold transition cursor-pointer shrink-0 flex items-center gap-1.5"
+                          className="px-3.5 h-9 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-40 text-zinc-950 text-xs font-bold shadow-sm shadow-emerald-500/20 transition cursor-pointer shrink-0 flex items-center gap-1.5"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>Add Task</span>
@@ -1481,7 +1481,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     <div className="bg-zinc-900/80 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl space-y-4">
                       <div className="flex items-center justify-between pb-3 border-b border-white/5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-emerald-400 flex items-center justify-center">
                             <Clock className="w-4 h-4" />
                           </div>
                           <div>
@@ -1517,7 +1517,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                                   {!b.background.startsWith('http') && b.title.slice(0, 1).toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-white group-hover:text-blue-300 truncate">
+                                  <p className="text-xs font-medium text-white group-hover:text-emerald-400 truncate">
                                     Active board: <span className="font-bold">{b.title}</span>
                                   </p>
                                   <p className="text-[10px] text-white/40">
@@ -1563,7 +1563,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div
-                                  className="w-7 h-7 rounded-lg shrink-0 bg-blue-700 text-white font-bold text-[11px] flex items-center justify-center shadow"
+                                  className="w-7 h-7 rounded-lg shrink-0 bg-emerald-600 text-zinc-950 font-bold text-[11px] flex items-center justify-center shadow"
                                   style={{
                                     backgroundImage: board.background?.startsWith('http')
                                       ? `url(${board.background})`
@@ -1579,7 +1579,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                                     board.title.slice(0, 1).toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-white group-hover:text-blue-300 truncate">
+                                  <p className="text-xs font-medium text-white group-hover:text-emerald-400 truncate">
                                     {board.title}
                                   </p>
                                   <p className="text-[10px] text-white/40 truncate">
@@ -1599,7 +1599,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div
-                                  className="w-7 h-7 rounded-lg shrink-0 bg-blue-700 text-white font-bold text-[11px] flex items-center justify-center shadow"
+                                  className="w-7 h-7 rounded-lg shrink-0 bg-emerald-600 text-zinc-950 font-bold text-[11px] flex items-center justify-center shadow"
                                   style={{
                                     backgroundImage: b.background.startsWith('http')
                                       ? `url(${b.background})`
@@ -1613,7 +1613,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                                   {!b.background.startsWith('http') && b.title.slice(0, 1).toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-white group-hover:text-blue-300 truncate">
+                                  <p className="text-xs font-medium text-white group-hover:text-emerald-400 truncate">
                                     {b.title}
                                   </p>
                                   <p className="text-[10px] text-white/40 truncate">Active Board</p>
@@ -1640,7 +1640,7 @@ export const WorkspaceDashboardPage: React.FC = () => {
                           className="w-full flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium transition cursor-pointer group"
                         >
                           <div className="flex items-center gap-2.5">
-                            <Plus className="w-4 h-4 text-blue-400" />
+                            <Plus className="w-4 h-4 text-emerald-400" />
                             <span>Create New Board</span>
                           </div>
                           <ArrowRight className="w-3.5 h-3.5 text-white/30 group-hover:text-white transition" />
@@ -1685,8 +1685,8 @@ export const WorkspaceDashboardPage: React.FC = () => {
                     </div>
 
                     {/* Pro Tips Card */}
-                    <div className="bg-gradient-to-br from-blue-950/40 to-indigo-950/40 border border-blue-500/20 rounded-2xl p-5 space-y-2.5">
-                      <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
+                    <div className="bg-gradient-to-br from-emerald-950/30 to-green-950/30 border border-emerald-500/20 rounded-2xl p-5 space-y-2.5">
+                      <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
                         <Sparkles className="w-4 h-4" />
                         <span>Power User Tips</span>
                       </div>

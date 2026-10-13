@@ -48,6 +48,7 @@ import ListActionsMenu from '../components/ListActionsMenu';
 import { BoardPlannerPanel } from '../components/BoardPlannerPanel';
 import { BoardInboxPanel } from '../components/BoardInboxPanel';
 import { BoardViewsPopover, type BoardViewMode } from '../components/BoardViewsPopover';
+import quashaLogo from '../assets/quasha.png';
 import { BoardViewsCanvas } from '../components/BoardViewsCanvas';
 import SwitchBoardsPopover from '../components/SwitchBoardsPopover';
 import { CreateBoardModal } from '../components/CreateBoardModal';
@@ -175,7 +176,7 @@ export const KanbanBoardPage: React.FC = () => {
     setIsBoardMenuOpen(true);
   };
 
-  // View Switcher (Original Trello: Board, Table, Calendar, Timeline, Dashboard, Map)
+  // View Switcher (Quasha: Board, Table, Calendar, Timeline, Dashboard, Map)
   const [viewMode, setViewMode] = useState<BoardViewMode>('board');
   const [isViewSwitcherOpen, setIsViewSwitcherOpen] = useState(false);
   const [isWorkspacePremium, setIsWorkspacePremium] = useState(true);
@@ -1896,12 +1897,7 @@ export const KanbanBoardPage: React.FC = () => {
         <header className="relative z-30 flex h-12 w-full items-center justify-between border-b border-white/10 bg-black/40 px-3 sm:px-4 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <Link to="/dashboard" className="flex items-center gap-2 group">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0052cc] text-white shadow-sm shadow-blue-500/40">
-                <Kanban className="h-4 w-4" />
-              </div>
-              <span className="text-sm font-bold tracking-tight text-white/90 group-hover:text-white">
-                Trello
-              </span>
+              <img src={quashaLogo} alt="Quasha" className="h-7 w-auto object-contain" />
             </Link>
           </div>
         </header>
@@ -1929,7 +1925,7 @@ export const KanbanBoardPage: React.FC = () => {
               </button>
               <Link
                 to="/dashboard"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0052cc] hover:bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-lg transition active:scale-95"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 px-5 py-2 text-xs font-bold text-zinc-950 shadow-lg shadow-emerald-500/20 transition active:scale-95"
               >
                 <Layers className="h-4 w-4" />
                 <span>Return to Dashboard</span>
@@ -1961,12 +1957,7 @@ export const KanbanBoardPage: React.FC = () => {
       <header className="relative z-30 flex h-12 w-full items-center justify-between border-b border-white/10 bg-black/40 px-3 sm:px-4 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <Link to="/dashboard" className="flex items-center gap-2 group">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0052cc] text-white shadow-sm shadow-blue-500/40">
-              <Kanban className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-bold tracking-tight text-white/90 group-hover:text-white">
-              Trello
-            </span>
+            <img src={quashaLogo} alt="Quasha" className="h-7 w-auto object-contain" />
           </Link>
 
           <div className="hidden sm:flex items-center gap-1">
@@ -2054,7 +2045,7 @@ export const KanbanBoardPage: React.FC = () => {
 
           <Link
             to="/dashboard"
-            className="flex items-center gap-1 rounded-md bg-[#0052cc] hover:bg-blue-600 active:bg-blue-700 px-2.5 py-1 text-xs font-semibold text-white shadow transition ml-1"
+            className="flex items-center gap-1 rounded-md bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 px-2.5 py-1 text-xs font-bold text-zinc-950 shadow-md shadow-emerald-500/20 transition ml-1"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Create</span>
@@ -2135,7 +2126,7 @@ export const KanbanBoardPage: React.FC = () => {
               className="flex items-center rounded-full ring-2 ring-white/20 hover:ring-white/40 transition cursor-pointer focus:outline-none"
               aria-label="Toggle user profile menu"
             >
-              <div className="h-7 w-7 rounded-full bg-[#0052cc] text-white flex items-center justify-center font-bold text-xs border border-white/20 shadow-sm">
+              <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center font-bold text-xs border border-emerald-400/30 shadow-sm">
                 {currentUser?.full_name
                   ? currentUser.full_name
                       .split(' ')
@@ -2219,7 +2210,7 @@ export const KanbanBoardPage: React.FC = () => {
                 if (e.key === 'Escape') setIsEditingBoardTitle(false);
               }}
               autoFocus
-              className="h-7 rounded-md border border-blue-500 bg-zinc-950/80 px-2 text-sm sm:text-base font-bold text-white focus:outline-none"
+              className="h-7 rounded-md border border-emerald-500 bg-zinc-950/80 px-2 text-sm sm:text-base font-bold text-white focus:outline-none"
             />
           ) : (
             <h1
@@ -2289,12 +2280,12 @@ export const KanbanBoardPage: React.FC = () => {
               }`}
               title="Views"
             >
-              <Kanban className="h-3.5 w-3.5 text-blue-400" />
+              <Kanban className="h-3.5 w-3.5 text-emerald-400" />
               <span className="capitalize hidden sm:inline">{viewMode}</span>
               <ChevronDown className="h-3 w-3 opacity-60" />
             </button>
 
-            {/* Authentic Trello Views Popover */}
+            {/* Authentic Quasha Views Popover */}
             <BoardViewsPopover
               isOpen={isViewSwitcherOpen}
               onClose={() => setIsViewSwitcherOpen(false)}
@@ -2306,7 +2297,7 @@ export const KanbanBoardPage: React.FC = () => {
               isPremium={isWorkspacePremium}
               onUpgradeToPremium={() => {
                 setIsWorkspacePremium(true);
-                setToastMessage('✨ Workspace upgraded to Trello Premium! All views unlocked.');
+                setToastMessage('✨ Workspace upgraded to Quasha Premium! All views unlocked.');
               }}
             />
           </div>
@@ -2316,7 +2307,7 @@ export const KanbanBoardPage: React.FC = () => {
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {isLoading && (
             <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded bg-white/10 text-xs text-white/80">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
               <span>Syncing...</span>
             </div>
           )}
@@ -2349,7 +2340,7 @@ export const KanbanBoardPage: React.FC = () => {
             onClick={() => setIsFilterOpen((prev) => !prev)}
             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
               isFilterOpen || filterKeyword || filterLabelId
-                ? 'bg-blue-600 text-white font-semibold shadow'
+                ? 'bg-emerald-500 text-zinc-950 font-bold shadow-md shadow-emerald-500/20'
                 : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
             title="Filter cards"
@@ -2367,7 +2358,7 @@ export const KanbanBoardPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="flex items-center gap-1 rounded-md bg-[#0052cc] hover:bg-blue-600 active:bg-blue-700 px-2.5 sm:px-3 py-1 text-xs font-semibold text-white shadow transition cursor-pointer active:scale-95"
+            className="flex items-center gap-1 rounded-md bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 px-2.5 sm:px-3 py-1 text-xs font-bold text-zinc-950 shadow-md shadow-emerald-500/20 transition cursor-pointer active:scale-95"
           >
             <Share2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Share</span>
@@ -2396,7 +2387,7 @@ export const KanbanBoardPage: React.FC = () => {
                 value={filterKeyword}
                 onChange={(e) => setFilterKeyword(e.target.value)}
                 placeholder="Filter by keyword..."
-                className="h-8 w-full rounded-lg border border-white/15 bg-white/5 pl-8 pr-7 text-xs text-white placeholder-white/40 focus:border-blue-400 focus:outline-none"
+                className="h-8 w-full rounded-lg border border-white/15 bg-white/5 pl-8 pr-7 text-xs text-white placeholder-white/40 focus:border-emerald-400 focus:outline-none"
               />
               {filterKeyword && (
                 <button
@@ -2440,7 +2431,7 @@ export const KanbanBoardPage: React.FC = () => {
                   setFilterKeyword('');
                   setFilterLabelId(null);
                 }}
-                className="text-[11px] text-blue-400 hover:text-blue-300 font-medium underline underline-offset-2 ml-1 cursor-pointer"
+                className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium underline underline-offset-2 ml-1 cursor-pointer"
               >
                 Clear all filters
               </button>
@@ -2705,14 +2696,14 @@ export const KanbanBoardPage: React.FC = () => {
                                       if (e.key === 'Escape') setEditingListId(null);
                                     }}
                                     autoFocus
-                                    className="h-6 w-full rounded border border-blue-500 bg-zinc-950/90 px-1.5 text-xs font-bold uppercase tracking-wider text-white focus:outline-none"
+                                    className="h-6 w-full rounded border border-emerald-500 bg-zinc-950/90 px-1.5 text-xs font-bold uppercase tracking-wider text-white focus:outline-none"
                                     onClick={(e) => e.stopPropagation()}
                                   />
                                 ) : (
                                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                     {pinnedListIds.includes(column.id) && (
                                       <span title="Pinned list">
-                                        <Pin className="w-3.5 h-3.5 text-blue-400 fill-current shrink-0" />
+                                        <Pin className="w-3.5 h-3.5 text-emerald-400 fill-current shrink-0" />
                                       </span>
                                     )}
                                     {watchedListIds.includes(column.id) && (
@@ -2827,8 +2818,8 @@ export const KanbanBoardPage: React.FC = () => {
                                                  : 'bg-zinc-800/90 hover:bg-zinc-800 border-white/5 text-white/95'
                                              } ${
                                                snapshotDraggableCard.isDragging
-                                                 ? 'shadow-2xl ring-2 ring-blue-500/60 opacity-95 bg-zinc-800 cursor-grabbing z-50'
-                                                 : 'hover:ring-2 hover:ring-[#579dff] hover:border-transparent'
+                                                 ? 'shadow-2xl ring-2 ring-emerald-500/60 opacity-95 bg-zinc-800 cursor-grabbing z-50'
+                                                 : 'hover:ring-2 hover:ring-emerald-500/60 hover:border-transparent'
                                              }`}
                                            >
                                              {/* Cover Image */}
@@ -2858,7 +2849,7 @@ export const KanbanBoardPage: React.FC = () => {
 
                                              {/* Title Row with Hover Circle Checkbox & Pencil Edit Button */}
                                              <div className="flex items-center gap-2 relative">
-                                               {/* Circle Checkbox (Authentic Trello hover behavior) */}
+                                               {/* Circle Checkbox (Authentic Quasha hover behavior) */}
                                                <button
                                                  type="button"
                                                  onClick={(e) => {
@@ -2990,7 +2981,7 @@ export const KanbanBoardPage: React.FC = () => {
                                                          ) : (
                                                            <div
                                                              key={i}
-                                                             className="h-4 w-4 rounded-full border border-white/20 bg-blue-600 flex items-center justify-center text-[8px] font-bold text-white shadow-sm"
+                                                             className="h-4 w-4 rounded-full border border-white/20 bg-emerald-600 flex items-center justify-center text-[8px] font-bold text-white shadow-sm"
                                                              title={assignee}
                                                            >
                                                              {assignee.slice(0, 2).toUpperCase()}
@@ -3019,7 +3010,7 @@ export const KanbanBoardPage: React.FC = () => {
                                       value={newCardText}
                                       onChange={(e) => setNewCardText(e.target.value)}
                                       placeholder="Enter a title for this card..."
-                                      className="w-full resize-none rounded-lg border border-blue-500 bg-zinc-950/80 p-2 text-xs text-white placeholder-white/40 focus:outline-none"
+                                      className="w-full resize-none rounded-lg border border-emerald-500 bg-zinc-950/80 p-2 text-xs text-white placeholder-white/40 focus:outline-none"
                                       rows={2}
                                       autoFocus
                                       onKeyDown={(e) => {
@@ -3033,7 +3024,7 @@ export const KanbanBoardPage: React.FC = () => {
                                       <button
                                         type="button"
                                         onClick={() => handleAddCardSubmit(column.id)}
-                                        className="rounded bg-[#0052cc] px-3 py-1 text-xs font-semibold text-white hover:bg-blue-600 transition cursor-pointer"
+                                        className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 px-3 py-1 text-xs font-bold text-zinc-950 hover:from-emerald-400 hover:to-green-400 shadow-sm shadow-emerald-500/20 transition cursor-pointer"
                                       >
                                         Add Card
                                       </button>
@@ -3083,12 +3074,12 @@ export const KanbanBoardPage: React.FC = () => {
                             onChange={(e) => setNewListTitle(e.target.value)}
                             placeholder="Enter list title..."
                             autoFocus
-                            className="w-full rounded-lg border border-blue-500 bg-zinc-950/80 px-2.5 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none"
+                            className="w-full rounded-lg border border-emerald-500 bg-zinc-950/80 px-2.5 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none"
                           />
                           <div className="flex items-center gap-2">
                             <button
                               type="submit"
-                              className="rounded bg-[#0052cc] px-3 py-1 text-xs font-semibold text-white hover:bg-blue-600 transition cursor-pointer"
+                              className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 px-3 py-1 text-xs font-bold text-zinc-950 hover:from-emerald-400 hover:to-green-400 shadow-sm shadow-emerald-500/20 transition cursor-pointer"
                             >
                               Add List
                             </button>
@@ -3121,7 +3112,7 @@ export const KanbanBoardPage: React.FC = () => {
         )}
       </div>
 
-      {/* Floating Bottom Pill Dock (Original Trello Style) */}
+      {/* Floating Bottom Pill Dock (Quasha Style) */}
       <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40">
         <div className="flex items-center gap-1 rounded-full border border-white/15 bg-[#1d2125]/95 p-1.5 shadow-2xl backdrop-blur-xl transition-all duration-200">
           {/* Inbox Tab */}

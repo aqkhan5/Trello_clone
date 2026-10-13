@@ -24,7 +24,7 @@ async def _send_smtp_email(
         return
     
     msg = EmailMessage()
-    from_name = getattr(settings, "SMTP_FROM_NAME", "Trello clone")
+    from_name = getattr(settings, "SMTP_FROM_NAME", "Quasha")
     from_email = getattr(settings, "SMTP_FROM_EMAIL", None) or settings.SMTP_USER
     msg["From"] = f"{from_name}<{from_email}>"
     msg["To"] = to_email
@@ -66,18 +66,18 @@ async def send_invitation_email(
 
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h2 style="color: #0052cc; margin-top: 0;">Trello Workspace Invitation</h2>
+        <h2 style="color: #10b981; margin-top: 0;">Quasha Workspace Invitation</h2>
         <p style="font-size: 16px; color: #334155;">
             You have been invited to join and collaborate on the <strong>{workspace_name}</strong> workspace.
         </p>
         <div style="margin: 30px 0;">
-            <a href="{invite_url}" style="background-color: #0052cc; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+            <a href="{invite_url}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
                 Join Workspace
             </a>
         </div>
         <p style="color: #64748b; font-size: 13px;">
             Or copy and paste this link into your browser:<br/>
-            <a href="{invite_url}" style="color: #0052cc;">{invite_url}</a>
+            <a href="{invite_url}" style="color: #10b981;">{invite_url}</a>
         </p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
         <p style="color: #94a3b8; font-size: 12px;">This invitation link will expire in 7 days.</p>
@@ -92,17 +92,17 @@ async def send_welcome_email(
         full_name: str
 ) ->  None:
     """Dispatching a welcome email upon the successfull registration of the user"""
-    subject = "Welcome to trello"
+    subject = "Welcome to Quasha"
 
     text_content = (
         f"Hi {full_name}\n\n"
-        f"Welcome to Trello clone. Your account is now active. \n"
+        f"Welcome to Quasha. Your account is now active. \n"
         f"Now you can create workspaces, organize boards and invite members"
 
     )
     html_content =  f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h2 style="color: #0052cc; margin-top: 0;">Welcome, {full_name}!</h2>
+        <h2 style="color: #10b981; margin-top: 0;">Welcome, {full_name}!</h2>
         <p style="font-size: 15px; color: #334155;">
             Your account has been created successfully. You can now start creating boards, managing tasks, and collaborating with your team.
         </p>
@@ -118,7 +118,7 @@ async def send_login_alert_email(
         ip_address: str = "unknown"
 ) -> None:
     """ Dispatching the security notification email for user sign-in"""
-    subject = f" Security alert!  A new sign-in to your Trello account "
+    subject = f" Security alert!  A new sign-in to your Quasha account "
 
     text_content = (
         f"Hi {full_name}/n/n"
@@ -150,7 +150,7 @@ async def send_password_reset_email(
     """Dispatches a password reset link with a 15-minute expiration."""
     frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5173").rstrip("/")
     reset_url = f"{frontend_url}/reset-password?token={token}"
-    subject = "Password Reset Request for Trello Clone"
+    subject = "Password Reset Request for Quasha"
 
     text_content = (
         f"Hi {full_name},\n\n"
@@ -162,19 +162,19 @@ async def send_password_reset_email(
 
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h2 style="color: #0052cc; margin-top: 0;">Password Reset Request</h2>
+        <h2 style="color: #10b981; margin-top: 0;">Password Reset Request</h2>
         <p style="font-size: 15px; color: #334155;">Hi {full_name},</p>
         <p style="font-size: 15px; color: #334155;">
             We received a request to reset your password. Click the button below to choose a new password:
         </p>
         <div style="margin: 30px 0;">
-            <a href="{reset_url}" style="background-color: #0052cc; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+            <a href="{reset_url}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
                 Reset Password
             </a>
         </div>
         <p style="color: #64748b; font-size: 13px;">
             Or copy and paste this link into your browser:<br/>
-            <a href="{reset_url}" style="color: #0052cc;">{reset_url}</a>
+            <a href="{reset_url}" style="color: #10b981;">{reset_url}</a>
         </p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
         <p style="color: #94a3b8; font-size: 12px;">This link will expire in 15 minutes. If you did not make this request, please disregard this email.</p>

@@ -156,7 +156,7 @@ export const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#0052cc] text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-green-400 text-zinc-950 flex items-center justify-center shadow-md shadow-emerald-500/20 font-bold">
               <UserPlus className="w-4 h-4" />
             </div>
             <div>
@@ -224,14 +224,14 @@ export const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="colleague@company.com"
                 disabled={isSubmitting}
-                className="w-full h-10 pl-9 pr-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition disabled:opacity-60"
+                className="w-full h-10 pl-9 pr-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-500 transition disabled:opacity-60"
               />
             </div>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'member' | 'admin')}
               disabled={isSubmitting}
-              className="h-10 px-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white focus:outline-none focus:border-blue-500 transition cursor-pointer disabled:opacity-60"
+              className="h-10 px-3 rounded-lg bg-zinc-950 border border-white/15 text-xs text-white focus:outline-none focus:border-emerald-500 transition cursor-pointer disabled:opacity-60"
             >
               <option value="member">Member</option>
               <option value="admin">Admin</option>
@@ -239,7 +239,7 @@ export const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
             <button
               type="submit"
               disabled={!email.trim() || isSubmitting}
-              className="inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-[#0052cc] hover:bg-blue-600 disabled:opacity-50 text-xs font-bold text-white shadow-md transition cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 disabled:opacity-50 text-xs font-bold text-zinc-950 shadow-md shadow-emerald-500/20 transition cursor-pointer shrink-0"
             >
               {isSubmitting ? (
                 <>
@@ -282,7 +282,7 @@ export const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
             </span>
             {isLoading && (
               <div className="flex items-center gap-1 text-[11px] text-white/40">
-                <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+                <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
                 <span>Syncing...</span>
               </div>
             )}
@@ -290,7 +290,7 @@ export const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
           <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
             {isLoading && pendingInvitations.length === 0 ? (
               <div className="py-6 text-center text-xs text-white/40 flex flex-col items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
                 <span>Loading workspace invitations...</span>
               </div>
             ) : pendingInvitations.length === 0 ? (
@@ -304,7 +304,7 @@ export const InviteMembersModal: React.FC<InviteMembersModalProps> = ({
                   className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-950/70 border border-white/5 text-xs hover:border-white/15 transition group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-full bg-[#0052cc]/30 text-blue-300 font-bold text-[10px] flex items-center justify-center shrink-0 border border-blue-500/20">
+                    <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] flex items-center justify-center shrink-0 border border-emerald-500/30">
                       {getInitials(inv.email)}
                     </div>
                     <div className="min-w-0">

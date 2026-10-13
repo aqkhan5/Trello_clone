@@ -460,7 +460,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                 className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition text-left cursor-pointer group"
               >
                 <div className="flex items-center gap-3">
-                  <Share2 className="w-4 h-4 text-blue-400" />
+                  <Share2 className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs font-medium text-white/90">Share</span>
                 </div>
                 <div className="h-6 w-6 rounded-full bg-[#0052cc] text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
@@ -692,12 +692,12 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                 className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition text-left cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <Eye className={`w-4 h-4 ${isWatching ? 'text-blue-400' : 'text-white/70'}`} />
+                  <Eye className={`w-4 h-4 ${isWatching ? 'text-emerald-400' : 'text-white/70'}`} />
                   <span className="text-xs font-medium text-white/90">
                     {isWatching ? 'Watching' : 'Watch'}
                   </span>
                 </div>
-                {isWatching && <Check className="w-3.5 h-3.5 text-blue-400" />}
+                {isWatching && <Check className="w-3.5 h-3.5 text-emerald-400" />}
               </button>
 
               {/* Copy board */}
@@ -771,7 +771,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsEditingDesc(true)}
-                      className="text-xs text-blue-400 hover:text-white transition cursor-pointer"
+                      className="text-xs text-emerald-400 hover:text-white transition cursor-pointer"
                     >
                       Edit
                     </button>
@@ -785,7 +785,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Add a detailed description for this board..."
                       rows={4}
-                      className="w-full rounded-xl border border-blue-500 bg-black/40 p-2.5 text-xs text-white placeholder-white/40 focus:outline-none resize-none"
+                      className="w-full rounded-xl border border-emerald-500 bg-black/40 p-2.5 text-xs text-white placeholder-white/40 focus:outline-none resize-none"
                     />
                     <div className="flex items-center gap-2">
                       <button
@@ -876,14 +876,14 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                   placeholder="Search board members..."
                   value={memberSearchQuery}
                   onChange={(e) => setMemberSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-emerald-500 transition"
                 />
               </div>
 
               {/* Member list */}
               {isLoadingBoardMembers ? (
                 <div className="py-10 text-center text-xs text-white/50 flex flex-col items-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+                  <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
                   <span>Loading board members...</span>
                 </div>
               ) : boardMembers.length === 0 ? (
@@ -923,7 +923,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                                 className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-white/20"
                               />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-[#0052cc]/30 text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 border border-blue-500/30">
+                              <div className="w-8 h-8 rounded-full bg-[#0052cc]/30 text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 border border-emerald-500/30">
                                 {initials}
                               </div>
                             )}
@@ -1041,7 +1041,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                         <Icon className={`w-4 h-4 ${item.color}`} />
                         <span className="text-xs font-bold text-white">{item.title}</span>
                       </div>
-                      {isSelected && <Check className="w-4 h-4 text-blue-400" />}
+                      {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
                     </div>
                     <p className="text-[11px] text-white/60 leading-relaxed pl-6">{item.desc}</p>
                   </div>
@@ -1059,7 +1059,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                 className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition text-left cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <Copy className="w-4 h-4 text-blue-400" />
+                  <Copy className="w-4 h-4 text-emerald-400" />
                   <div>
                     <p className="text-xs font-bold text-white">Copy link to board</p>
                     <p className="text-[10px] text-white/50">Share with colleagues</p>
@@ -1118,7 +1118,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                   }}
                   className={`w-full flex items-center justify-between p-3 rounded-xl border transition cursor-pointer ${
                     !currentBg || currentBg === 'default'
-                      ? 'bg-[#0052cc]/20 border-blue-500 text-white'
+                      ? 'bg-[#0052cc]/20 border-emerald-500 text-white'
                       : 'bg-zinc-950 border-white/10 hover:border-white/30 text-white/80'
                   }`}
                 >
@@ -1132,7 +1132,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                     </div>
                   </div>
                   {(!currentBg || currentBg === 'default') && (
-                    <Check className="w-4 h-4 text-blue-400" />
+                    <Check className="w-4 h-4 text-emerald-400" />
                   )}
                 </button>
               </div>
@@ -1215,7 +1215,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                     value={customPhotoUrl}
                     onChange={(e) => setCustomPhotoUrl(e.target.value)}
                     placeholder="https://example.com/wallpaper.jpg"
-                    className="flex-1 h-8 rounded-lg border border-white/15 bg-black/40 px-2.5 text-xs text-white placeholder-white/40 focus:border-blue-500 focus:outline-none"
+                    className="flex-1 h-8 rounded-lg border border-white/15 bg-black/40 px-2.5 text-xs text-white placeholder-white/40 focus:border-emerald-500 focus:outline-none"
                   />
                   <button
                     type="button"
@@ -1464,7 +1464,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                     className="p-2.5 rounded-xl bg-white/5 border border-white/5 space-y-1 text-xs"
                   >
                     <p className="text-white/90">
-                      <strong className="text-blue-400">{log.user}</strong> {log.action}
+                      <strong className="text-emerald-400">{log.user}</strong> {log.action}
                     </p>
                     <span className="text-[10px] text-white/40 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -1508,7 +1508,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                   value={archivedSearchQuery}
                   onChange={(e) => setArchivedSearchQuery(e.target.value)}
                   placeholder={archivedTab === 'cards' ? 'Search archived cards...' : 'Search archived lists...'}
-                  className="w-full rounded-lg bg-white/5 border border-white/10 pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full rounded-lg bg-white/5 border border-white/10 pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-500 transition"
                 />
               </div>
 
@@ -1613,7 +1613,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
 
         {/* Footer */}
         <div className="p-3 border-t border-white/10 shrink-0 text-center">
-          <span className="text-[10px] text-white/40">Trello Board Engine v2.5</span>
+          <span className="text-[10px] text-white/40">Quasha Board Engine v2.5</span>
         </div>
       </aside>
 
@@ -1644,7 +1644,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
                 value={copyTitle}
                 onChange={(e) => setCopyTitle(e.target.value)}
                 placeholder={`Copy of ${board?.title || 'Board'}`}
-                className="w-full h-9 rounded-xl border border-white/15 bg-black/40 px-3 text-xs text-white focus:border-blue-500 focus:outline-none"
+                className="w-full h-9 rounded-xl border border-white/15 bg-black/40 px-3 text-xs text-white focus:border-emerald-500 focus:outline-none"
                 autoFocus
               />
             </div>
@@ -1725,7 +1725,7 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-400" />
+                <Mail className="w-4 h-4 text-emerald-400" />
                 <h3 className="text-sm font-bold text-white">Email-to-board</h3>
               </div>
               <button
@@ -1740,13 +1740,13 @@ export const BoardMenuDrawer: React.FC<BoardMenuDrawerProps> = ({
               Send or forward emails to this private address to automatically create cards on this board.
             </p>
             <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 text-[11px] font-mono text-emerald-400 truncate">
-              board-{(board?.id || 'main').slice(0, 8)}@inbox.trello.clone
+              board-{(board?.id || 'main').slice(0, 8)}@inbox.quasha.app
             </div>
             <div className="flex items-center justify-end">
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText(`board-${(board?.id || 'main').slice(0, 8)}@inbox.trello.clone`);
+                  navigator.clipboard.writeText(`board-${(board?.id || 'main').slice(0, 8)}@inbox.quasha.app`);
                   showToast('Board email copied!');
                   setShowEmailModal(false);
                 }}

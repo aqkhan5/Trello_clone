@@ -54,18 +54,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/5">
           {isOpen ? (
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#0052cc] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/30">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 text-zinc-950 font-extrabold text-xs flex items-center justify-center shrink-0 shadow-sm shadow-emerald-500/20">
                 {activeInitial}
               </div>
               <div className="min-w-0">
                 <span className="block text-xs font-bold text-white truncate">
                   {activeWorkspace?.name || 'Workspace'}
                 </span>
-                <span className="block text-[10px] text-white/50 truncate">Enterprise</span>
+                <span className="block text-[10px] text-emerald-400/80 truncate">Enterprise</span>
               </div>
             </div>
           ) : (
-            <div className="w-7 h-7 mx-auto rounded-lg bg-[#0052cc] text-white font-bold text-xs flex items-center justify-center shadow-sm shadow-blue-500/30">
+            <div className="w-7 h-7 mx-auto rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 text-zinc-950 font-extrabold text-xs flex items-center justify-center shadow-sm shadow-emerald-500/20">
               {activeInitial}
             </div>
           )}
@@ -87,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onSelectSection && onSelectSection('boards')}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer text-left ${
               activeSection === 'boards'
-                ? 'bg-[#0052cc] text-white shadow-sm'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold shadow-sm'
                 : 'text-white/70 hover:bg-white/5 hover:text-white'
             }`}
             title="Boards"
@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onSelectSection && onSelectSection('templates')}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer text-left ${
               activeSection === 'templates'
-                ? 'bg-[#0052cc] text-white shadow-sm'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold shadow-sm'
                 : 'text-white/70 hover:bg-white/5 hover:text-white'
             }`}
             title="Templates"
@@ -115,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => onSelectSection && onSelectSection('home')}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer text-left ${
               activeSection === 'home'
-                ? 'bg-[#0052cc] text-white shadow-sm'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold shadow-sm'
                 : 'text-white/70 hover:bg-white/5 hover:text-white'
             }`}
             title="Home"
@@ -154,14 +154,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => onSelectWorkspace && onSelectWorkspace(ws)}
                       className={`w-full flex items-center justify-between p-1.5 rounded-lg text-xs cursor-pointer transition text-left ${
                         isActive
-                          ? 'bg-[#0052cc]/20 text-white border border-[#0052cc]/40 font-semibold'
+                          ? 'bg-emerald-500/20 text-white border border-emerald-500/40 font-semibold'
                           : 'hover:bg-white/5 text-white/80'
                       }`}
                     >
                       <div className="flex items-center gap-2 truncate">
                         <div
                           className={`w-5 h-5 rounded ${
-                            isActive ? 'bg-[#0052cc]' : 'bg-zinc-800 border border-white/10'
+                            isActive ? 'bg-gradient-to-br from-emerald-500 to-green-600 text-zinc-950 font-bold' : 'bg-zinc-800 border border-white/10'
                           } text-[9px] font-bold text-white flex items-center justify-center shrink-0`}
                         >
                           {initials}

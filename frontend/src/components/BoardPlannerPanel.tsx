@@ -304,7 +304,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
         title: 'Team Standup & Sync',
         startTime: '10:00',
         endTime: '10:30',
-        color: provider === 'google' ? 'bg-blue-500/20 border-blue-500 text-blue-200' : 'bg-sky-500/20 border-sky-500 text-sky-200',
+        color: provider === 'google' ? 'bg-blue-500/20 border-emerald-500 text-blue-200' : 'bg-sky-500/20 border-sky-500 text-sky-200',
         source: provider,
         description: 'Daily engineering standup and blocker discussion',
       },
@@ -315,7 +315,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
         endTime: '15:00',
         color: 'bg-purple-500/20 border-purple-500 text-purple-200',
         source: provider,
-        description: 'Trello frontend responsive layout & planning review',
+        description: 'Quasha frontend responsive layout & planning review',
       },
     ];
     setCustomEvents((prev) => [...prev, ...sampleEvents]);
@@ -360,7 +360,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
               onClick={() => setIsMonthPickerOpen(!isMonthPickerOpen)}
               className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition cursor-pointer"
             >
-              <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
+              <CalendarIcon className="h-3.5 w-3.5 text-emerald-400" />
               <span>{monthShort}</span>
               <ChevronDown className="h-3 w-3 text-white/50" />
             </button>
@@ -598,7 +598,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
                   }}
                   className="w-full text-left px-2.5 py-1.5 rounded text-white/80 hover:bg-white/10 hover:text-white flex items-center gap-2"
                 >
-                  <RefreshCw className="h-3 w-3 text-blue-400" />
+                  <RefreshCw className="h-3 w-3 text-emerald-400" />
                   <span>Connect calendar</span>
                 </button>
                 {isConnected && (
@@ -774,7 +774,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
                     )}
 
                     {isAddingHere && (
-                      <div className="mb-2 p-2 rounded-lg bg-zinc-800 border border-blue-500/50 shadow-lg space-y-2 z-20 relative animate-in fade-in duration-150">
+                      <div className="mb-2 p-2 rounded-lg bg-zinc-800 border border-emerald-500/50 shadow-lg space-y-2 z-20 relative animate-in fade-in duration-150">
                         <input
                           type="text"
                           placeholder="Task or event title..."
@@ -1207,7 +1207,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CalendarCheck className="h-5 w-5 text-blue-400" />
+                <CalendarCheck className="h-5 w-5 text-emerald-400" />
                 <h4 className="text-sm font-bold text-white">Connect Calendar</h4>
               </div>
               <button
@@ -1235,13 +1235,13 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
                     <span className="text-[9px] font-black text-[#4285f4]">31</span>
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-white group-hover:text-blue-400 transition">
+                    <div className="text-xs font-semibold text-white group-hover:text-emerald-400 transition">
                       Google Calendar
                     </div>
                     <div className="text-[10px] text-white/50">Personal & Google Workspace</div>
                   </div>
                 </div>
-                <Sparkles className="h-4 w-4 text-blue-400 opacity-0 group-hover:opacity-100 transition" />
+                <Sparkles className="h-4 w-4 text-emerald-400 opacity-0 group-hover:opacity-100 transition" />
               </button>
 
               <button
@@ -1254,7 +1254,7 @@ export const BoardPlannerPanel: React.FC<BoardPlannerPanelProps> = ({
                     O
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-white group-hover:text-blue-400 transition">
+                    <div className="text-xs font-semibold text-white group-hover:text-emerald-400 transition">
                       Microsoft Outlook
                     </div>
                     <div className="text-[10px] text-white/50">Office 365 & Outlook.com</div>

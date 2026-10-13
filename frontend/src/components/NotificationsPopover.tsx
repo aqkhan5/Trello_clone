@@ -72,7 +72,7 @@ export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({
         {
           id: 'sys-welcome',
           type: 'system',
-          title: 'Welcome to Trello Clone',
+          title: 'Welcome to Quasha',
           message: 'Explore your workspaces, create boards, and organize tasks with ease.',
           time: 'Just now',
           isRead: false,
@@ -190,7 +190,7 @@ export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-blue-400" />
+          <Bell className="w-4 h-4 text-emerald-400" />
           <h3 className="text-xs font-bold text-white">Notifications</h3>
           {unreadCount > 0 && (
             <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-bold">
@@ -204,7 +204,7 @@ export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({
             <button
               type="button"
               onClick={handleMarkAllAsRead}
-              className="text-[11px] text-blue-400 hover:text-white transition cursor-pointer"
+              className="text-[11px] text-emerald-400 hover:text-white transition cursor-pointer"
             >
               Mark all as read
             </button>
@@ -270,7 +270,7 @@ export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({
       <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
         {isLoading ? (
           <div className="py-12 text-center text-xs text-white/50 flex flex-col items-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+            <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
             <span>Loading notifications...</span>
           </div>
         ) : filteredNotifications.length === 0 ? (
@@ -336,7 +336,7 @@ export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({
                     type="button"
                     disabled={actionLoadingId === n.id}
                     onClick={() => handleAcceptInvite(n.token!, n.id)}
-                    className="flex-1 py-1 px-2.5 rounded-lg bg-[#0052cc] hover:bg-blue-600 text-white text-[11px] font-semibold transition cursor-pointer flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                    className="flex-1 py-1 px-2.5 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-zinc-950 text-[11px] font-bold transition cursor-pointer flex items-center justify-center gap-1 shadow-sm shadow-emerald-500/20 disabled:opacity-50"
                   >
                     {actionLoadingId === n.id ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
