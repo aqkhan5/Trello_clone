@@ -37,6 +37,7 @@ async def create_list(
      ) -> ListModel:
     """" Create a list on the board with automatic position assignment """
     list_repo = ListRepository(db)
+    service = ListService(list_repo, db)
     new_list = await service.create_list(board_id, payload)
     await manager.broadcast_to_board(
         board_id,

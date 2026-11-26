@@ -3,7 +3,7 @@ import uuid
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import (
@@ -12,6 +12,7 @@ from app.api.deps import (
     require_card_board_member,
     require_card_board_writer,
 )
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.attachment import Attachment
 from app.models.board_member import BoardMember
@@ -70,9 +71,12 @@ async def upload_attachment(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Attachment:
-    uploads_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../uploads/attachments")
+    base_upload_dir = (
+        os.path.abspath(settings.UPLOAD_DIR)
+        if settings.UPLOAD_DIR
+        else os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../uploads"))
     )
+    uploads_dir = os.path.join(base_upload_dir, "attachments")
     os.makedirs(uploads_dir, exist_ok=True)
 
     file_ext = os.path.splitext(file.filename or "")[1]
@@ -80,7 +84,13 @@ async def upload_attachment(
     stored_name = f"{safe_id}{file_ext}"
     dest_path = os.path.join(uploads_dir, stored_name)
 
+    MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024  # 10 MB
     content = await file.read()
+    if len(content) > MAX_ATTACHMENT_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="File too large (max 10 MB)",
+        )
     with open(dest_path, "wb") as f:
         f.write(content)
 
@@ -119,7 +129,8 @@ async def delete_attachment(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
-    await require_card_board_writer((await CardRepository(db).get_by_id(attachment.card_id), None), current_user, db)
+    card_and_member = await require_card_board_member(attachment.card_id, current_user, db)
+    await require_card_board_writer(card_and_member, current_user, db)
     service = get_collaboration_service(db)
     await service.delete_attachment(attachment)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

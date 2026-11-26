@@ -19,7 +19,7 @@ app = FastAPI(title=settings.PROJECT_NAME)
 
 import os
 
-origins = [
+raw_origins = [
     settings.FRONTEND_URL,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -28,8 +28,8 @@ origins = [
 ]
 extra_origins = os.getenv("ADDITIONAL_CORS_ORIGINS", "")
 if extra_origins:
-    origins.extend([o.strip() for o in extra_origins.split(",") if o.strip()])
-origins = list(dict.fromkeys(origins))
+    raw_origins.extend(extra_origins.split(","))
+origins = list(dict.fromkeys(o.strip().rstrip("/") for o in raw_origins if o and o.strip()))
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,7 +41,11 @@ app.add_middleware(
 
 from starlette.staticfiles import StaticFiles
 
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+UPLOAD_DIR = (
+    os.path.abspath(settings.UPLOAD_DIR)
+    if settings.UPLOAD_DIR
+    else os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+)
 os.makedirs(os.path.join(UPLOAD_DIR, "attachments"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
@@ -58,3 +62,13 @@ app.include_router(comments_router, prefix=settings.API_V1_STR)
 app.include_router(attachments_router, prefix=settings.API_V1_STR)
 app.include_router(activity_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router, prefix=settings.API_V1_STR)
+
+
+@app.get("/", tags=["Health"])
+async def root() -> dict[str, str]:
+    return {"status": "ok", "service": settings.PROJECT_NAME}
+
+
+@app.get("/health", tags=["Health"])
+async def health_check() -> dict[str, str]:
+    return {"status": "ok"}

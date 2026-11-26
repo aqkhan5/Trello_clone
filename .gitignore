@@ -222,3 +222,7 @@ node_modules/
 dist/
 .env*.local
 .antigravity/
+
+# AI Agent configuration & skills (keep private)
+.agents/
+AGENTS.md

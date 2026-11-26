@@ -164,6 +164,7 @@ async def move_card(
 ) -> Card:
     """Move card to a new target list and/or assign a new fractional position."""
     card, _ = card_and_member
+    source_list_id = card.list_id
     card_repo = CardRepository(db)
     list_repo = ListRepository(db)
     service = CardService(card_repo, list_repo, db)
@@ -175,7 +176,7 @@ async def move_card(
             {
                 "type": "CARD_MOVED",
                 "card_id": str(moved_card.id),
-                "source_list_id": str(payload.source_list_id or card.list_id),
+                "source_list_id": str(source_list_id),
                 "target_list_id": str(payload.target_list_id),
                 "board_id": str(list_obj.board_id),
             },

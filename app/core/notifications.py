@@ -121,7 +121,7 @@ async def send_login_alert_email(
     subject = f" Security alert!  A new sign-in to your Quasha account "
 
     text_content = (
-        f"Hi {full_name}/n/n"
+        f"Hi {full_name}\n\n"
         f"A new sign-in has been detected from you IP address {ip_address}.\n"
         f"If this is not you please secure your account!"
     )

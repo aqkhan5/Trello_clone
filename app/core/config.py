@@ -37,5 +37,7 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: str = ""
     SMTP_STARTTLS: str = "True"
     FRONTEND_URL: str = "http://localhost:5173"
+    SQL_ECHO: bool = False
+    UPLOAD_DIR: str = ""
 
 settings = Settings()

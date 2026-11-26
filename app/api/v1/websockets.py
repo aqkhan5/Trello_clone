@@ -8,6 +8,9 @@ from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
 
 from app.core.config import settings
 from app.core.websocket import manager
+from app.db.session import AsyncSessionLocal
+from app.repositories.board_repository import BoardRepository
+from app.repositories.workspace_repository import WorkspaceRepository
 
 logger = logging.getLogger("uvicorn")
 router = APIRouter(tags=["WebSockets"])
@@ -40,7 +43,23 @@ async def websocket_board_endpoint(
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
-    # 2. Join the board room
+    # 2. Verify board exists and user is authorized to access it
+    async with AsyncSessionLocal() as db:
+        board_repo = BoardRepository(db)
+        board = await board_repo.get_by_id(board_id)
+        if not board:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+        board_member = await board_repo.get_member(board.id, user_id)
+        if not board_member and board.created_by != user_id:
+            workspace_repo = WorkspaceRepository(db)
+            workspace = await workspace_repo.get_by_id(board.workspace_id)
+            if not workspace or workspace.owner_id != user_id:
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+                return
+
+    # 3. Join the board room
     await manager.connect(board_id, websocket)
 
     try:
