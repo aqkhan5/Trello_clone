@@ -18,7 +18,7 @@ import { StarredBoardsPopover } from './StarredBoardsPopover';
 import GlobalSearchModal from './GlobalSearchModal';
 import NotificationsPopover from './NotificationsPopover';
 import HelpModal from './HelpModal';
-import quashaLogo from '../assets/quasha.png';
+import { QuashaLogo } from './QuashaLogo';
 
 export interface NavbarProps {
   onMobileMenuToggle?: () => void;
@@ -127,8 +127,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {/* Brand */}
-        <Link to="/dashboard" className="flex items-center gap-2 group transition-opacity">
-          <img src={quashaLogo} alt="Quasha" className="h-7 w-auto object-contain" />
+        <Link to="/dashboard" className="flex items-center gap-2 group transition-opacity text-white">
+          <QuashaLogo size="sm" />
         </Link>
 
         {/* Workspaces Menu */}

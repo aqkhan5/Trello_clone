@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import invitationService from '../services/invitationService';
 import { authService } from '../services/auth';
-import quashaLogo from '../assets/quasha.png';
+import { QuashaLogo } from '../components/QuashaLogo';
 
 export const AcceptInvitationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -97,8 +97,8 @@ export const AcceptInvitationPage: React.FC = () => {
     <div className="min-h-screen flex flex-col justify-between bg-zinc-950 p-4 sm:p-6 text-white font-sans select-none">
       {/* Top Navbar Header */}
       <header className="flex items-center justify-between max-w-6xl w-full mx-auto py-2">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <img src={quashaLogo} alt="Quasha" className="h-8 w-auto object-contain" />
+        <Link to="/dashboard" className="flex items-center gap-2 text-white">
+          <QuashaLogo size="md" />
         </Link>
       </header>
 

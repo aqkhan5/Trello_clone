@@ -14,7 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { resetPassword } from '../services/auth';
-import quashaLogo from '../assets/quasha.png';
+import { QuashaLogo } from '../components/QuashaLogo';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -74,8 +74,8 @@ export const ResetPasswordPage: React.FC = () => {
       <header className="relative z-20 w-full bg-white/5 backdrop-blur-md border-b border-white/10 shadow-sm">
         <div className="h-16 w-full px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <img src={quashaLogo} alt="Quasha" className="h-8 w-auto object-contain" />
+            <Link to="/dashboard" className="flex items-center gap-2 text-white">
+              <QuashaLogo size="md" />
             </Link>
             <div className="h-4 w-px bg-white/20" />
             <span className="px-2 py-0.5 rounded bg-white/10 text-white text-[11px] font-bold tracking-wider uppercase backdrop-blur-sm">
@@ -121,7 +121,7 @@ export const ResetPasswordPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex flex-col items-center text-center mb-6">
-              <img src={quashaLogo} alt="Quasha" className="h-12 w-auto object-contain mb-3" />
+              <QuashaLogo size="lg" className="mb-3" />
               <h1 className="text-xl font-bold text-white tracking-tight">Set a new password</h1>
               <p className="text-xs text-white/60 mt-1 max-w-xs">
                 Ensure your new password meets corporate compliance standards.

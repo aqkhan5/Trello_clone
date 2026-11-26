@@ -48,7 +48,7 @@ import ListActionsMenu from '../components/ListActionsMenu';
 import { BoardPlannerPanel } from '../components/BoardPlannerPanel';
 import { BoardInboxPanel } from '../components/BoardInboxPanel';
 import { BoardViewsPopover, type BoardViewMode } from '../components/BoardViewsPopover';
-import quashaLogo from '../assets/quasha.png';
+import { QuashaLogo } from '../components/QuashaLogo';
 import { BoardViewsCanvas } from '../components/BoardViewsCanvas';
 import SwitchBoardsPopover from '../components/SwitchBoardsPopover';
 import { CreateBoardModal } from '../components/CreateBoardModal';
@@ -1896,8 +1896,8 @@ export const KanbanBoardPage: React.FC = () => {
         {/* Top Navbar */}
         <header className="relative z-30 flex h-12 w-full items-center justify-between border-b border-white/10 bg-black/40 px-3 sm:px-4 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="flex items-center gap-2 group">
-              <img src={quashaLogo} alt="Quasha" className="h-7 w-auto object-contain" />
+            <Link to="/dashboard" className="flex items-center gap-2 group text-white">
+              <QuashaLogo size="sm" />
             </Link>
           </div>
         </header>
@@ -1956,8 +1956,8 @@ export const KanbanBoardPage: React.FC = () => {
       {/* Top Navbar */}
       <header className="relative z-30 flex h-12 w-full items-center justify-between border-b border-white/10 bg-black/40 px-3 sm:px-4 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <Link to="/dashboard" className="flex items-center gap-2 group">
-            <img src={quashaLogo} alt="Quasha" className="h-7 w-auto object-contain" />
+          <Link to="/dashboard" className="flex items-center gap-2 group text-white">
+            <QuashaLogo size="sm" />
           </Link>
 
           <div className="hidden sm:flex items-center gap-1">
