@@ -1,9 +1,14 @@
 import axios from 'axios';
 
+const defaultBackendUrl =
+  import.meta.env.PROD && typeof window !== 'undefined'
+    ? window.location.origin
+    : 'http://localhost:8000';
+
 export const BACKEND_URL =
   (import.meta.env.VITE_BACKEND_URL as string) ||
   (import.meta.env.VITE_API_URL as string)?.replace(/\/api\/v1\/?$/, '') ||
-  'http://localhost:8000';
+  defaultBackendUrl;
 
 export const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string) ||

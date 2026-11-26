@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.v1.activity_logs import router as activity_router
 from app.api.v1.attachments import router as attachments_router
@@ -64,11 +65,45 @@ app.include_router(activity_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router, prefix=settings.API_V1_STR)
 
 
-@app.get("/", tags=["Health"])
-async def root() -> dict[str, str]:
-    return {"status": "ok", "service": settings.PROJECT_NAME}
-
-
 @app.get("/health", tags=["Health"])
 async def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+FRONTEND_DIST_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+)
+FRONTEND_INDEX = os.path.join(FRONTEND_DIST_DIR, "index.html")
+
+if os.path.isfile(FRONTEND_INDEX):
+    assets_dir = os.path.join(FRONTEND_DIST_DIR, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="frontend-assets")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_spa_root() -> FileResponse:
+        return FileResponse(FRONTEND_INDEX)
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa_fallback(full_path: str) -> FileResponse:
+        if (
+            full_path == "api"
+            or full_path.startswith("api/")
+            or full_path == "uploads"
+            or full_path.startswith("uploads/")
+        ):
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        candidate = os.path.abspath(os.path.join(FRONTEND_DIST_DIR, full_path))
+        if (
+            os.path.commonpath([FRONTEND_DIST_DIR, candidate]) == FRONTEND_DIST_DIR
+            and os.path.isfile(candidate)
+        ):
+            return FileResponse(candidate)
+
+        return FileResponse(FRONTEND_INDEX)
+else:
+
+    @app.get("/", tags=["Health"])
+    async def root() -> dict[str, str]:
+        return {"status": "ok", "service": settings.PROJECT_NAME}
